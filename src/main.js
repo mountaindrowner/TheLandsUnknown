@@ -10,6 +10,7 @@
     const game = new TLU.Game();
     window.GAME = game;
     game.init(disp);
+    if (TLU.Touch) TLU.Touch.init(game);
     window.addEventListener('beforeunload', function () { try { if (game.state === 'play') game.save(); } catch (e) {} });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);

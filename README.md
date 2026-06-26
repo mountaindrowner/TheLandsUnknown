@@ -31,11 +31,51 @@ https://raw.githack.com/mountaindrowner/TheLandsUnknown/claude/eldest-girl-dwarf
 python3 -m http.server 8080      # then open http://localhost:8080
 ```
 
+**📱 Mobile:** fully playable by touch. On phones/tablets you get an on-screen **D-pad**
+(with an 8-direction pad + center *Action*), **swipe-to-move / tap-to-interact** on the map,
+quick-buttons for Bag / Hero / Quest / Codex / Menu, **tap-to-select** menus, and
+tap-an-enemy-to-attack in combat. The layout reflows for small screens automatically.
+
 ![Title](assets/screenshot-title.png)
 ![Overworld](assets/screenshot-play.png)
 ![NPC dialogue](assets/screenshot-npc.png)
 ![Codex](assets/screenshot-codex.png)
 ![Combat](assets/screenshot-combat.png)
+![Mobile](assets/screenshot-mobile.png)
+
+---
+
+## Extending the game — the content framework
+
+The game is **data-driven**. You can add entire regions, creatures, gear, NPCs, dialogue,
+rumors, quests, and lore in **content packs** — plain data files — *without touching engine
+code*. A pack is one call to `TLU.Content.register({ ... })`; the registry merges it into
+the live tables at load.
+
+- **Author's guide:** [`content/CONTENT_GUIDE.md`](content/CONTENT_GUIDE.md) — full schema + examples.
+- **Worked example:** [`content/example-pack.js`](content/example-pack.js) — a mini-region (a hold, two
+  creatures with lore, a unique blade, affixes, a bard NPC, rumors, a travel event, a
+  side-quest, codex entries) added in ~80 lines.
+- In the browser console, `TLU.Content.summary()` shows what's loaded.
+
+```js
+TLU.Content.register({
+  id: 'my-pack',
+  bestiary: [ { id:'frost_wisp', name:'Hoarfrost Wisp', glyph:'i', lvl:3, hp:26, atk:11,
+                def:2, spd:15, biomes:['coast'], lore:'Codex entry shown on first kill.' } ],
+  npcs:    { bard: { role:'Bard', glyph:'♪', greet:[...], talk:[...], bye:[...] } },
+  quests:  [ { id:'...', name:'...', stages:[...], onComplete:{...} } ],
+  // ...materials, weapons, prefixes, uniques, abilities, skills, orders, events, rumors...
+});
+```
+
+## Designing further
+
+[`DESIGN_QUESTIONS.md`](DESIGN_QUESTIONS.md) is a working questionnaire to refine the
+gameplay loop, progression depth, endgame, replay variance, and a set of **original
+"unique spin"** mechanics (the storm as a duelable clock; wisp-bonds with opinions; a
+soul-economy where every kill arms the apocalypse; asynchronous dynasties). Answer it and
+the next build follows from your choices.
 
 ---
 
@@ -119,6 +159,8 @@ src/
     bestiary.js       # enemies, mini-boss, final boss, scaling
     quests.js         # main arc + side quests
     dialogue.js       # NPC archetypes, rumors, codex, barks, travel events
+  content/
+    registry.js       # content-pack loader/merger (the modding framework)
   world.js            # overworld generation (biomes, sites, roads)
   dungeon.js          # dungeon floor generation
   player.js           # character: attributes, gear, derived stats, leveling, codex
@@ -127,12 +169,18 @@ src/
   render.js           # canvas ASCII viewport + minimap
   ui.js               # HUD + generic menu rendering
   game.js             # state machine: movement, encounters, quests, discovery
-  screens.js          # keyboard input + every overlay screen
+  screens.js          # keyboard input + every overlay screen (+ end screens)
+  touch.js            # mobile/touch controls (D-pad, swipe, tap-to-select)
   main.js             # bootstrap
+content/
+  CONTENT_GUIDE.md    # how to author content packs
+  example-pack.js     # a worked example pack
 test/
   sim.js              # headless logic tests (worldgen, loot, combat, final boss)
-  browser.js          # full UI playthrough in Chromium (town/NPC/codex/dungeon/boss)
+  browser.js          # full desktop UI playthrough in Chromium
+  mobile.js           # phone-emulated touch playthrough
   shots.js            # screenshot capture
+DESIGN_QUESTIONS.md   # refinement questionnaire (loop, depth, endgame, unique spin)
 ```
 
 ---
@@ -140,8 +188,9 @@ test/
 ## Tests
 
 ```bash
-npm test               # headless logic simulation (no browser needed)  -> 828 checks
-npm run test:browser   # full UI playthrough in Chromium (needs playwright-core) -> 24 checks
+npm test               # headless logic simulation (no browser needed)   -> 828 checks
+npm run test:browser   # full desktop UI playthrough in Chromium          -> 24 checks
+npm run test:mobile    # phone-emulated touch playthrough in Chromium      -> 15 checks
 ```
 
 The logic suite generates worlds, rolls hundreds of items, levels a character, runs

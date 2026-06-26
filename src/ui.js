@@ -79,7 +79,7 @@
     html += '<div class="menu-list">';
     (m.items || []).forEach(function (it, i) {
       const sel = i === m.cursor;
-      html += '<div class="menu-item' + (sel ? ' sel' : '') + (it.disabled ? ' disabled' : '') + '"' +
+      html += '<div class="menu-item' + (sel ? ' sel' : '') + (it.disabled ? ' disabled' : '') + '" data-mi="' + i + '"' +
         (it.color ? ' style="color:' + it.color + '"' : '') + '>' +
         '<span class="mi-cursor">' + (sel ? '▶ ' : '  ') + '</span>' +
         '<span class="mi-label">' + it.label + '</span>' +

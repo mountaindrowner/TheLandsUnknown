@@ -59,6 +59,43 @@
     else UI.hideOverlay();
   };
 
+  // ---------- touch / synthetic input ----------
+  // dispatch a key through the normal handler (used by on-screen controls)
+  Game.prototype.key = function (k) { this.onKey({ key: k, preventDefault: function () {} }); };
+
+  // resolve the active overlay's "cursor" field (varies by screen)
+  Game.prototype._cursorRef = function () {
+    const o = this.overlay; if (!o) return null;
+    if (o.type === 'chargen') {
+      if (o.step === 0) return { get: function () { return o.orderIdx; }, set: function (v) { o.orderIdx = v; } };
+      if (o.step === 1) return { get: function () { return o.weaponIdx; }, set: function (v) { o.weaponIdx = v; } };
+      return null;
+    }
+    if (typeof o.cursor === 'number') return { get: function () { return o.cursor; }, set: function (v) { o.cursor = v; } };
+    return null;
+  };
+
+  // tap a rendered menu item → focus it and confirm (single tap)
+  Game.prototype.touchMenuSelect = function (idx) {
+    const o = this.overlay; if (!o) return;
+    const ref = this._cursorRef();
+    if (ref) ref.set(idx);
+    this.key('Enter');
+  };
+
+  // tap a codex tab
+  Game.prototype.touchCodexTab = function (idx) {
+    if (this.overlay && this.overlay.type === 'codex') { this.overlay.tab = idx; this.render(); }
+  };
+
+  // tap an enemy card in combat → quick-attack it (or pick as target mid-action)
+  Game.prototype.touchEnemy = function (aliveIdx) {
+    const o = this.overlay, c = this.combat;
+    if (!o || o.type !== 'combat' || !c || !c.awaitingPlayer) return;
+    if (o.menu === 'target') { o.cursor = aliveIdx; this.key('Enter'); return; }
+    if (o.menu === 'root') { o.pending = { kind: 'attack' }; o.menu = 'target'; o.cursor = aliveIdx; this.render(); this.key('Enter'); }
+  };
+
   // ---------- helpers ----------
   function menuNav(o, k, len, onConfirm, onCancel) {
     if (k === 'ArrowUp' || k === 'w' || k === 'k') o.cursor = (o.cursor - 1 + len) % len;
@@ -557,9 +594,11 @@
       let html = '<div class="combat">';
       // enemies
       html += '<div class="cb-enemies">';
+      const alive = SCREENS.combat.aliveList(c);
       c.enemies.forEach(function (e, i) {
-        const targeting = (o.menu === 'target') && SCREENS.combat.aliveList(c)[o.cursor] === e;
-        html += '<div class="cb-enemy' + (e.alive ? '' : ' dead') + (targeting ? ' target' : '') + '">' +
+        const targeting = (o.menu === 'target') && alive[o.cursor] === e;
+        const aIdx = alive.indexOf(e);
+        html += '<div class="cb-enemy' + (e.alive ? '' : ' dead') + (targeting ? ' target' : '') + '"' + (e.alive ? ' data-eidx="' + aIdx + '"' : '') + '>' +
           '<div class="cb-glyph" style="color:' + e.color + '">' + esc(e.glyph) + (e.boss ? ' ☠' : '') + '</div>' +
           '<div class="cb-name">' + esc(e.name) + '</div>' +
           (e.alive ? UI.bar(e.hp, e.maxHp, e.boss ? '#ff2d78' : '#a33') : '<div class="slain">SLAIN</div>') +
@@ -663,7 +702,7 @@
     render: function (g) {
       const o = g.overlay, p = g.player; g.ensureCodex();
       const D = TLU.Dialogue;
-      let tabs = CODEX_TABS.map(function (t, i) { return '<span class="cx-tab' + (i === o.tab ? ' on' : '') + '">' + t + '</span>'; }).join(' ');
+      let tabs = CODEX_TABS.map(function (t, i) { return '<span class="cx-tab' + (i === o.tab ? ' on' : '') + '" data-cxtab="' + i + '">' + t + '</span>'; }).join(' ');
       let body = '';
       if (o.tab === 0) {
         body = D.CODEX.world.map(function (e) { return '<div class="cx-entry"><div class="cx-h">' + esc(e.title) + '</div><div class="cx-b">' + esc(e.text) + '</div></div>'; }).join('');
@@ -764,6 +803,53 @@
       const r = g.rng, world = TLU.Dialogue.CODEX.world;
       const e = TLU.Dialogue.pick(r, world);
       return e.title + ': ' + e.text;
+    },
+  };
+
+  // ---- GAME OVER ----
+  function statsBlock(g) {
+    const p = g.player;
+    return '<div class="end-stats">' +
+      '<span>Order · ' + esc(p.order.name) + '</span>' +
+      '<span>Level · ' + p.level + '</span>' +
+      '<span>Day · ' + g.day + '</span>' +
+      '<span>Foes slain · ' + p.stats.kills + '</span>' +
+      '<span>Rift fragments · ' + p.fragments + '/4</span>' +
+      '<span>Gold · ' + p.gold + '</span>' +
+      '</div>';
+  }
+  SCREENS.over = {
+    render: function (g) {
+      const cont = TLU.Save.hasSave();
+      return '<div class="title-screen endscreen death"><div class="end-title">✟ You Have Fallen ✟</div>' +
+        '<div class="end-quote">' + esc(g.overlay.quote || '') + '</div>' + statsBlock(g) +
+        UI.renderMenu({ items: cont ? [{ label: 'Reload last camp', color: '#7ec8ff' }, { label: 'Return to title' }] : [{ label: 'Return to title' }], cursor: g.overlay.cursor || 0 }) +
+        '<div class="menu-foot">The storm moves on. Will you?</div></div>';
+    },
+    key: function (g, k) {
+      const o = g.overlay; o.cursor = o.cursor || 0;
+      const cont = TLU.Save.hasSave();
+      const n = cont ? 2 : 1;
+      menuNav(o, k, n, function (i) {
+        if (cont && i === 0) g.continueGame();
+        else g.openTitle();
+        g.render();
+      });
+      g.render();
+    },
+  };
+
+  // ---- VICTORY ----
+  SCREENS.win = {
+    render: function (g) {
+      return '<div class="title-screen endscreen victory"><div class="end-title win">★ The Last Storm Stilled ★</div>' +
+        '<div class="end-quote">Vethra, the Gloammother, unravels into fading light. The Galestorm gentles, and across Aurenmark the wisps wheel skyward in silent salute. You are the first of the Sworn reborn — and you have ended the eldest of the Hollow Ones.</div>' +
+        statsBlock(g) +
+        UI.renderMenu({ items: [{ label: 'Begin anew', color: '#ffd86b' }], cursor: 0 }) +
+        '<div class="menu-foot">Strength before weakness. Journey before destination. — Thank you for playing.</div></div>';
+    },
+    key: function (g, k) {
+      if (k === 'Enter' || k === ' ' || k === 'Escape') { g.openTitle(); g.render(); }
     },
   };
 

@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#05060a" />
 <title>The Lands Unknown — A Chronicle of Gale and Gleam</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext y='13' font-size='13'%3E%E2%9A%94%3C/text%3E%3C/svg%3E" />
 <link rel="stylesheet" href="styles.css" />
@@ -39,6 +42,9 @@
 <script src="src/data/bestiary.js"></script>
 <script src="src/data/quests.js"></script>
 <script src="src/data/dialogue.js"></script>
+<!-- content framework + packs (author content here; see content/CONTENT_GUIDE.md) -->
+<script src="src/content/registry.js"></script>
+<script src="content/example-pack.js"></script>
 <!-- generation -->
 <script src="src/world.js"></script>
 <script src="src/dungeon.js"></script>
@@ -51,6 +57,7 @@
 <script src="src/ui.js"></script>
 <script src="src/game.js"></script>
 <script src="src/screens.js"></script>
+<script src="src/touch.js"></script>
 <script src="src/main.js"></script>
 </body>
 </html>

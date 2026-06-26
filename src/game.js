@@ -36,6 +36,7 @@
       UI.renderHUD(this);
     }
     this.renderOverlay();
+    if (TLU.Touch) TLU.Touch.sync(this);
   };
 
   Game.prototype.msg = function (m, c) { UI.log(this, m, c); };
@@ -79,6 +80,7 @@
     this.msg('You wake on the Rockbud Plains, wisps circling like curious sparks.');
     this.msg('Seek the Galewardens in a hold (⌂). Press [?] for help, [Enter] to interact.');
     this.save();
+    this.render();
   };
 
   Game.prototype.continueGame = function () {
@@ -100,6 +102,7 @@
     this.mode = 'world'; this.state = 'play'; this.overlay = null;
     this.logLines = [];
     this.msg('%c— The journey continues. —', 'head');
+    this.render();
   };
 
   Game.prototype.save = function () { try { TLU.Save.save(this); } catch (e) {} };
