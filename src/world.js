@@ -131,7 +131,7 @@
     // --- Mini-boss lair ---
     const lair = placeSite({ type: 'lair', glyph: '☠', color: '#ff6a3d', name: 'Varen\'s Warcamp', level: 8, boss: 'highlord_reaver', cleared: false }, 8);
 
-    // --- Final ruin: Aharietiam (placed deep in the storm-lands, east) ---
+    // --- Final ruin: Dawnhollow (placed deep in the storm-lands, east) ---
     let aha = null;
     for (let tries = 0; tries < 500 && !aha; tries++) {
       const x = rng.int(W - 18, W - 4), y = rng.int(6, H - 6);

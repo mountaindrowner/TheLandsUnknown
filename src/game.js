@@ -58,7 +58,7 @@
       orderIdx: 0,
       weapons: [['blades', 'Sword & Dagger'], ['blunt', 'Mace & Hammer'], ['polearm', 'Spear & Glaive'], ['archery', 'Bow']],
       weaponIdx: 0,
-      seedStr: 'kharavar-' + (Math.floor(performance.now()) ^ 0x5bd1e995),
+      seedStr: 'aurenmark-' + (Math.floor(performance.now()) ^ 0x5bd1e995),
     };
   };
 
