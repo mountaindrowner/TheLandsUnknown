@@ -1,4 +1,4 @@
-/* Capture title + combat screenshots for the README. */
+/* Capture showcase screenshots: title, overworld, NPC dialogue, codex. */
 const { chromium } = require('playwright-core');
 const http = require('http');
 const fs = require('fs');
@@ -10,27 +10,34 @@ function serve() { return new Promise((r) => { const s = http.createServer((req,
   const srv = await serve(); const port = srv.address().port;
   const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--no-sandbox'] });
   const page = await browser.newPage({ viewport: { width: 1280, height: 820 } });
+  const press = async (k) => { await page.keyboard.press(k); await page.waitForTimeout(55); };
   await page.goto(`http://localhost:${port}/index.html`, { waitUntil: 'networkidle' });
   await page.evaluate(() => localStorage.clear());
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForTimeout(300);
   await page.screenshot({ path: path.join(ROOT, 'assets', 'screenshot-title.png') });
 
-  // start a game and jump into a boss combat for a dramatic shot
-  const press = async (k) => { await page.keyboard.press(k); await page.waitForTimeout(60); };
+  // start a game
   await press('Enter'); await press('Enter'); await press('Enter'); await press('Enter');
-  await page.waitForTimeout(200);
-  await page.evaluate(() => {
-    const g = window.GAME;
-    TLU.Player.gainXp(g.player, 6000, () => {});
-    g.player.hp = Math.round(g.player.maxHp * 0.7);
-    const boss = TLU.Bestiary.scale(TLU.Bestiary.MINIBOSS, TLU.Bestiary.MINIBOSS.lvl);
-    const adds = [TLU.Bestiary.scale(TLU.Bestiary.byId('reaver_raider'), 6), TLU.Bestiary.scale(TLU.Bestiary.byId('reaver_raider'), 6)];
-    g.startCombat([boss].concat(adds), { biome: 'plains', level: 8, isBoss: true, canFlee: false });
-  });
   await page.waitForTimeout(150);
-  await press('ArrowDown'); // move cursor to Surge to show menu depth
-  await page.screenshot({ path: path.join(ROOT, 'assets', 'screenshot-combat.png') });
+  // explore a bit for a populated map + log
+  for (let i = 0; i < 28; i++) { await page.keyboard.press(['ArrowRight','ArrowDown','ArrowRight','ArrowUp'][i % 4]); await page.waitForTimeout(16); const inc = await page.evaluate(() => window.GAME.state === 'combat'); if (inc) { for (let j=0;j<40;j++){ const st=await page.evaluate(()=>({s:window.GAME.state,a:window.GAME.combat&&window.GAME.combat.awaitingPlayer,m:window.GAME.overlay&&window.GAME.overlay.menu})); if(st.s!=='combat')break; if(!st.a){await page.waitForTimeout(25);continue;} await page.keyboard.press('Enter'); await page.waitForTimeout(25);} } }
+  await page.evaluate(() => { if (window.GAME.overlay) window.GAME.overlay = null; window.GAME.render(); });
+  await page.waitForTimeout(60);
+  await page.screenshot({ path: path.join(ROOT, 'assets', 'screenshot-play.png') });
+
+  // NPC dialogue
+  await page.evaluate(() => { const g = window.GAME; const t = g.world.towns[0]; g.openNpcs(t); });
+  await page.waitForTimeout(60);
+  await page.keyboard.press('Enter'); await page.waitForTimeout(60);  // approach first NPC
+  await page.keyboard.press('Enter'); await page.waitForTimeout(60);  // talk
+  await page.screenshot({ path: path.join(ROOT, 'assets', 'screenshot-npc.png') });
+
+  // codex (bestiary tab after a kill earlier) - open and show world tab
+  await page.evaluate(() => { window.GAME.overlay = null; window.GAME.openCodex(); });
+  await page.waitForTimeout(60);
+  await page.screenshot({ path: path.join(ROOT, 'assets', 'screenshot-codex.png') });
+
   await browser.close(); srv.close();
   console.log('shots captured');
 })().catch((e) => { console.error(e); process.exit(1); });

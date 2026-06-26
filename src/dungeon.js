@@ -1,5 +1,5 @@
 /* ============================================================
- * dungeon.js — Shardvault / ruin interiors (roguelike floors).
+ * dungeon.js — Riftvault / ruin interiors (roguelike floors).
  * Rooms + corridors, monsters, ground loot, stairs, boss rooms.
  * ============================================================ */
 (function (TLU) {
@@ -94,7 +94,7 @@
     // fragment pickup on deepest non-boss vaults
     if (opts.hasFragment && depth === maxDepth) {
       const c = center(downRoom);
-      features.push({ x: c.x, y: c.y, type: 'fragment', name: 'Dawnshard Fragment' });
+      features.push({ x: c.x, y: c.y, type: 'fragment', name: 'Rift Fragment' });
     }
 
     return {

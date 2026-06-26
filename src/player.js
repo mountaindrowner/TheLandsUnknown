@@ -35,6 +35,7 @@
       visited: {},    // discovered overworld tiles "x,y"
       questState: {}, // questId -> { stage }
       kills: {}, campsCleared: 0, vaultsCleared: 0, deepestVault: 0, gemsFound: 0,
+      codex: { bestiary: {}, places: {}, biomes: {}, rumors: [] },
       stats: { steps: 0, kills: 0, deaths: 0, found: 0 },
     };
 

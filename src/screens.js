@@ -46,6 +46,7 @@
       case 'i': case 'I': this.openInventory(); break;
       case 'c': case 'C': this.openCharacter(); break;
       case 'q': case 'Q': this.openQuests(); break;
+      case 'L': this.openCodex(); break;
       case '?': case '/': this.openHelp(); break;
       case 'Escape': this.overlay = { type: 'system', cursor: 0 }; this.render(); break;
     }
@@ -79,11 +80,11 @@
       lines.push('Defense ' + it.def);
     } else if (it.type === 'consumable') {
       if (it.heal) lines.push('Restores ' + it.heal + ' HP');
-      if (it.stormlight) lines.push('Restores ' + it.stormlight + ' Stormlight');
+      if (it.stormlight) lines.push('Restores ' + it.stormlight + ' Gleam');
       if (it.food) lines.push('Restores ' + it.food + ' Sustenance');
       if (it.scroll) lines.push('Scroll: ' + it.scroll);
       if (it.cure) lines.push('Cures ' + it.cure);
-    } else if (it.type === 'gem') { lines.push('Infused gem · +' + it.stormlight + ' Stormlight when used'); }
+    } else if (it.type === 'gem') { lines.push('Infused gem · +' + it.stormlight + ' Gleam when used'); }
     if (it.bonus) { const b = []; for (const key in it.bonus) { if (key === 'element' || key === 'voidbane') b.push(key + ' ' + it.bonus[key]); else b.push((it.bonus[key] > 0 ? '+' : '') + it.bonus[key] + ' ' + key); } if (b.length) lines.push('<span style="color:#7ec8ff">' + b.join(', ') + '</span>'); }
     if (it.desc) lines.push('<i style="color:#9a8">' + esc(it.desc) + '</i>');
     lines.push('Value ' + (it.value || 0) + 'g');
@@ -116,7 +117,7 @@
       html += '<pre class="logo">' + esc(art) + '</pre>';
       html += '<div class="tagline">' + esc(TLU.LORE.subtitle) + '</div>';
       html += UI.renderMenu({ items: g.overlay.items.map(function (it) { return { label: it.label, color: it.color }; }), cursor: g.overlay.cursor });
-      html += '<div class="menu-foot">↑/↓ move · Enter select · A storm-wracked open world of Shards & spren</div>';
+      html += '<div class="menu-foot">↑/↓ move · Enter select · A storm-wracked open world of rift & wisp</div>';
       html += '</div>';
       return html;
     },
@@ -151,13 +152,13 @@
         body += '<div class="cg-q">Choose your weapon focus:</div>';
         body += UI.renderMenu({ items: o.weapons.map(function (w) { return { label: w[1] }; }), cursor: o.weaponIdx });
       } else {
-        body += '<div class="cg-q">Your name, Radiant?</div>';
+        body += '<div class="cg-q">Your name, Sworn?</div>';
         body += '<div class="cg-name">' + esc(o.name) + ' <span class="dimk">(Tab to reroll)</span></div>';
         const ord = TLU.LORE.orders[o.orderKeys[o.orderIdx]];
         body += '<div class="cg-summary">' + ord.glyph + ' ' + ord.name + ' · ' + o.weapons[o.weaponIdx][1] + '</div>';
         body += '<div class="menu-foot">Enter to begin your journey.</div>';
       }
-      return '<div class="title-screen"><div class="menu-title">Create Your Radiant</div>' + body +
+      return '<div class="title-screen"><div class="menu-title">Create Your Gleamsworn</div>' + body +
         '<div class="menu-foot">↑/↓ choose · Enter next · Esc back</div></div>';
     },
     key: function (g, k) {
@@ -205,11 +206,12 @@
         ['Interact / Enter site / Stairs', 'Enter or E'],
         ['Inventory', 'I'], ['Character & level-up', 'C'], ['Quests', 'Q'],
         ['Pause / Save / Quit', 'Esc'], ['This help', '?'],
+        ['Codex / Journal', 'L'],
         ['—', '—'],
-        ['Goal', 'Find the Stormwardens, gather 4 Dawnshard fragments from'],
-        ['', 'sunken vaults (▼), end Highlord Vaten (☠), then descend'],
-        ['', 'Aharietiam (Ω) and destroy the Midnight Mother.'],
-        ['Tips', 'Skills level by USE. Highstorms (⛈) refill Stormlight fast'],
+        ['Goal', 'Find the Galewardens, gather 4 Rift fragments from'],
+        ['', 'drowned vaults (▼), end Warlord Varen (☠), then descend'],
+        ['', 'Dawnhollow (Ω) and destroy the Gloammother.'],
+        ['Tips', 'Skills level by USE. Galestorms (⛈) refill Gleam fast'],
         ['', 'but make the wilds deadlier. The east is far more dangerous.'],
       ];
       let html = '<div class="title-screen"><div class="menu-title">How to Play</div><div class="help-grid">';
@@ -266,14 +268,14 @@
       if (it.type === 'consumable') {
         if (it.heal) { const h = Math.min(p.maxHp - p.hp, it.heal); p.hp += h; g.msg('%cYou drink ' + it.name + ' (+' + h + ' HP).', 'good'); }
         if (it.food) { p.food = Math.min(100, p.food + it.food); g.msg('You eat. (+' + it.food + ' sustenance)'); }
-        if (it.stormlight) { p.stormlight = Math.min(p.maxStormlight, p.stormlight + it.stormlight); g.msg('%c+' + it.stormlight + ' Stormlight.', 'good'); }
+        if (it.stormlight) { p.stormlight = Math.min(p.maxStormlight, p.stormlight + it.stormlight); g.msg('%c+' + it.stormlight + ' Gleam.', 'good'); }
         if (it.scroll === 'recall') { SCREENS.inventory.recall(g); }
         else if (it.scroll === 'blast') { g.msg('That scroll only works in battle.'); return; }
         if (it.cure) { g.msg('Nothing to cure right now.'); return; }
         P.removeItem(p, it, 1);
       } else if (it.type === 'gem') {
         const s = Math.min(p.maxStormlight - p.stormlight, it.stormlight);
-        p.stormlight += s; g.msg('%cYou breathe in the gem\'s light. +' + s + ' Stormlight.', 'good');
+        p.stormlight += s; g.msg('%cYou breathe in the gem\'s light. +' + s + ' Gleam.', 'good');
         P.removeItem(p, it, 1);
       }
     },
@@ -304,7 +306,7 @@
           a.charAt(0).toUpperCase() + a.slice(1) + ': <b>' + p.attr[a] + '</b></div>';
       });
       html += '<div class="ch-h">Derived</div>';
-      html += '<div class="ch-d">HP ' + p.maxHp + ' · Stormlight ' + p.maxStormlight + '</div>';
+      html += '<div class="ch-d">HP ' + p.maxHp + ' · Gleam ' + p.maxStormlight + '</div>';
       html += '<div class="ch-d">Attack ' + p.attack + ' · Defense ' + p.defense + '</div>';
       html += '<div class="ch-d">Speed ' + p.speed + ' · Crit ' + Math.round(p.crit * 100) + '%</div>';
       html += '<div class="ch-d">Block ' + Math.round(p.blockChance * 100) + '% · Frags ' + p.fragments + '/4</div>';
@@ -385,13 +387,13 @@
 
   // ---- TOWN ----
   SCREENS.town = {
-    services: [['Rest at the inn (10g)', 'rest'], ['Visit the merchant', 'shop'], ['Train skills', 'train'], ['Speak with the Stormwarden', 'speak'], ['Leave'.toString(), 'leave']],
+    services: [['Rest at the inn (10g)', 'rest'], ['Visit the merchant', 'shop'], ['Train skills', 'train'], ['Speak with the townsfolk', 'folk'], ['Speak with the Galewarden', 'speak'], ['Leave'.toString(), 'leave']],
     render: function (g) {
       const o = g.overlay, site = o.site;
       if (o.sub === 'shop') return SCREENS.town.renderShop(g);
       if (o.sub === 'train') return SCREENS.town.renderTrain(g);
       let html = '<div class="panel town"><div class="menu-title">⌂ ' + esc(site.name) + '</div>' +
-        '<div class="town-desc">A storm-bunkered hold of the ' + (site.level > 6 ? 'eastern frontier' : 'western plains') + '. Travelers shelter behind its windward wall.</div>';
+        '<div class="town-desc">A gale-bunkered hold of the ' + (site.level > 6 ? 'eastern frontier' : 'western plains') + '. Travelers shelter behind its windward wall.</div>';
       html += UI.renderMenu({ items: SCREENS.town.services.map(function (s) { return { label: s[0] }; }), cursor: o.cursor });
       html += '<div class="menu-foot">' + g.player.gold + 'g · HP ' + Math.round(g.player.hp) + '/' + g.player.maxHp + ' · Enter select · Esc leave</div></div>';
       return html;
@@ -405,6 +407,7 @@
         if (act === 'rest') SCREENS.town.rest(g);
         else if (act === 'shop') { o.sub = 'shop'; o.cursor = 0; o.mode = 'buy'; SCREENS.town.ensureStock(g); }
         else if (act === 'train') { o.sub = 'train'; o.cursor = 0; }
+        else if (act === 'folk') { g.openNpcs(o.site); return; }
         else if (act === 'speak') SCREENS.town.speak(g);
         else if (act === 'leave') { g.overlay = null; }
       }, function () { g.overlay = null; });
@@ -414,29 +417,29 @@
       const p = g.player;
       if (p.gold < 10) { g.msg('You cannot afford a bed (10g).'); g.render(); return; }
       p.gold -= 10; P.fullHeal(p); p.food = 100; g.day++;
-      g.msg('%cYou rest. HP & Stormlight restored. (Day ' + g.day + ')', 'good');
+      g.msg('%cYou rest. HP & Gleam restored. (Day ' + g.day + ')', 'good');
       g.save(); g.render();
     },
     speak: function (g) {
       const p = g.player;
       g.advanceMain('talk:stormwarden');
       const st = p.questState.main.stage;
-      g.overlay = { type: 'dialog', who: 'The Stormwarden', back: 'town', backSite: g.townSite,
+      g.overlay = { type: 'dialog', who: 'The Galewarden', back: 'town', backSite: g.townSite,
         lines: SCREENS.town.stormwardenLines(g, st), idx: 0 };
       g.render();
     },
     stormwardenLines: function (g, stage) {
       if (stage <= 1) return [
-        'The Stormwarden studies the spren orbiting your shoulders.',
-        '"So. The old bonds stir again. You are no Stormless — you are the first of a reborn Order."',
-        '"Listen: the Everstorm is no mere tempest. An Unmade wakes beneath Aharietiam — Re-Shephir, the Midnight Mother."',
-        '"To stand against her you must reclaim a Dawnshard. Its pieces lie scattered in the sunken Shardvaults (▼). Recover all four."',
-        '"And beware Highlord Vaten of the Ashen Reavers (☠). He hunts Radiants. End him before he ends you."',
+        'The Galewarden studies the wisps orbiting your shoulders.',
+        '"So. The old bonds stir again. You are no Gleamless — you are the first of a reborn Order."',
+        '"Listen: the Galestorm is no mere tempest. A Hollow One wakes beneath Dawnhollow — Vethra, the Gloammother."',
+        '"To stand against her you must reclaim a Rift. Its fragments lie scattered in the drowned Riftvaults (▼). Recover all four."',
+        '"And beware Warlord Varen of the Cinder Reavers (☠). He hunts the Sworn. End him before he ends you."',
       ];
       return [
-        'The Stormwarden bows her head.',
-        '"You carry ' + g.player.fragments + ' of four fragments. When all are joined, descend into Aharietiam (Ω)."',
-        '"Journey before destination, Radiant. The last storm is coming."',
+        'The Galewarden bows her head.',
+        '"You carry ' + g.player.fragments + ' of four fragments. When all are joined, descend into Dawnhollow (Ω)."',
+        '"Strength before weakness, Sworn. The last storm is coming."',
       ];
     },
     // ---- shop ----
@@ -565,7 +568,7 @@
       html += '</div>';
       // player panel
       html += '<div class="cb-player"><div class="cb-pname">@ ' + esc(p.name) + ' · Lv' + p.level + ' ' + statusTags(p) + '</div>' +
-        '<div class="cb-bars">HP ' + UI.bar(p.hp, p.maxHp, '#c0392b') + 'Light ' + UI.bar(p.stormlight, p.maxStormlight, '#7e6bff') + '</div></div>';
+        '<div class="cb-bars">HP ' + UI.bar(p.hp, p.maxHp, '#c0392b') + 'Gleam ' + UI.bar(p.stormlight, p.maxStormlight, '#7e6bff') + '</div></div>';
       // menu
       html += '<div class="cb-menu">' + SCREENS.combat.renderMenu(g) + '</div>';
       html += '</div>';
@@ -616,7 +619,7 @@
         menuNav(o, k, Math.max(1, ids.length), function (i) {
           const id = ids[i]; if (!id) return;
           const ab = TLU.Abilities[id];
-          if ((ab.cost || 0) > p.stormlight) { g.msg('Not enough Stormlight.'); return; }
+          if ((ab.cost || 0) > p.stormlight) { g.msg('Not enough Gleam.'); return; }
           if (ab.target === 'enemy') { o.pending = { kind: 'ability', id: id }; o.menu = 'target'; o.cursor = 0; }
           else { c.playerAct({ type: 'ability', id: id }); SCREENS.combat.after(g); }
         });
@@ -653,6 +656,116 @@
     const map = { guard: '⛨', evade: '»', blur: '◍', truesight: '◉', burn: '🔥', bleed: '⸙', poison: '☠', stun: '✸', bound: '⛓', fear: '‼', rage: '⇈' };
     return Object.keys(a.statuses).map(function (s) { return '<span class="st st-' + s + '" title="' + s + '">' + (map[s] || s) + '</span>'; }).join('');
   }
+
+  // ---- CODEX / JOURNAL (discovery-driven lore) ----
+  const CODEX_TABS = ['World', 'Factions', 'Bestiary', 'Places', 'Rumors'];
+  SCREENS.codex = {
+    render: function (g) {
+      const o = g.overlay, p = g.player; g.ensureCodex();
+      const D = TLU.Dialogue;
+      let tabs = CODEX_TABS.map(function (t, i) { return '<span class="cx-tab' + (i === o.tab ? ' on' : '') + '">' + t + '</span>'; }).join(' ');
+      let body = '';
+      if (o.tab === 0) {
+        body = D.CODEX.world.map(function (e) { return '<div class="cx-entry"><div class="cx-h">' + esc(e.title) + '</div><div class="cx-b">' + esc(e.text) + '</div></div>'; }).join('');
+      } else if (o.tab === 1) {
+        body = Object.keys(D.CODEX.factions).map(function (k) { return '<div class="cx-entry"><div class="cx-h">' + esc(TLU.LORE.factions[k].name) + '</div><div class="cx-b">' + esc(D.CODEX.factions[k]) + '</div></div>'; }).join('');
+      } else if (o.tab === 2) {
+        const ids = Object.keys(p.codex.bestiary).filter(function (id) { return p.codex.bestiary[id]; });
+        body = ids.length ? ids.map(function (id) {
+          const b = TLU.Bestiary.byId(id);
+          return '<div class="cx-entry"><div class="cx-h" style="color:' + (b.color || '#fff') + '">' + esc(b.name) + '</div><div class="cx-b">' + esc(D.BESTIARY_LORE[id] || '') + '</div></div>';
+        }).join('') : '<div class="cx-empty">Slay the creatures of Aurenmark to fill these pages.</div>';
+      } else if (o.tab === 3) {
+        const keys = Object.keys(p.codex.places).filter(function (t) { return p.codex.places[t]; });
+        body = keys.length ? keys.map(function (t) { return '<div class="cx-entry"><div class="cx-h">' + esc(g.placeName(t)) + '</div><div class="cx-b">' + esc(D.CODEX.places[t]) + '</div></div>'; }).join('') : '<div class="cx-empty">Explore the world to chart its places.</div>';
+      } else {
+        body = (p.codex.rumors && p.codex.rumors.length) ? p.codex.rumors.slice().reverse().map(function (r) { return '<div class="cx-entry"><div class="cx-b">“' + esc(r) + '”</div></div>'; }).join('') : '<div class="cx-empty">Speak with townsfolk to gather rumors.</div>';
+      }
+      return '<div class="panel codex"><div class="menu-title">Codex &amp; Journal</div><div class="cx-tabs">' + tabs + '</div>' +
+        '<div class="cx-body">' + body + '</div><div class="menu-foot">←/→ switch section · Esc close</div></div>';
+    },
+    key: function (g, k) {
+      const o = g.overlay;
+      if (k === 'ArrowLeft' || k === 'a' || k === 'h') o.tab = (o.tab - 1 + CODEX_TABS.length) % CODEX_TABS.length;
+      else if (k === 'ArrowRight' || k === 'd' || k === 'l') o.tab = (o.tab + 1) % CODEX_TABS.length;
+      else if (k === 'Escape' || k === 'L' || k === 'Enter') { g.overlay = null; }
+      g.render();
+    },
+  };
+
+  // ---- NPC ROSTER ----
+  SCREENS.npclist = {
+    render: function (g) {
+      const o = g.overlay;
+      const items = o.roster.map(function (npc) { return { label: npc.arch.glyph + ' ' + esc(npc.name), hint: npc.arch.role, color: npc.arch.color }; });
+      return '<div class="panel"><div class="menu-title">The folk of ' + esc(o.site.name) + '</div>' +
+        UI.renderMenu({ items: items, cursor: o.cursor, footer: 'Enter: approach · Esc: back' }) + '</div>';
+    },
+    key: function (g, k) {
+      const o = g.overlay;
+      menuNav(o, k, o.roster.length, function (i) {
+        const npc = o.roster[i];
+        const greet = TLU.Dialogue.pick(g.rng || (g.rng = new TLU.RNG(g.seed + ':npc')), npc.arch.greet);
+        g.overlay = { type: 'npc', npc: npc, site: o.site, line: greet, cursor: 0 };
+      }, function () { g.openTown(o.site); });
+      g.render();
+    },
+  };
+
+  // ---- NPC CONVERSATION ----
+  SCREENS.npc = {
+    topics: function (npc) {
+      const t = [['Talk', 'talk'], ['Ask for rumors', 'rumor']];
+      if (npc.archKey === 'scholar' || npc.archKey === 'priest') t.push(['Ask about the world', 'lore']);
+      t.push(['Farewell', 'bye']);
+      return t;
+    },
+    render: function (g) {
+      const o = g.overlay, npc = o.npc;
+      const topics = SCREENS.npc.topics(npc);
+      let html = '<div class="panel dialog"><div class="menu-title" style="color:' + npc.arch.color + '">' + npc.arch.glyph + ' ' + esc(npc.name) + ' <span class="npc-role">— ' + npc.arch.role + '</span></div>';
+      html += '<div class="dlg-text">' + esc(o.line) + '</div>';
+      html += UI.renderMenu({ items: topics.map(function (t) { return { label: t[0] }; }), cursor: o.cursor });
+      html += '<div class="menu-foot">Enter: choose · Esc: leave</div></div>';
+      return html;
+    },
+    key: function (g, k) {
+      const o = g.overlay, npc = o.npc;
+      const topics = SCREENS.npc.topics(npc);
+      if (!g.rng) g.rng = new TLU.RNG(g.seed + ':npc');
+      menuNav(o, k, topics.length, function (i) {
+        const act = topics[i][1];
+        if (act === 'talk') { o.line = TLU.Dialogue.pick(g.rng, npc.arch.talk); }
+        else if (act === 'rumor') { o.line = SCREENS.npc.giveRumor(g); }
+        else if (act === 'lore') { o.line = SCREENS.npc.giveLore(g); }
+        else { o.line = TLU.Dialogue.pick(g.rng, npc.arch.bye); g.openTown(o.site); return; }
+      }, function () { g.openTown(o.site); });
+      g.render();
+    },
+    giveRumor: function (g) {
+      const r = g.rng, D = TLU.Dialogue;
+      g.ensureCodex();
+      if (r.chance(0.4)) {
+        // a rumor that reveals a map site
+        const tmpl = D.pick(r, D.SITE_RUMORS);
+        const found = g.revealNearestSite(tmpl.type);
+        if (found) {
+          const text = tmpl.text.replace('{dir}', found.dir);
+          if (g.player.codex.rumors.indexOf(text) < 0) g.player.codex.rumors.push(text);
+          g.msg('%c✦ A location was marked on your map: ' + found.site.name + ' (' + found.dir + ').', 'skill');
+          return text + '  [marked on your map]';
+        }
+      }
+      const rumor = D.pick(r, D.RUMORS);
+      if (g.player.codex.rumors.indexOf(rumor) < 0) g.player.codex.rumors.push(rumor);
+      return '"' + rumor + '"';
+    },
+    giveLore: function (g) {
+      const r = g.rng, world = TLU.Dialogue.CODEX.world;
+      const e = TLU.Dialogue.pick(r, world);
+      return e.title + ': ' + e.text;
+    },
+  };
 
   TLU.SCREENS = SCREENS;
 })(window.TLU = window.TLU || {});

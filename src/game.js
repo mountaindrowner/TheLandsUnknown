@@ -72,10 +72,12 @@
     this.questLog = {};
     p.questState.main = { stage: 0 };
     this.revealWorld(p.wx, p.wy, 4);
+    this.ensureCodex();
+    this.discoverBiome(p.wx, p.wy);
     this.logLines = [];
     this.msg('%c' + TLU.LORE.title + ' — ' + TLU.LORE.subtitle, 'head');
-    this.msg('You wake on the Rockbud Plains, spren circling like curious sparks.');
-    this.msg('Seek the Stormwardens in a hold (⌂). Press [?] for help, [Enter] to interact.');
+    this.msg('You wake on the Rockbud Plains, wisps circling like curious sparks.');
+    this.msg('Seek the Galewardens in a hold (⌂). Press [?] for help, [Enter] to interact.');
     this.save();
   };
 
@@ -90,6 +92,7 @@
     this.player.order = TLU.LORE.orders[this.player.orderId];
     TLU.Player.recompute(this.player);
     TLU.Player.refreshAbilities(this.player);
+    this.ensureCodex();
     this.turnCount = data.turnCount || 0;
     this.storm = data.storm || this.storm;
     this.day = data.day || 1;
@@ -120,9 +123,10 @@
     p.wx = nx; p.wy = ny; p.stats.steps++;
     this.revealWorld(nx, ny, 4);
     this.worldTurn();
+    this.discoverBiome(nx, ny);
     const site = w.siteAt(nx, ny);
     if (site) { this.msg('%cYou stand before ' + site.name + '. Press [Enter] to ' + (site.type === 'town' ? 'enter' : 'descend') + '.', 'note'); }
-    else this.maybeEncounter();
+    else { this.maybeEncounter(); if (this.state === 'play' && !this.overlay) this.ambientTick(); }
     if (p.stats.steps % 12 === 0) this.save();
     this.render();
   };
@@ -140,7 +144,7 @@
     this.storm.timer--;
     if (this.storm.timer <= 0) {
       this.storm.active = !this.storm.active;
-      if (this.storm.active) { this.storm.timer = 14; this.storm.front = 0; this.msg('%c⛈ A highstorm sweeps in from the east! Surges flow freely, but the wilds grow deadly.', 'storm'); }
+      if (this.storm.active) { this.storm.timer = 14; this.storm.front = 0; this.msg('%c⛈ A galestorm sweeps in from the east! The surges flow freely, but the wilds grow deadly.', 'storm'); }
       else { this.storm.timer = 90 + (this.turnCount % 40); this.storm.front = 999; this.day++; this.msg('%c☀ The storm passes. Dawn breaks on day ' + this.day + '.', 'note'); }
     }
     if (this.storm.active) this.storm.front = Math.max(0, this.storm.front - 4);
@@ -192,6 +196,7 @@
     if (site.type === 'lair') bossKind = site.boss;
     if (site.final) bossKind = 'final';
     this.dungeon = { site: site, depth: 1, maxDepth: maxDepth, bossKind: bossKind };
+    this.discoverPlace(site.type);
     if (site.final) this.advanceMain('reach:aharietiam');
     this.buildFloor(1);
     this.mode = 'dungeon'; this.state = 'play'; this.overlay = null;
@@ -406,6 +411,7 @@
   Game.prototype.onEnemyKilled = function (e) {
     const p = this.player;
     p.kills[e.id] = (p.kills[e.id] || 0) + 1; p.stats.kills++;
+    this.discoverBestiary(e);
     if (e.id === 'highlord_reaver') this.advanceMain('kill:highlord_reaver');
     if (e.id === 'midnight_mother') this.advanceMain('kill:midnight_mother');
     if (e.id === 'thunderclast') this.advanceSide();
@@ -502,8 +508,88 @@
 
   Game.prototype.openTown = function (site) {
     this.townSite = site;
+    this.discoverPlace('town');
     this.overlay = { type: 'town', cursor: 0, site: site };
     this.state = 'play';
+    this.render();
+  };
+
+  // ---------- discovery / codex / dialogue ----------
+  Game.prototype.ensureCodex = function () {
+    const p = this.player; if (!p) return;
+    p.codex = p.codex || {};
+    p.codex.bestiary = p.codex.bestiary || {};
+    p.codex.places = p.codex.places || {};
+    p.codex.biomes = p.codex.biomes || {};
+    p.codex.rumors = p.codex.rumors || [];
+  };
+  Game.prototype.discoverBiome = function (x, y) {
+    const p = this.player, t = this.world.tiles[y] && this.world.tiles[y][x];
+    if (!t) return; this.ensureCodex();
+    if (!p.codex.biomes[t.biome]) {
+      p.codex.biomes[t.biome] = true;
+      const fl = TLU.LORE.biomeFlavor[t.biome];
+      if (fl) this.msg('%c' + fl, 'note');
+    }
+  };
+  Game.prototype.placeName = function (type) { return { town: 'Holds', vault: 'Riftvaults', camp: 'Reaver Camps', lair: 'Warcamps', ruin: 'Dawnhollow' }[type] || type; };
+  Game.prototype.discoverPlace = function (type) {
+    const p = this.player; this.ensureCodex();
+    if (!p.codex.places[type] && TLU.Dialogue.CODEX.places[type]) {
+      p.codex.places[type] = true;
+      this.msg('%c✦ Codex: discovered ' + this.placeName(type) + '. [L] to read.', 'skill');
+    }
+  };
+  Game.prototype.discoverBestiary = function (e) {
+    const p = this.player; this.ensureCodex();
+    if (TLU.Dialogue.BESTIARY_LORE[e.id] && !p.codex.bestiary[e.id]) {
+      p.codex.bestiary[e.id] = true;
+      this.msg('%c✦ Bestiary: recorded ' + e.name + '. [L] to read.', 'skill');
+    }
+  };
+
+  // ambient barks + non-combat travel events
+  Game.prototype.ambientTick = function () {
+    if (!this.rng) this.rng = new TLU.RNG(this.seed + ':enc');
+    const r = this.rng;
+    if (r.chance(0.06)) { this.triggerEvent(); return; }
+    if (r.chance(0.14)) this.msg(TLU.Dialogue.pick(r, TLU.Dialogue.BARKS));
+  };
+  Game.prototype.triggerEvent = function () {
+    const r = this.rng;
+    const ev = r.weighted(TLU.Dialogue.EVENTS.map(function (e) { return { v: e, w: e.weight || 1 }; }));
+    this.msg('%c' + ev.text, 'note');
+    try { ev.effect(this); } catch (err) {}
+  };
+
+  Game.prototype.dirWord = function (dx, dy) {
+    const ns = dy < -1 ? 'north' : dy > 1 ? 'south' : '';
+    const ew = dx < -1 ? 'west' : dx > 1 ? 'east' : '';
+    return (ns + ew) || 'nearby';
+  };
+  // reveal nearest undiscovered site of a type → {site, dir} or null
+  Game.prototype.revealNearestSite = function (type) {
+    const p = this.player, w = this.world;
+    let best = null, bd = 1e9;
+    w.sites.forEach(function (s) {
+      if (s.type !== type || p.visited[s.x + ',' + s.y]) return;
+      const d = Math.abs(s.x - p.wx) + Math.abs(s.y - p.wy);
+      if (d < bd) { bd = d; best = s; }
+    });
+    if (!best) return null;
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+      const mx = best.x + dx, my = best.y + dy;
+      if (mx >= 0 && my >= 0 && mx < w.w && my < w.h) p.visited[mx + ',' + my] = 1;
+    }
+    return { site: best, dir: this.dirWord(best.x - p.wx, best.y - p.wy) };
+  };
+
+  Game.prototype.openCodex = function () { if (this.state !== 'play') return; this.ensureCodex(); this.overlay = { type: 'codex', tab: 0 }; this.render(); };
+  Game.prototype.npcRng = function (site) { return new TLU.RNG(this.seed + ':npc:' + site.x + ',' + site.y); };
+  Game.prototype.openNpcs = function (site) {
+    this.ensureCodex();
+    const roster = TLU.Dialogue.rosterFor(this.npcRng(site), site);
+    this.overlay = { type: 'npclist', cursor: 0, site: site, roster: roster };
     this.render();
   };
 

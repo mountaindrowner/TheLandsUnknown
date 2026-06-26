@@ -10,10 +10,10 @@
     { id: 'crude',    name: 'Crude',     mult: 0.7, value: 0.5, tier: 0, color: '#9a8f80' },
     { id: 'iron',     name: 'Iron',      mult: 1.0, value: 1.0, tier: 1, color: '#c9c9c9' },
     { id: 'steel',    name: 'Steel',     mult: 1.25, value: 1.8, tier: 2, color: '#dfe6ee' },
-    { id: 'bronze',   name: 'Soulbronze', mult: 1.45, value: 2.6, tier: 3, color: '#caa04b' },
-    { id: 'azure',    name: 'Azish',     mult: 1.7, value: 4.0, tier: 4, color: '#7ec8ff' },
-    { id: 'shardsteel', name: 'Shardsteel', mult: 2.1, value: 7.5, tier: 5, color: '#b99cff' },
-    { id: 'soulcast', name: 'Soulcast',  mult: 2.6, value: 12, tier: 6, color: '#67e08a' },
+    { id: 'bronze',   name: 'Tarnsteel', mult: 1.45, value: 2.6, tier: 3, color: '#caa04b' },
+    { id: 'azure',    name: 'Azurine',     mult: 1.7, value: 4.0, tier: 4, color: '#7ec8ff' },
+    { id: 'shardsteel', name: 'Riftsteel', mult: 2.1, value: 7.5, tier: 5, color: '#b99cff' },
+    { id: 'soulcast', name: 'Gleamforged',  mult: 2.6, value: 12, tier: 6, color: '#67e08a' },
   ];
 
   // Weapon base types. dmg is base at iron tier; speed affects turn order.
@@ -28,7 +28,7 @@
     { id: 'glaive',   name: 'Glaive',     glyph: '|', dmg: 18, speed: 7, hands: 2, skill: 'polearm' },
     { id: 'greatbow', name: 'Longbow',    glyph: '}', dmg: 14, speed: 9, hands: 2, skill: 'archery', ranged: true },
     { id: 'shortbow', name: 'Shortbow',   glyph: '}', dmg: 9, speed: 12, hands: 2, skill: 'archery', ranged: true },
-    { id: 'halfshard', name: 'Half-Shard Blade', glyph: '†', dmg: 20, speed: 10, hands: 1, skill: 'blades', crit: 0.1, special: 'shard' },
+    { id: 'halfshard', name: 'Riftshard Blade', glyph: '†', dmg: 20, speed: 10, hands: 1, skill: 'blades', crit: 0.1, special: 'shard' },
   ];
 
   // Armor slots and bases. def = base armor at iron tier.
@@ -53,7 +53,7 @@
     { id: 'swift',   name: 'Swift',    tier: 1, bonus: { speed: 2 } },
     { id: 'heavy',   name: 'Brutal',   tier: 2, bonus: { dmg: 4 } },
     { id: 'guarded', name: 'Warded',   tier: 2, bonus: { def: 4 } },
-    { id: 'stormlit', name: 'Stormlit', tier: 3, bonus: { dmg: 5, maxStormlight: 15 } },
+    { id: 'stormlit', name: 'Gleamlit', tier: 3, bonus: { dmg: 5, maxStormlight: 15 } },
     { id: 'vicious', name: 'Vicious',  tier: 3, bonus: { dmg: 6, crit: 0.08 } },
     { id: 'adamant', name: 'Adamant',  tier: 3, bonus: { def: 7, maxHp: 12 } },
     { id: 'godslaying', name: 'God-Slaying', tier: 4, bonus: { dmg: 10, crit: 0.12 } },
@@ -64,9 +64,9 @@
     { id: 'of_warding',   name: 'of Warding',    tier: 2, bonus: { def: 3, maxHp: 8 } },
     { id: 'of_flame',     name: 'of Flame',      tier: 2, bonus: { dmg: 4, element: 'fire' } },
     { id: 'of_frost',     name: 'of Frost',      tier: 2, bonus: { dmg: 4, element: 'frost' } },
-    { id: 'of_the_storm', name: 'of the Storm',  tier: 3, bonus: { maxStormlight: 30, stormRegen: 1 } },
+    { id: 'of_the_storm', name: 'of the Gale',  tier: 3, bonus: { maxStormlight: 30, stormRegen: 1 } },
     { id: 'of_vigor',     name: 'of Vigor',      tier: 3, bonus: { maxHp: 25, regen: 1 } },
-    { id: 'of_radiance',  name: 'of Radiance',   tier: 4, bonus: { dmg: 6, def: 6, maxStormlight: 25 } },
+    { id: 'of_radiance',  name: 'of Dawnlight',   tier: 4, bonus: { dmg: 6, def: 6, maxStormlight: 25 } },
     { id: 'of_voidbane',  name: 'of Voidbane',   tier: 5, bonus: { dmg: 12, voidbane: 0.4 } },
   ];
 
@@ -75,10 +75,10 @@
     potion_minor:  { id: 'potion_minor', name: 'Minor Healing Draught', glyph: '!', type: 'consumable', heal: 25, value: 15, stack: true },
     potion:        { id: 'potion', name: 'Healing Draught', glyph: '!', type: 'consumable', heal: 60, value: 40, stack: true },
     potion_major:  { id: 'potion_major', name: 'Greater Healing Draught', glyph: '!', type: 'consumable', heal: 140, value: 110, stack: true },
-    elixir_storm:  { id: 'elixir_storm', name: 'Stormlight Elixir', glyph: '*', type: 'consumable', stormlight: 60, value: 60, stack: true },
+    elixir_storm:  { id: 'elixir_storm', name: 'Gleam Elixir', glyph: '*', type: 'consumable', stormlight: 60, value: 60, stack: true },
     antidote:      { id: 'antidote', name: 'Antidote', glyph: '!', type: 'consumable', cure: 'poison', value: 25, stack: true },
     ration:        { id: 'ration', name: 'Travel Ration', glyph: '%', type: 'consumable', food: 30, value: 5, stack: true },
-    scroll_blast:  { id: 'scroll_blast', name: 'Scroll of Stormblast', glyph: '?', type: 'consumable', scroll: 'blast', value: 50, stack: true },
+    scroll_blast:  { id: 'scroll_blast', name: 'Scroll of Galeblast', glyph: '?', type: 'consumable', scroll: 'blast', value: 50, stack: true },
     scroll_warp:   { id: 'scroll_warp', name: 'Scroll of Recall', glyph: '?', type: 'consumable', scroll: 'recall', value: 80, stack: true },
   };
 
@@ -180,23 +180,23 @@
   const UNIQUES = {
     oathbringer: function () {
       return { uid: uid(), type: 'weapon', base: 'longsword', glyph: '†', mat: 'shardsteel', color: '#b99cff',
-        name: 'Oathbringer, the Dawnshard', skill: 'blades', slot: 'weapon', hands: 1, dmg: 55, speed: 11, crit: 0.2,
+        name: 'Gravewind, the First Rift', skill: 'blades', slot: 'weapon', hands: 1, dmg: 55, speed: 11, crit: 0.2,
         armorPierce: 0.6, shard: true, rarity: 'artifact', level: 20, affixes: [{name:'Soulsevering',tier:5}],
         bonus: { dmg: 20, voidbane: 0.6, maxStormlight: 50 }, value: 9999,
-        desc: 'A living Shardblade that severs the soul. The dead cannot rise from its cut.' };
+        desc: 'A living Riftblade that severs the soul. The dead cannot rise from its cut.' };
     },
     sunmaker: function () {
       return { uid: uid(), type: 'weapon', base: 'warhammer', glyph: '†', mat: 'soulcast', color: '#ff7a4b',
-        name: 'Sunmaker, the Ashbringer', skill: 'blunt', slot: 'weapon', hands: 2, dmg: 70, speed: 6, crit: 0.12,
+        name: 'Cinderfall, the Ruin', skill: 'blunt', slot: 'weapon', hands: 2, dmg: 70, speed: 6, crit: 0.12,
         armorPierce: 0.8, shard: true, rarity: 'artifact', level: 24, affixes: [{name:'Cataclysm',tier:5}],
         bonus: { dmg: 25, element: 'fire' }, value: 9999,
-        desc: 'A Shardhammer that burned a hundred holds to ash. It hungers still.' };
+        desc: 'A Rifthammer that burned a hundred holds to ash. It hungers still.' };
     },
     plate_radiant: function () {
       return { uid: uid(), type: 'armor', base: 'halfplate', glyph: '◊', mat: 'shardsteel', color: '#b99cff',
-        name: 'Radiant Shardplate', skill: 'heavy', slot: 'body', def: 50, block: 0.2, rarity: 'artifact', level: 20,
-        affixes: [{name:'Stormforged',tier:5}], bonus: { maxHp: 80, maxStormlight: 60, stormRegen: 2, def: 20 }, value: 9999,
-        desc: 'Glowing plate that drinks Stormlight to mend itself and its bearer.' };
+        name: 'Gleamsworn Riftplate', skill: 'heavy', slot: 'body', def: 50, block: 0.2, rarity: 'artifact', level: 20,
+        affixes: [{name:'Galeforged',tier:5}], bonus: { maxHp: 80, maxStormlight: 60, stormRegen: 2, def: 20 }, value: 9999,
+        desc: 'Glowing plate that drinks Gleam to mend itself and its bearer.' };
     },
   };
 

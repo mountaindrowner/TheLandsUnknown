@@ -1,7 +1,7 @@
 /* ============================================================
- * world.js — procedural overworld of Kharavar.
+ * world.js — procedural overworld of Aurenmark.
  * Value-noise heightmap -> biomes; scatter towns, vaults, camps,
- * roads, and the final ruin of Aharietiam. Fully seed-reproducible.
+ * roads, and the final ruin of Dawnhollow. Fully seed-reproducible.
  * ============================================================ */
 (function (TLU) {
   'use strict';
@@ -13,9 +13,9 @@
     hills:   { id: 'hills',   glyph: 'n', color: '#7d7048', bg: '#16140c', name: 'Windward Hills', biome: 'hills' },
     forest:  { id: 'forest',  glyph: '♣', color: '#3f7a3f', bg: '#0d160d', name: 'Stonewood', biome: 'forest' },
     mountain:{ id: 'mountain',glyph: '▲', color: '#8a8a8a', bg: '#161616', name: 'The Unclimbed', biome: 'plateau', passable: false },
-    plateau: { id: 'plateau', glyph: '=', color: '#9a7a4a', bg: '#161208', name: 'Shattered Plains', biome: 'plateau' },
+    plateau: { id: 'plateau', glyph: '=', color: '#9a7a4a', bg: '#161208', name: 'Sundered Plains', biome: 'plateau' },
     crater:  { id: 'crater',  glyph: 'o', color: '#6a5a3a', bg: '#13100a', name: 'Crater Flats', biome: 'crater' },
-    storm:   { id: 'storm',   glyph: '§', color: '#7e6bff', bg: '#0e0b1a', name: 'Stormseat', biome: 'storm' },
+    storm:   { id: 'storm',   glyph: '§', color: '#7e6bff', bg: '#0e0b1a', name: 'The Galeseat', biome: 'storm' },
     desert:  { id: 'desert',  glyph: ':', color: '#caa84a', bg: '#161206', name: 'The Ashlands', biome: 'plains' },
   };
 
@@ -110,7 +110,7 @@
     const vaults = [];
     for (let i = 0; i < VAULT_COUNT; i++) {
       const v = placeSite({
-        type: 'vault', glyph: '▼', color: '#b99cff', name: 'Shardvault of ' + TLU.genName(rng),
+        type: 'vault', glyph: '▼', color: '#b99cff', name: 'Riftvault of ' + TLU.genName(rng),
         level: 3 + i * 2, floors: 2 + Math.min(5, Math.floor(i / 1.3)),
         hasFragment: i < 4, // four fragments across the early vaults
         cleared: false,
@@ -123,24 +123,24 @@
     const camps = [];
     for (let i = 0; i < CAMP_COUNT; i++) {
       const c = placeSite({
-        type: 'camp', glyph: '▲', color: '#c0533b', name: 'Reaver Camp', level: 2 + i, cleared: false,
+        type: 'camp', glyph: '▲', color: '#c0533b', name: 'Cinder Reaver Camp', level: 2 + i, cleared: false,
       }, 6);
       if (c) camps.push(c);
     }
 
     // --- Mini-boss lair ---
-    const lair = placeSite({ type: 'lair', glyph: '☠', color: '#ff6a3d', name: 'Vaten\'s Warcamp', level: 8, boss: 'highlord_reaver', cleared: false }, 8);
+    const lair = placeSite({ type: 'lair', glyph: '☠', color: '#ff6a3d', name: 'Varen\'s Warcamp', level: 8, boss: 'highlord_reaver', cleared: false }, 8);
 
     // --- Final ruin: Aharietiam (placed deep in the storm-lands, east) ---
     let aha = null;
     for (let tries = 0; tries < 500 && !aha; tries++) {
       const x = rng.int(W - 18, W - 4), y = rng.int(6, H - 6);
       if (isLand(x, y)) {
-        aha = { type: 'ruin', glyph: 'Ω', color: '#ff2d78', name: 'Aharietiam, the Last Ruin', level: 16, floors: 4, final: true, x: x, y: y };
+        aha = { type: 'ruin', glyph: 'Ω', color: '#ff2d78', name: 'Dawnhollow, the Last Ruin', level: 16, floors: 4, final: true, x: x, y: y };
         tiles[y][x].site = aha; tiles[y][x].passable = true; sites.push(aha);
       }
     }
-    if (!aha) { aha = Object.assign({ type: 'ruin', glyph: 'Ω', color: '#ff2d78', name: 'Aharietiam, the Last Ruin', level: 16, floors: 4, final: true }, { x: W - 5, y: Math.floor(H / 2) }); tiles[aha.y][aha.x].site = aha; tiles[aha.y][aha.x].passable = true; sites.push(aha); }
+    if (!aha) { aha = Object.assign({ type: 'ruin', glyph: 'Ω', color: '#ff2d78', name: 'Dawnhollow, the Last Ruin', level: 16, floors: 4, final: true }, { x: W - 5, y: Math.floor(H / 2) }); tiles[aha.y][aha.x].site = aha; tiles[aha.y][aha.x].passable = true; sites.push(aha); }
 
     // --- Roads: connect towns via simple line carving (visual + safer travel) ---
     function carveRoad(a, b) {

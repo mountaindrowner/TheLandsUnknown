@@ -119,7 +119,7 @@
     } else if (action.type === 'ability') {
       const ab = TLU.Abilities[action.id];
       if (ab) {
-        if ((ab.cost || 0) > p.stormlight) { this.log('Not enough Stormlight!'); this.awaitingPlayer = true; return; }
+        if ((ab.cost || 0) > p.stormlight) { this.log('Not enough Gleam!'); this.awaitingPlayer = true; return; }
         p.stormlight -= (ab.cost || 0);
         ctx.target = action.target && action.target.alive ? action.target : this.aliveEnemies()[0];
         this.log('%c' + p.name + ' invokes ' + ab.name + '!', 'cast');
@@ -151,7 +151,7 @@
   Combat.prototype._useItem = function (p, item, target) {
     if (!item) return;
     if (item.heal) { this.heal(p, item.heal, item.name); }
-    if (item.stormlight) { p.stormlight = Math.min(p.maxStormlight, p.stormlight + item.stormlight); this.log('%c+' + item.stormlight + ' Stormlight.', 'good'); }
+    if (item.stormlight) { p.stormlight = Math.min(p.maxStormlight, p.stormlight + item.stormlight); this.log('%c+' + item.stormlight + ' Gleam.', 'good'); }
     if (item.cure && p.statuses[item.cure]) { delete p.statuses[item.cure]; this.log('Cured ' + item.cure + '.'); }
     if (item.scroll === 'blast') { TLU.Abilities.scroll_blast.effect(this._ctx(p)); }
     TLU.Player.removeItem(p, item, 1);
@@ -309,7 +309,7 @@
 
   Combat.prototype.spawnAdd = function (boss) {
     const add = TLU.Bestiary.scale(TLU.Bestiary.byId('midnight_essence'), this.level);
-    add.name = 'Midnight Shadow';
+    add.name = 'Gloam Shadow';
     add.statuses = {}; add.alive = true; add._id = 'add' + this.rng.int(0, 9999);
     this.enemies.push(add);
     this.log('%cA murderous shadow peels from the darkness!', 'boss');

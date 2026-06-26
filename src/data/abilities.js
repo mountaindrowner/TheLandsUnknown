@@ -21,12 +21,12 @@
       effect: function (c) { c.combat.attack(c.user, c.target, { mult: 1.4, bonusCrit: 0.4, label: 'Aimed Shot' }); } },
 
     // --- Windrunner: Gravitation / Adhesion ---
-    lashing: { name: 'Skyward Lashing', cost: 12, school: 'gravitation', target: 'enemy', unlock: 1, order: 'windrunner',
+    lashing: { name: 'Skyward Pull', cost: 12, school: 'gravitation', target: 'enemy', unlock: 1, order: 'windrunner',
       desc: 'Reverse a foe\'s gravity, dealing storm damage and stunning briefly.',
-      effect: function (c) { c.combat.magicHit(c.user, c.target, 1.4, 'storm', 'Skyward Lashing'); if (c.rng.chance(0.5)) c.combat.applyStatus(c.target, 'stun', 1); } },
-    full_lashing: { name: 'Full Lashing', cost: 18, school: 'adhesion', target: 'enemy', unlock: 4, order: 'windrunner',
+      effect: function (c) { c.combat.magicHit(c.user, c.target, 1.4, 'storm', 'Skyward Pull'); if (c.rng.chance(0.5)) c.combat.applyStatus(c.target, 'stun', 1); } },
+    full_lashing: { name: 'Binding', cost: 18, school: 'adhesion', target: 'enemy', unlock: 4, order: 'windrunner',
       desc: 'Bind a foe in place — they cannot act next turn.',
-      effect: function (c) { c.combat.applyStatus(c.target, 'bound', 2); c.log(c.target.name + ' is lashed to the stone!'); } },
+      effect: function (c) { c.combat.applyStatus(c.target, 'bound', 2); c.log(c.target.name + ' is bound to the stone!'); } },
 
     // --- Stoneward: Cohesion / Tension ---
     stonestance: { name: 'Stonestance', cost: 10, school: 'cohesion', target: 'self', unlock: 1, order: 'stoneward',
@@ -45,7 +45,7 @@
       effect: function (c) { c.combat.heal(c.user, Math.round(c.user.maxHp * 0.33), 'Regrowth'); } },
 
     // --- Truthwatcher: Illumination / Progression ---
-    illusion_double: { name: 'Lightweaving', cost: 13, school: 'illumination', target: 'self', unlock: 1, order: 'truthwatcher',
+    illusion_double: { name: 'Veilweaving', cost: 13, school: 'illumination', target: 'self', unlock: 1, order: 'truthwatcher',
       desc: 'Weave a decoy of light: foes likely miss you next turns.',
       effect: function (c) { c.combat.applyStatus(c.user, 'blur', 3); c.log(c.user.name + ' splits into shards of light.'); } },
     foresight: { name: 'Foresight', cost: 12, school: 'illumination', target: 'self', unlock: 3, order: 'truthwatcher',
@@ -61,8 +61,8 @@
       effect: function (c) { c.enemies.filter(function (e) { return e.alive; }).forEach(function (e) { c.combat.magicHit(c.user, e, 1.3, 'fire', 'Ashstorm'); c.combat.applyStatus(e, 'burn', 2); }); } },
 
     // --- consumable scrolls reuse these ---
-    scroll_blast: { name: 'Stormblast', cost: 0, target: 'all-enemies', hidden: true,
-      effect: function (c) { c.enemies.filter(function (e) { return e.alive; }).forEach(function (e) { c.combat.magicHit(c.user, e, 1.6, 'storm', 'Stormblast'); }); } },
+    scroll_blast: { name: 'Galeblast', cost: 0, target: 'all-enemies', hidden: true,
+      effect: function (c) { c.enemies.filter(function (e) { return e.alive; }).forEach(function (e) { c.combat.magicHit(c.user, e, 1.6, 'storm', 'Galeblast'); }); } },
   };
 
   // Enemy abilities, chosen by the combat AI.
@@ -72,7 +72,7 @@
     shellguard: { name: 'Shell Guard', target: 'self', effect: function (c) { c.combat.applyStatus(c.user, 'guard', 2); c.log(c.user.name + ' pulls into its shell.'); } },
     drain: { name: 'Soul Drain', target: 'enemy', effect: function (c) { const d = c.combat.magicHit(c.user, c.target, 1.0, 'void', 'Soul Drain'); c.combat.heal(c.user, Math.round(d * 0.6), null); } },
     swallow: { name: 'Swallow', target: 'enemy', effect: function (c) { c.combat.attack(c.user, c.target, { mult: 1.5, label: 'Swallow' }); if (c.rng.chance(0.3)) c.combat.applyStatus(c.target, 'stun', 1); } },
-    stormblast: { name: 'Stormblast', target: 'enemy', effect: function (c) { c.combat.magicHit(c.user, c.target, 1.3, 'storm', 'Stormblast'); } },
+    stormblast: { name: 'Galeblast', target: 'enemy', effect: function (c) { c.combat.magicHit(c.user, c.target, 1.3, 'storm', 'Galeblast'); } },
     quake: { name: 'Quake', target: 'all-enemies', effect: function (c) { c.allies0(c).forEach(function (t) { c.combat.magicHit(c.user, t, 0.9, 'storm', 'Quake'); }); } },
     gravlance: { name: 'Gravitation Lance', target: 'enemy', effect: function (c) { c.combat.magicHit(c.user, c.target, 1.5, 'storm', 'Gravitation Lance'); } },
     regenvoid: { name: 'Void Mending', target: 'self', effect: function (c) { c.combat.heal(c.user, Math.round(c.user.maxHp * 0.15), 'Void Mending'); } },
