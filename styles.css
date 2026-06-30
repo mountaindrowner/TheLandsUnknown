@@ -398,3 +398,35 @@ body.theme-folio .annals-code { background:#efe7d0; }
 .rec-card.sel { background:rgba(154,59,42,.12); border-color:#9a3b2a; }
 .rec-card .tlu-portrait { width:76px; }
 .rec-meta { flex:1; min-width:0; }
+
+/* ---- intro cinematic (dark, full-screen, theme-independent) ---- */
+#overlay.show.intro { background:#000; backdrop-filter:none; padding:0; }
+.cine { position:relative; width:100vw; height:100vh; overflow:hidden; cursor:pointer;
+  font-family:'EB Garamond', Georgia, serif; color:#e7dcc4; }
+.cine-art { position:absolute; inset:0; z-index:1; }
+.cine-art svg { width:100%; height:100%; display:block; }
+.cine::before, .cine::after { content:''; position:absolute; left:0; right:0; height:6vh; background:#000; z-index:4; }
+.cine::before { top:0; } .cine::after { bottom:0; }
+.cine-chapter { position:absolute; top:7.5vh; left:0; right:0; z-index:3; text-align:center;
+  font-variant:small-caps; letter-spacing:5px; font-size:15px; color:#c9a86a; opacity:0;
+  animation:cineFade 1.4s ease forwards; text-shadow:0 2px 8px #000; }
+.cine-text { position:absolute; left:0; right:0; bottom:14vh; z-index:3; margin:0 auto; max-width:860px;
+  padding:0 28px; text-align:center; }
+.cine-line { font-size:22px; line-height:1.55; color:#efe6d0; margin:10px 0; opacity:0;
+  text-shadow:0 2px 12px rgba(0,0,0,0.95); animation:cineRise 1.5s ease forwards; }
+.cine-foot { position:absolute; bottom:1.6vh; left:0; right:0; z-index:5; display:flex; gap:26px;
+  justify-content:center; align-items:center; font-size:12.5px; letter-spacing:1px; color:#9a8e72;
+  opacity:0; animation:cineFade 1s ease forwards; animation-delay:2.4s; }
+.cine-skip { cursor:pointer; border:1px solid #5a4f3a; border-radius:12px; padding:2px 12px; color:#c9a86a; }
+.cine-prompt { color:#cdbf9a; } .cine-count { color:#6a6048; }
+@keyframes cineFade { to { opacity:1; } }
+@keyframes cineRise { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+
+/* ---- enriched Order choosing (chargen step 0) ---- */
+.cg-order { display:flex; gap:18px; align-items:flex-start; text-align:left; margin:12px auto 0; max-width:560px; }
+.cg-order .pf { width:112px; flex:none; }
+.cg-order .pf .tlu-portrait { width:112px; }
+.cg-ord-name { font-variant:small-caps; font-size:21px; letter-spacing:1px; }
+.cg-ord-tag { color:var(--dim); font-style:italic; font-size:13px; margin-top:1px; }
+.cg-ord-desc { font-size:14px; line-height:1.5; margin-top:7px; }
+.cg-ord-att { margin-top:9px; font-size:13px; color:var(--storm); font-variant:small-caps; letter-spacing:.5px; }

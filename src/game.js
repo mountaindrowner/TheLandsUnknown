@@ -47,6 +47,7 @@
     this.state = 'title';
     const items = [{ label: 'New Game', key: 'new' }];
     if (TLU.Save.hasSave()) items.unshift({ label: 'Continue', key: 'continue', color: '#7ec8ff' });
+    items.push({ label: 'The Tale', key: 'tale', color: '#c9a86a' });
     items.push({ label: 'How to Play', key: 'help' });
     this.overlay = { type: 'title', cursor: 0, items: items };
   };

@@ -58,7 +58,10 @@ function serve() {
     themes.some(function (s) { return /bauhaus\|.*theme-bauhaus/.test(s); }));
 
   // ----- chargen -----
-  await press('Enter');                          // New Game
+  await press('Enter');                          // New Game -> intro cinematic
+  ok('intro cinematic shows', (await page.locator('.cine').count()) > 0);
+  await press('Enter'); await press('Enter');    // advance a couple of beats
+  await press('Escape');                         // skip the rest -> chargen
   ok('chargen shows', (await title()).includes('Kindled'));
   await press('ArrowDown'); await press('Enter'); // order
   await press('Enter');                           // weapon

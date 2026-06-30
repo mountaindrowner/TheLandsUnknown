@@ -30,8 +30,9 @@ const OUT = path.join(ROOT, 'assets', 'design');
   await page.evaluate(() => localStorage.clear());
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForTimeout(300);
-  // new game through chargen
-  await press('Enter'); await press('Enter'); await press('Enter'); await press('Enter');
+  // new game: New Game -> skip intro cinematic -> chargen (order, weapon, name)
+  await press('Enter'); await press('Escape');
+  await press('Enter'); await press('Enter');
   await page.locator('.title-screen').first().dispatchEvent('click').catch(() => {});
   await page.waitForTimeout(200);
   // set up a lived-in hero

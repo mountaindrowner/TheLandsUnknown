@@ -71,6 +71,11 @@
     if (b) { game.key(b.getAttribute('data-key')); return true; }
     const ov = document.getElementById('overlay');
     if (!ov || !ov.classList.contains('show')) return false;
+    // intro cinematic: tap to advance, or the corner to skip
+    if (game.overlay && game.overlay.type === 'intro') {
+      if (target.closest('[data-skip]')) game.endIntro(); else game.advanceIntro();
+      return true;
+    }
     const mi = target.closest('[data-mi]');
     if (mi && !mi.classList.contains('disabled')) { game.touchMenuSelect(parseInt(mi.getAttribute('data-mi'), 10)); return true; }
     const tab = target.closest('.cx-tab[data-cxtab]');

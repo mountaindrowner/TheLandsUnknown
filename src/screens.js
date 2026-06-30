@@ -197,7 +197,8 @@
       const o = g.overlay;
       menuNav(o, k, o.items.length, function (i) {
         const key = o.items[i].key;
-        if (key === 'new') g.startChargen();
+        if (key === 'new') g.startIntro('chargen');
+        else if (key === 'tale') g.startIntro('title');
         else if (key === 'continue') g.continueGame();
         else if (key === 'help') g.openHelp();
         g.render();
@@ -212,14 +213,20 @@
       const o = g.overlay;
       let body = '';
       if (o.step === 0) {
-        body += '<div class="cg-q">Choose your Order (class & Attunements):</div>';
+        body += '<div class="cg-q">Five traditions endure. One will answer to your hand.</div>';
         const items = o.orderKeys.map(function (key) {
           const ord = TLU.LORE.orders[key];
           return { label: ord.glyph + ' ' + ord.name, hint: ord.attune.join(' / '), color: ord.color };
         });
         body += UI.renderMenu({ items: items, cursor: o.orderIdx });
-        const ord = TLU.LORE.orders[o.orderKeys[o.orderIdx]];
-        body += '<div class="cg-blurb">' + esc(ord.blurb) + '</div>';
+        const key = o.orderKeys[o.orderIdx], ord = TLU.LORE.orders[key];
+        const lore = (TLU.Intro && TLU.Intro.ORDER_LORE[key]) || {};
+        const port = (TLU.Art && TLU.Art.portrait) ? TLU.Art.portrait('order:' + key, { role: lore.role || 'channeler', accent: ord.color, age: 'prime', fem: (o.orderIdx % 2 === 0) }) : '';
+        body += '<div class="cg-order"><div class="pf">' + port + '</div><div class="col">' +
+          '<div class="cg-ord-name" style="color:' + ord.color + '">' + ord.glyph + ' ' + esc(ord.name) + '</div>' +
+          '<div class="cg-ord-tag">' + esc(lore.tag || '') + '</div>' +
+          '<div class="cg-ord-desc">' + esc(lore.desc || ord.blurb) + '</div>' +
+          '<div class="cg-ord-att">✦ Attunements · ' + ord.attune.join(' &amp; ') + '</div></div></div>';
       } else if (o.step === 1) {
         body += '<div class="cg-q">Choose your weapon focus:</div>';
         body += UI.renderMenu({ items: o.weapons.map(function (w) { return { label: w[1] }; }), cursor: o.weaponIdx });
@@ -249,6 +256,32 @@
         } else if (k === 'Escape') o.step = 1;
       }
       g.render();
+    },
+  };
+
+  // ---- INTRO CINEMATIC ----
+  SCREENS.intro = {
+    render: function (g) {
+      const o = g.overlay, B = TLU.Intro.BEATS;
+      const beat = B[o.beat] || B[B.length - 1];
+      const last = o.beat >= B.length - 1;
+      const art = (TLU.Art && TLU.Art.vista) ? TLU.Art.vista(beat.kind, o.seed + ':' + o.beat) : '';
+      const lines = beat.lines.map(function (t, i) {
+        return '<div class="cine-line" style="animation-delay:' + (0.3 + i * 0.95).toFixed(2) + 's">' + esc(t) + '</div>';
+      }).join('');
+      let html = '<div class="cine" data-intro="1">';
+      html += '<div class="cine-art">' + art + '</div>';
+      html += '<div class="cine-chapter">' + esc(beat.chapter) + '</div>';
+      html += '<div class="cine-text">' + lines + '</div>';
+      html += '<div class="cine-foot"><span class="cine-prompt">' + (last ? '▸ Press Enter to choose your Order' : 'Press Enter ▸ continue') + '</span>' +
+        '<span class="cine-skip" data-skip="1">Esc · Skip</span>' +
+        '<span class="cine-count">' + (o.beat + 1) + ' / ' + B.length + '</span></div>';
+      html += '</div>';
+      return html;
+    },
+    key: function (g, k) {
+      if (k === 'Escape') { g.endIntro(); return; }
+      if (k === 'Enter' || k === ' ' || k === 'ArrowRight') { g.advanceIntro(); return; }
     },
   };
 

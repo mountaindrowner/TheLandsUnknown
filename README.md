@@ -180,6 +180,10 @@ or fill the **Codex** bestiary to see it. A standalone gallery lives at `design/
 
 ## What's in it
 
+- **A cinematic opening.** A slow, dark, Souls/Miyazaki-style prologue poses the deep
+  world and frames you as a tiny figure within it, then resolves into the choosing of an
+  Order — narration fading in over generative dusk vistas (`src/art/scenes.js`). Replay it
+  any time from the title's **The Tale**.
 - **Procedural open world.** A value-noise continent with nine biomes, holds (towns),
   drowned Riftvaults, reaver camps, roads, the roaming Churn, and a far-eastern danger gradient —
   every world is reproducible from its seed.

@@ -62,7 +62,9 @@ function serve() {
   ok('content pack merged', await page.evaluate(() => window.TLU.Content.summary().packs.includes('frostmere')));
 
   // ----- chargen by tapping menu items (single tap = select) -----
-  await tap('.menu-item[data-mi="0"]');            // New Game
+  await tap('.menu-item[data-mi="0"]');            // New Game -> intro cinematic
+  ok('intro cinematic via tap', (await page.locator('.cine').count()) > 0);
+  await tap('.cine-skip');                          // skip the cinematic -> chargen
   ok('chargen reached via tap', (await page.evaluate(() => window.GAME.state)) === 'chargen');
   await tap('.menu-item[data-mi="1"]');            // choose 2nd Order
   await tap('.menu-item[data-mi="0"]');            // choose 1st weapon
