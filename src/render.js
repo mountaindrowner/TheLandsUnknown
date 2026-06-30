@@ -44,33 +44,40 @@
     }
   };
 
+  // theme helpers (pass-through on the default 'storm' theme)
+  function TC(hex, role) { return TLU.Theme ? TLU.Theme.col(hex, role) : hex; }
+  function TB(hex) { return TLU.Theme ? TLU.Theme.bg(hex) : hex; }
+  function themed() { return TLU.Theme && TLU.Theme.activeId !== 'storm'; }
+
   // ---- overworld viewport ----
   function drawWorld(disp, game) {
     const w = game.world, p = game.player;
-    const ctx = disp.ctx;
-    disp.clear('#05060a');
+    disp.clear(TB('#05060a'));
     const halfC = Math.floor(disp.cols / 2), halfR = Math.floor(disp.rows / 2);
     const ox = p.wx - halfC, oy = p.wy - halfR;
+    const th = themed();
     for (let sy = 0; sy < disp.rows; sy++) {
       for (let sx = 0; sx < disp.cols; sx++) {
         const mx = ox + sx, my = oy + sy;
-        if (mx < 0 || my < 0 || mx >= w.w || my >= w.h) { disp.put(sx, sy, ' ', null, '#05060a'); continue; }
+        if (mx < 0 || my < 0 || mx >= w.w || my >= w.h) { disp.put(sx, sy, ' ', null, TB('#05060a')); continue; }
         const t = w.tiles[my][mx];
         const seen = p.visited[mx + ',' + my];
-        let glyph = t.glyph, color = t.color, bg = t.bg;
+        let glyph = t.glyph, color = t.color, bg = t.bg, role = null;
         if (t.road && !t.site) { glyph = '+'; color = '#8a7a55'; }
-        if (t.site) { glyph = t.site.glyph; color = t.site.color; bg = '#0a0a12'; }
-        if (game.storm && game.storm.active) {
+        if (t.site) { glyph = t.site.glyph; color = t.site.color; bg = '#0a0a12'; role = 'site'; }
+        // theme the colour, then apply the (default-only) churn shading & fog
+        color = TC(color, role);
+        bg = TB(bg);
+        if (!th && game.storm && game.storm.active) {
           const dxF = mx - game.storm.x;
-          if (Math.abs(dxF) <= 3) { bg = '#3a1455'; if (Math.abs(dxF) <= 1) bg = '#5a1f7a'; }   // the front
-          else if (dxF < 0) bg = '#160c22';                                                       // the wake
+          if (Math.abs(dxF) <= 3) { bg = '#3a1455'; if (Math.abs(dxF) <= 1) bg = '#5a1f7a'; }
+          else if (dxF < 0) bg = '#160c22';
         }
-        if (!seen) { color = dim(color, 0.42); bg = dim(bg || '#05060a', 0.5); glyph = t.site ? t.site.glyph : glyph; }
+        if (!seen) { color = dim(color, 0.42); bg = dim(bg || '#05060a', 0.5); }
         disp.put(sx, sy, glyph, color, bg);
       }
     }
-    // player on top
-    disp.put(halfC, halfR, '@', '#fff36b', '#1a1a2a');
+    disp.put(halfC, halfR, '@', TC('#fff36b', 'player'), TB('#1a1a2a'));
     drawMinimap(game);
   }
 
@@ -78,35 +85,33 @@
   function drawDungeon(disp, game) {
     const d = game.dungeon.floor;
     const p = game.player;
-    disp.clear('#04040a');
+    const dbg = TB('#04040a'), fbg = TB('#0c0c16');
+    disp.clear(dbg);
     const halfC = Math.floor(disp.cols / 2), halfR = Math.floor(disp.rows / 2);
     const ox = p.dx - halfC, oy = p.dy - halfR;
     const seen = game.dungeon.seen;
     for (let sy = 0; sy < disp.rows; sy++) {
       for (let sx = 0; sx < disp.cols; sx++) {
         const mx = ox + sx, my = oy + sy;
-        if (mx < 0 || my < 0 || mx >= d.w || my >= d.h) { disp.put(sx, sy, ' ', null, '#04040a'); continue; }
+        if (mx < 0 || my < 0 || mx >= d.w || my >= d.h) { disp.put(sx, sy, ' ', null, dbg); continue; }
         const vis = seen[my * d.w + mx];
-        if (!vis) { disp.put(sx, sy, ' ', null, '#04040a'); continue; }
+        if (!vis) { disp.put(sx, sy, ' ', null, dbg); continue; }
         const lit = vis === 2;
-        const wallc = lit ? '#3a3550' : '#1c1a2a';
-        const floorc = lit ? '#5a5440' : '#26241c';
-        if (d.grid[my][mx] === TLU.Dungeon.WALL) { disp.put(sx, sy, '#', wallc, '#0a0a14'); continue; }
-        // stairs
-        if (mx === d.down.x && my === d.down.y) { disp.put(sx, sy, '>', lit ? '#ffd86b' : '#7a6a30', '#0c0c16'); continue; }
-        if (mx === d.entrance.x && my === d.entrance.y) { disp.put(sx, sy, '<', lit ? '#9adfff' : '#3a5a66', '#0c0c16'); continue; }
-        // features
+        const wallc = TC(lit ? '#3a3550' : '#1c1a2a');
+        const floorc = TC(lit ? '#5a5440' : '#26241c');
+        if (d.grid[my][mx] === TLU.Dungeon.WALL) { disp.put(sx, sy, '#', wallc, TB('#0a0a14')); continue; }
+        if (mx === d.down.x && my === d.down.y) { disp.put(sx, sy, '>', lit ? TC('#ffd86b', 'site') : TC('#7a6a30'), fbg); continue; }
+        if (mx === d.entrance.x && my === d.entrance.y) { disp.put(sx, sy, '<', lit ? TC('#9adfff', 'site') : TC('#3a5a66'), fbg); continue; }
         const feat = d.features.find(function (f) { return f.x === mx && f.y === my && !f.taken; });
-        if (feat) { disp.put(sx, sy, featGlyph(feat), lit ? featColor(feat) : dim(featColor(feat), 0.5), '#0c0c16'); continue; }
-        // enemies (only if lit)
+        if (feat) { const fc = TC(featColor(feat), 'site'); disp.put(sx, sy, featGlyph(feat), lit ? fc : dim(fc, 0.5), fbg); continue; }
         if (lit) {
           const e = d.entities.find(function (en) { return en.alive && en.x === mx && en.y === my; });
-          if (e) { disp.put(sx, sy, e.glyph, e.color, '#140a0a'); continue; }
+          if (e) { disp.put(sx, sy, e.glyph, TC(e.color, e.boss ? 'boss' : 'enemy'), TB('#140a0a')); continue; }
         }
-        disp.put(sx, sy, '.', floorc, '#080810');
+        disp.put(sx, sy, '.', floorc, TB('#080810'));
       }
     }
-    disp.put(halfC, halfR, '@', '#fff36b', '#1a1a2a');
+    disp.put(halfC, halfR, '@', TC('#fff36b', 'player'), TB('#1a1a2a'));
     drawMinimap(game);
   }
 
@@ -120,9 +125,9 @@
     const ctx = cv.getContext('2d');
     const w = game.world;
     const W = cv.width, H = cv.height;
-    ctx.fillStyle = '#05060a'; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = TB('#05060a'); ctx.fillRect(0, 0, W, H);
     if (game.mode !== 'world') {
-      ctx.fillStyle = '#555'; ctx.font = '10px monospace'; ctx.textAlign = 'center';
+      ctx.fillStyle = TC('#555'); ctx.font = '10px monospace'; ctx.textAlign = 'center';
       ctx.fillText('(inside ' + (game.dungeon.site ? game.dungeon.site.name.split(' ')[0] : 'ruin') + ')', W / 2, H / 2);
       return;
     }
@@ -130,16 +135,23 @@
     for (let y = 0; y < w.h; y++) for (let x = 0; x < w.w; x++) {
       if (!game.player.visited[x + ',' + y]) continue;
       const t = w.tiles[y][x];
-      ctx.fillStyle = t.site ? t.site.color : dim(t.color, 0.8);
+      ctx.fillStyle = t.site ? TC(t.site.color, 'site') : dim(TC(t.color), 0.8);
       ctx.fillRect(x * sx, y * sy, Math.ceil(sx), Math.ceil(sy));
     }
     // the Churn front as a vertical band
     if (game.storm && game.storm.active && game.storm.x >= 0 && game.storm.x <= w.w) {
-      ctx.fillStyle = 'rgba(150,80,220,0.55)';
+      ctx.fillStyle = (TLU.Theme && TLU.Theme.activeId !== 'storm') ? hexA(TC('#ffffff', 'accent'), 0.5) : 'rgba(150,80,220,0.55)';
       ctx.fillRect(Math.round(game.storm.x * sx) - 1, 0, Math.max(2, Math.ceil(sx * 2)), H);
     }
-    ctx.fillStyle = '#fff36b';
+    ctx.fillStyle = TC('#fff36b', 'player');
     ctx.fillRect(game.player.wx * sx - 1, game.player.wy * sy - 1, 3, 3);
+  }
+
+  // hex -> rgba string at alpha a
+  function hexA(hex, a) {
+    if (!hex || hex[0] !== '#') return hex;
+    const n = parseInt(hex.slice(1), 16);
+    return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')';
   }
 
   function dim(hex, f) {

@@ -259,3 +259,75 @@ body.has-touch .touch-ui { display: block; }
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
+
+/* ============================================================
+ * THEMES — switchable minimalist styles (cycle with T)
+ * Each overrides the design tokens + a few targeted selectors.
+ * ============================================================ */
+
+/* ---- PHOSPHOR — vintage amber CRT terminal ---- */
+body.theme-phosphor {
+  --bg:#080500; --panel:#0f0a00; --panel2:#140d01; --border:#5a3c00;
+  --ink:#ffb000; --dim:#9a6a10; --gold:#ffd060; --storm:#ffb000; --good:#ffd877; --bad:#ff7a1a;
+}
+body.theme-phosphor { background:#080500; }
+body.theme-phosphor #map-wrap { box-shadow:0 0 30px rgba(255,176,0,.12), inset 0 0 70px rgba(0,0,0,.75); }
+body.theme-phosphor .pname, body.theme-phosphor .menu-title, body.theme-phosphor .end-title,
+body.theme-phosphor .logo, body.theme-phosphor .tagline { text-shadow:0 0 8px rgba(255,176,0,.55); }
+body.theme-phosphor .logo { color:#ffb000; }
+body.theme-phosphor .menu-item.sel { background:rgba(255,176,0,.18); }
+body.theme-phosphor .logline { color:#9a6a10; }
+body.theme-phosphor .log-head, body.theme-phosphor .log-level, body.theme-phosphor .log-good, body.theme-phosphor .log-skill { color:#ffd877; }
+body.theme-phosphor .log-bad, body.theme-phosphor .log-kill, body.theme-phosphor .log-boss, body.theme-phosphor .log-storm { color:#ff8a2a; }
+body.theme-phosphor .log-crit { color:#fff0b0; }
+body.theme-phosphor .log-note, body.theme-phosphor .log-cast, body.theme-phosphor .log-ecast, body.theme-phosphor .log-block, body.theme-phosphor .log-dot { color:#c98a20; }
+body.theme-phosphor .barlabel { color:#1a0e00; text-shadow:none; }
+body.theme-phosphor .bar { background:#241400; border-color:#5a3c00; }
+
+/* ---- ALMANAC — printed naturalist's field journal (light / e-ink) ---- */
+body.theme-almanac {
+  --bg:#e7e0cb; --panel:#f1ecdc; --panel2:#efe9d7; --border:#bcb091;
+  --ink:#2a2620; --dim:#6f6650; --gold:#9a3b2a; --storm:#3f6173; --good:#4a6b3a; --bad:#9a3b2a;
+}
+body.theme-almanac { background:#d8d0b8; }
+body.theme-almanac #map-wrap { background:#e7e0cb; box-shadow:0 2px 6px rgba(60,50,30,.25); }
+body.theme-almanac .pname, body.theme-almanac .menu-title, body.theme-almanac .end-title,
+body.theme-almanac .logo, body.theme-almanac .tagline { text-shadow:none; }
+body.theme-almanac .logo { color:#9a3b2a; }
+body.theme-almanac .menu-item.sel { background:rgba(154,59,42,.16); }
+body.theme-almanac .logline { color:#6f6650; }
+body.theme-almanac .log-head, body.theme-almanac .log-level, body.theme-almanac .log-good, body.theme-almanac .log-skill { color:#4a6b3a; }
+body.theme-almanac .log-bad, body.theme-almanac .log-kill, body.theme-almanac .log-boss, body.theme-almanac .log-storm { color:#9a3b2a; }
+body.theme-almanac .log-crit { color:#7a4a1a; }
+body.theme-almanac .log-note, body.theme-almanac .log-cast, body.theme-almanac .log-ecast, body.theme-almanac .log-block, body.theme-almanac .log-dot { color:#5a6173; }
+body.theme-almanac .bar { background:#d8d0b8; border-color:#bcb091; }
+body.theme-almanac .barlabel { color:#f1ecdc; text-shadow:0 0 2px #2a2620; }
+body.theme-almanac #map { background:#e7e0cb; }
+body.theme-almanac .annals-code { background:#efe9d7; }
+
+/* ---- BAUHAUS — Swiss / International-Typographic; stark, one signal-red ---- */
+body.theme-bauhaus {
+  --bg:#0b0b0b; --panel:#141414; --panel2:#171717; --border:#ededed;
+  --ink:#ededed; --dim:#9a9a9a; --gold:#e4002b; --storm:#e4002b; --good:#ededed; --bad:#e4002b;
+}
+body.theme-bauhaus { background:#0b0b0b; }
+body.theme-bauhaus .panel, body.theme-bauhaus .title-screen, body.theme-bauhaus .endscreen,
+body.theme-bauhaus #map-wrap, body.theme-bauhaus #stats, body.theme-bauhaus #controls,
+body.theme-bauhaus #minimap, body.theme-bauhaus .log, body.theme-bauhaus .bar,
+body.theme-bauhaus .barfill, body.theme-bauhaus .menu-item, body.theme-bauhaus .cx-tab,
+body.theme-bauhaus .touch-btn, body.theme-bauhaus .ab, body.theme-bauhaus .qcard,
+body.theme-bauhaus .cb-enemy, body.theme-bauhaus .cb-ally, body.theme-bauhaus .cb-player {
+  border-radius:0 !important; box-shadow:none !important; text-shadow:none !important;
+}
+body.theme-bauhaus #map-wrap, body.theme-bauhaus .panel, body.theme-bauhaus .title-screen,
+body.theme-bauhaus #stats, body.theme-bauhaus #controls, body.theme-bauhaus .log { border-width:2px; }
+body.theme-bauhaus .menu-title, body.theme-bauhaus .end-title, body.theme-bauhaus .pname, body.theme-bauhaus .logo { color:#e4002b; }
+body.theme-bauhaus .menu-item.sel { background:#e4002b; }
+body.theme-bauhaus .menu-item.sel .mi-cursor, body.theme-bauhaus .menu-item.sel .mi-label, body.theme-bauhaus .menu-item.sel .mi-hint { color:#0b0b0b; }
+body.theme-bauhaus .logline { color:#9a9a9a; }
+body.theme-bauhaus .log-head, body.theme-bauhaus .log-level, body.theme-bauhaus .log-good, body.theme-bauhaus .log-skill, body.theme-bauhaus .log-crit { color:#ededed; }
+body.theme-bauhaus .log-bad, body.theme-bauhaus .log-kill, body.theme-bauhaus .log-boss, body.theme-bauhaus .log-storm { color:#e4002b; }
+body.theme-bauhaus .log-note, body.theme-bauhaus .log-cast, body.theme-bauhaus .log-ecast, body.theme-bauhaus .log-block, body.theme-bauhaus .log-dot { color:#bdbdbd; }
+body.theme-bauhaus .bar { background:#222; border-color:#ededed; }
+body.theme-bauhaus .barlabel { color:#0b0b0b; text-shadow:none; }
+body.theme-bauhaus .menu-title { letter-spacing:2px; text-transform:uppercase; }

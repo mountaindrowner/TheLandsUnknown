@@ -26,6 +26,9 @@
     const navKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'Enter'];
     if (navKeys.indexOf(k) >= 0) e.preventDefault();
 
+    // global: cycle visual theme anywhere
+    if ((k === 't' || k === 'T') && TLU.Theme) { TLU.Theme.cycle(this); return; }
+
     if (this.overlay) {
       const s = SCREENS[this.overlay.type];
       if (s && s.key) s.key(this, k);
@@ -224,15 +227,17 @@
   // ---- SYSTEM (pause) ----
   SCREENS.system = {
     render: function (g) {
-      return UI.renderMenu({ title: 'Paused', items: [{ label: 'Resume' }, { label: 'Save Game' }, { label: 'Help' }, { label: 'Quit to Title' }], cursor: g.overlay.cursor, footer: 'Esc to resume' });
+      const tn = TLU.Theme ? TLU.Theme.active().name : '—';
+      return UI.renderMenu({ title: 'Paused', items: [{ label: 'Resume' }, { label: 'Theme', hint: tn + ' — Enter/T to cycle' }, { label: 'Save Game' }, { label: 'Help' }, { label: 'Quit to Title' }], cursor: g.overlay.cursor, footer: 'Esc to resume' });
     },
     key: function (g, k) {
       const o = g.overlay;
-      menuNav(o, k, 4, function (i) {
+      menuNav(o, k, 5, function (i) {
         if (i === 0) { g.overlay = null; }
-        else if (i === 1) { g.save(); g.msg('%cGame saved.', 'good'); g.overlay = null; }
-        else if (i === 2) { g.openHelp(); return; }
-        else if (i === 3) { g.save(); g.openTitle(); }
+        else if (i === 1) { if (TLU.Theme) TLU.Theme.cycle(g); return; }
+        else if (i === 2) { g.save(); g.msg('%cGame saved.', 'good'); g.overlay = null; }
+        else if (i === 3) { g.openHelp(); return; }
+        else if (i === 4) { g.save(); g.openTitle(); }
         g.render();
       }, function () { g.overlay = null; g.render(); });
       g.render();
@@ -247,7 +252,7 @@
         ['Interact / Enter site / Stairs', 'Enter or E'],
         ['Inventory', 'I'], ['Character & level-up', 'C'], ['Quests', 'Q'], ['Talents', 'P'],
         ['Pause / Save / Quit', 'Esc'], ['This help', '?'],
-        ['Codex / Journal', 'L'],
+        ['Codex / Journal', 'L'], ['Cycle visual theme', 'T'],
         ['—', '—'],
         ['Goal', 'Find the Wardens, gather 4 Rift fragments from'],
         ['', 'drowned vaults (▼), end Warlord Varen (☠), then descend'],

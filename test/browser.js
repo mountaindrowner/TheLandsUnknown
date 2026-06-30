@@ -46,6 +46,17 @@ function serve() {
   ok('title screen shows', await page.locator('.title-screen').count() > 0);
   ok('TLU + GAME loaded', await page.evaluate(() => !!(window.TLU && window.GAME && window.TLU.Dialogue)));
 
+  // themes cycle and apply a body class
+  const themes = await page.evaluate(() => {
+    const out = [];
+    for (let i = 0; i < 4; i++) { window.TLU.Theme.cycle(window.GAME); out.push(window.TLU.Theme.activeId + '|' + document.body.className); }
+    window.TLU.Theme.apply('storm');
+    return out;
+  });
+  ok('themes cycle + set body class', themes.some(function (s) { return /phosphor\|.*theme-phosphor/.test(s); }) &&
+    themes.some(function (s) { return /almanac\|.*theme-almanac/.test(s); }) &&
+    themes.some(function (s) { return /bauhaus\|.*theme-bauhaus/.test(s); }));
+
   // ----- chargen -----
   await press('Enter');                          // New Game
   ok('chargen shows', (await title()).includes('Kindled'));

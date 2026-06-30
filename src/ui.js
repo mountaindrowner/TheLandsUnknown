@@ -27,6 +27,7 @@
 
   function bar(cur, max, color, w) {
     cur = Math.max(0, cur); const pct = max > 0 ? Math.round(cur / max * 100) : 0;
+    if (TLU.Theme) color = TLU.Theme.col(color);
     return '<div class="bar"><div class="barfill" style="width:' + pct + '%;background:' + color + '"></div>' +
       '<span class="barlabel">' + Math.round(cur) + ' / ' + Math.round(max) + '</span></div>';
   }
