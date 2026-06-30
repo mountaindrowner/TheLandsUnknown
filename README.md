@@ -45,6 +45,36 @@ tap-an-enemy-to-attack in combat. The layout reflows for small screens automatic
 
 ---
 
+## The signature loop: duel the Churn
+
+The **Churn** is a roaming apocalypse that marches **east→west** across the map on a
+**forecastable schedule you can read and exploit** (the HUD shows how many tiles away it is
+and when it returns). Standing in the front makes the **Arts surge** — huge Anima regen —
+but its wilds are far more frequent and several levels deadlier. As it passes it **lays the
+land bare and uncovers hidden sites**, so chasing the Churn is how an explorer charts the
+world. A force you plan routes around, not weather you watch.
+
+## Depth systems
+
+- **Talents on level-up** — every level offers a choice of three perks (Duelist, Berserker,
+  Lifedrinker, Channeler, Treasure Hunter, Churn-Rider…) gated by your skills. Press **P**.
+- **Companions** — recruit up to two followers (Warrior/Warden/Skirmisher/Channeler) at any
+  hold's tavern; they fight as a real ally side, can be downed without ending the battle,
+  and revive after a win.
+- **Crafting & economy** — slain foes drop materials; **reinforce** gear at the smith
+  (+10%/level, up to +5) and **brew** potions/scrolls at the alchemist.
+- **Explorer landmarks** — ten hand-authored curiosities (the Weeping Colossus, a Fallen
+  Star, a Field of Echoes, a Black Obelisk…), each a one-time discovery with lore + a reward,
+  charted into the Codex.
+- **Asynchronous dynasties** — every hero who dies or wins is recorded into the **Annals**,
+  a ledger that outlives saves. Past heroes return as ghostly **echoes (φ)** in later runs,
+  granting a fragment of their legacy. Legends export to a share code; `?legend=<code>`
+  seeds another player's hero into your world.
+- **Authored hard finale** — beating the main boss unlocks a choice: rest, or **descend into
+  the Heart of the Churn** to face **Karth-Vael**, a 3-phase superboss, for the true ending.
+
+---
+
 ## Extending the game — the content framework
 
 The game is **data-driven**. You can add entire regions, creatures, gear, NPCs, dialogue,
@@ -103,6 +133,7 @@ the next build follows from your choices.
 | Inventory | `I` |
 | Character & spend level-up points | `C` |
 | Quests & bounties | `Q` |
+| **Talents** (choose perks) | `P` |
 | **Codex / Journal** | `Shift+L` |
 | Pause / Save / Quit | `Esc` |
 | Help | `?` |
@@ -158,14 +189,17 @@ src/
     abilities.js      # channeling powers + enemy moves
     bestiary.js       # enemies, mini-boss, final boss, scaling
     quests.js         # main arc + side quests
-    dialogue.js       # NPC archetypes, rumors, codex, barks, travel events
+    dialogue.js       # NPC archetypes, rumors, codex, barks, events, landmarks
+    perks.js          # level-up talent pool
+    companions.js     # recruitable follower roles
   content/
     registry.js       # content-pack loader/merger (the modding framework)
   world.js            # overworld generation (biomes, sites, roads)
   dungeon.js          # dungeon floor generation
   player.js           # character: attributes, gear, derived stats, leveling, codex
-  combat.js           # turn-based battle resolver
+  combat.js           # turn-based battle resolver (player + ally side)
   save.js             # localStorage persistence
+  dynasty.js          # the Annals — asynchronous dynasties / echoes
   render.js           # canvas ASCII viewport + minimap
   ui.js               # HUD + generic menu rendering
   game.js             # state machine: movement, encounters, quests, discovery
@@ -188,10 +222,16 @@ DESIGN_QUESTIONS.md   # refinement questionnaire (loop, depth, endgame, unique s
 ## Tests
 
 ```bash
-npm test               # headless logic simulation (no browser needed)   -> 828 checks
-npm run test:browser   # full desktop UI playthrough in Chromium          -> 24 checks
+npm test               # headless logic simulation (no browser needed)   -> 837 checks
+npm run test:browser   # full desktop UI playthrough in Chromium          -> 44 checks
 npm run test:mobile    # phone-emulated touch playthrough in Chromium      -> 15 checks
 ```
+
+The desktop suite drives one continuous run: chargen → every overlay → talents →
+the Churn front → all town services (shop/smith/alchemist/trainer/recruiter) →
+NPC dialogue → a landmark → asynchronous-dynasty echo → a dungeon → companion
+combat → the main boss → and the **descent into the Heart of the Churn for the
+true ending** — all with zero console errors.
 
 The logic suite generates worlds, rolls hundreds of items, levels a character, runs
 dozens of battles, and verifies a maxed champion can defeat the final boss. The browser
