@@ -452,6 +452,7 @@
     this.combat = new TLU.Combat(this, {
       rng: this.rng.fork('battle' + this.turnCount + ':' + enemies.length),
       player: this.player, enemies: enemies, level: opts.level, biome: opts.biome,
+      allies: (this.player.party || []).filter(function (a) { return a.alive && a.hp > 0; }),
       isBoss: opts.isBoss, canFlee: opts.canFlee,
       log: this.mkLog(),
       onEnd: function (c) { self.onCombatEnd(c); },
@@ -467,6 +468,10 @@
     if (c.result === 'victory') {
       TLU.Player.gainXp(p, c.rewards.xp, this.mkLog());
       TLU.Player.addGold(p, c.rewards.gold);
+      // revive downed companions to half health after a won battle
+      (p.party || []).forEach(function (a) {
+        if (!a.alive || a.hp <= 0) { a.alive = true; a.hp = Math.max(1, Math.round(a.maxHp * 0.5)); }
+      });
       const loot = (c.rewards.loot || []).filter(Boolean);
       // remove dead from dungeon floor
       if (this.mode === 'dungeon') this.dungeon.floor.entities = this.dungeon.floor.entities.filter(function (e) { return e.alive; });

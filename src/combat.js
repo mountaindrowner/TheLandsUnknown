@@ -38,9 +38,13 @@
     // ensure enemies have statuses + unique tags
     this.enemies.forEach(function (e, i) { e.statuses = e.statuses || {}; e._id = 'e' + i; e.alive = e.hp > 0; });
     this.player.statuses = this.player.statuses || {};
+    // companions fight on the player's side
+    this.allies = (opts.allies || []).filter(function (a) { return a && a.hp > 0; });
+    this.allies.forEach(function (a, i) { a.statuses = a.statuses || {}; a._id = 'a' + i; a.alive = a.hp > 0; a.kind = 'ally'; });
   }
 
   Combat.prototype.aliveEnemies = function () { return this.enemies.filter(function (e) { return e.alive && e.hp > 0; }); };
+  Combat.prototype.aliveAllies = function () { return this.allies.filter(function (a) { return a.alive && a.hp > 0; }); };
 
   Combat.prototype.start = function () {
     this.log('%c⚔ ' + this._enemyDesc() + ' block your path!', 'head');
@@ -56,7 +60,7 @@
   Combat.prototype._newRound = function () {
     this.round++;
     // build initiative
-    const all = [this.player].concat(this.aliveEnemies());
+    const all = [this.player].concat(this.aliveAllies()).concat(this.aliveEnemies());
     const rng = this.rng;
     all.forEach(function (a) { a._init = speedOf(a) + rng.float(0, 5); });
     all.sort(function (a, b) { return b._init - a._init; });
@@ -70,7 +74,7 @@
     while (!this.over) {
       if (this.turnIndex >= this.order.length) { this._newRound(); return; }
       const actor = this.order[this.turnIndex];
-      if (!actor || (actor.kind === 'enemy' && (!actor.alive || actor.hp <= 0))) { this.turnIndex++; continue; }
+      if (!actor || (actor.kind !== 'player' && (!actor.alive || actor.hp <= 0))) { this.turnIndex++; continue; }
       // status tick at start of this actor's turn
       const skip = this._tickStatuses(actor);
       if (this._checkEnd()) return;
@@ -80,6 +84,10 @@
       if (actor.kind === 'player') {
         this.awaitingPlayer = true;
         return; // wait for playerAct()
+      } else if (actor.kind === 'ally') {
+        this._allyTurn(actor);
+        this.turnIndex++;
+        if (this._checkEnd()) return;
       } else {
         this._enemyTurn(actor);
         this.turnIndex++;
@@ -159,11 +167,33 @@
     TLU.Player.removeItem(p, item, 1);
   };
 
+  // ---- ally (companion) AI ----
+  Combat.prototype._allyTurn = function (a) {
+    const enemies = this.aliveEnemies();
+    if (!enemies.length) return;
+    const p = this.player;
+    if (a.art) {
+      if (p.hp < p.maxHp * 0.4 && this.rng.chance(0.6)) { this.heal(p, Math.round(p.maxHp * 0.18), a.name + '’s mending'); return; }
+      this.magicHit(a, this.rng.pick(enemies), 1.2, 'storm', a.name + '’s Art');
+      return;
+    }
+    if (a.guardy && this.rng.chance(0.22)) { this.applyStatus(a, 'guard', 2); this.log(a.name + ' raises a guard.'); return; }
+    this.attack(a, this.rng.pick(enemies), {});
+  };
+
+  // pick whom an enemy strikes (player is twice as likely as any one ally)
+  Combat.prototype._enemyPickTarget = function () {
+    const pool = [this.player, this.player];
+    this.aliveAllies().forEach(function (a) { pool.push(a); });
+    const live = pool.filter(function (x) { return x.hp > 0; });
+    return live.length ? this.rng.pick(live) : this.player;
+  };
+
   // ---- enemy AI ----
   Combat.prototype._enemyTurn = function (e) {
     const p = this.player;
     const ctx = this._ctx(e);
-    ctx.target = p;
+    ctx.target = this._enemyPickTarget();
 
     // boss phase transitions
     if (e.boss && e.phases) this._bossPhase(e);
@@ -181,7 +211,7 @@
       this.log('%c' + e.name + ' uses ' + ab.name + '!', 'ecast');
       ab.effect(ctx);
     } else {
-      this.attack(e, p, {});
+      this.attack(e, ctx.target || p, {});
     }
   };
 
@@ -308,6 +338,10 @@
       if (this.rng.chance(0.5)) this.rewards.loot.push(TLU.Items.rollMaterial(this.rng, target));
       // track kills
       this.game.onEnemyKilled && this.game.onEnemyKilled(target);
+    } else if (target.kind === 'ally') {
+      if (!target.alive) return;
+      target.alive = false; target.hp = 0;
+      this.log('%c' + target.name + ' is downed!', 'bad');
     } else {
       // player died
       this.over = true; this.result = 'defeat';
@@ -341,7 +375,7 @@
     return {
       rng: this.rng, user: user, target: null, combat: this, log: this.log,
       enemies: this.enemies, allies: [this.player],
-      allies0: function () { return [self.player]; }, // "the player's side" for enemy AoE
+      allies0: function () { return [self.player].concat(self.aliveAllies()); }, // "the player's side" for enemy AoE
     };
   };
 

@@ -151,8 +151,17 @@ function serve() {
   for (let i = 0; i < 8; i++) { if ((await state()).ov !== 'dialog') break; await press('Enter'); }
   const mainStage = await page.evaluate(() => window.GAME.player.questState.main.stage);
   ok('main quest advanced past intro', mainStage >= 1);
-  // leave town
-  if ((await state()).ov === 'town') { await page.evaluate(() => { window.GAME.overlay.cursor = 7; }); await press('Enter'); }
+  // recruit a companion (service index 7)
+  if ((await state()).ov === 'town') {
+    await page.evaluate(() => { window.GAME.overlay.cursor = 7; });
+    await press('Enter'); ok('recruiter opens', (await title()).includes('Recruit'));
+    const partyBefore = await page.evaluate(() => window.GAME.player.party.length);
+    await press('Enter');                          // hire first sellsword
+    ok('companion hired', await page.evaluate(() => window.GAME.player.party.length) > partyBefore);
+    await press('Escape');
+  }
+  // leave town (service index 8)
+  if ((await state()).ov === 'town') { await page.evaluate(() => { window.GAME.overlay.cursor = 8; }); await press('Enter'); }
 
   // ----- landmark discovery (explorer payoff) -----
   await page.evaluate(() => {
@@ -193,6 +202,7 @@ function serve() {
   });
   await page.waitForTimeout(80);
   ok('combat screen renders', await page.locator('.combat').count() > 0);
+  ok('companion fights alongside', await page.evaluate(() => window.GAME.combat.allies.length) >= 1);
   await page.screenshot({ path: path.join(ROOT, 'assets', 'screenshot-combat.png') });
   const normEnded = await resolveCombat(page, press, state);
   ok('normal combat resolves', normEnded);

@@ -37,6 +37,8 @@
       questState: {}, // questId -> { stage }
       kills: {}, campsCleared: 0, vaultsCleared: 0, deepestVault: 0, gemsFound: 0,
       codex: { bestiary: {}, places: {}, biomes: {}, rumors: [] },
+      party: [],
+      discoveries: 0,
       stats: { steps: 0, kills: 0, deaths: 0, found: 0 },
     };
 

@@ -363,6 +363,12 @@
       html += '<div class="ch-h">Arts Known</div><div class="ab-list">';
       p.knownAbilities.forEach(function (id) { const ab = TLU.Abilities[id]; html += '<span class="ab">' + ab.name + ' <i>(' + (ab.cost || 0) + ')</i></span>'; });
       html += '</div>';
+      if (p.party && p.party.length) {
+        html += '<div class="ch-h">Companions</div><div class="ab-list">';
+        p.party.forEach(function (a) { html += '<span class="ab" style="color:' + a.color + '">' + esc(a.glyph + ' ' + a.name) + ' <i>' + a.roleName + ' Lv' + a.level + '</i></span>'; });
+        html += '</div>';
+      }
+      if (p.discoveries) html += '<div class="ch-d" style="margin-top:6px">◹ Discoveries charted: ' + p.discoveries + '</div>';
       html += '<div class="menu-foot">↑/↓ select attribute · Enter spend point · [P] perks · Esc close</div></div>';
       return html;
     },
@@ -464,13 +470,14 @@
 
   // ---- TOWN ----
   SCREENS.town = {
-    services: [['Rest at the inn (10g)', 'rest'], ['Visit the merchant', 'shop'], ['Visit the smith', 'smith'], ['Visit the alchemist', 'alchemy'], ['Train skills', 'train'], ['Speak with the townsfolk', 'folk'], ['Speak with the Warden', 'speak'], ['Leave'.toString(), 'leave']],
+    services: [['Rest at the inn (10g)', 'rest'], ['Visit the merchant', 'shop'], ['Visit the smith', 'smith'], ['Visit the alchemist', 'alchemy'], ['Train skills', 'train'], ['Speak with the townsfolk', 'folk'], ['Speak with the Warden', 'speak'], ['Recruit a companion', 'recruit'], ['Leave'.toString(), 'leave']],
     render: function (g) {
       const o = g.overlay, site = o.site;
       if (o.sub === 'shop') return SCREENS.town.renderShop(g);
       if (o.sub === 'train') return SCREENS.town.renderTrain(g);
       if (o.sub === 'smith') return SCREENS.town.renderSmith(g);
       if (o.sub === 'alchemy') return SCREENS.town.renderAlchemy(g);
+      if (o.sub === 'recruit') return SCREENS.town.renderRecruit(g);
       let html = '<div class="panel town"><div class="menu-title">⌂ ' + esc(site.name) + '</div>' +
         '<div class="town-desc">A churn-bunkered hold of the ' + (site.level > 6 ? 'eastern frontier' : 'western plains') + '. Travelers shelter behind its windward wall.</div>';
       html += UI.renderMenu({ items: SCREENS.town.services.map(function (s) { return { label: s[0] }; }), cursor: o.cursor });
@@ -483,12 +490,14 @@
       if (o.sub === 'train') return SCREENS.town.keyTrain(g, k);
       if (o.sub === 'smith') return SCREENS.town.keySmith(g, k);
       if (o.sub === 'alchemy') return SCREENS.town.keyAlchemy(g, k);
+      if (o.sub === 'recruit') return SCREENS.town.keyRecruit(g, k);
       menuNav(o, k, SCREENS.town.services.length, function (i) {
         const act = SCREENS.town.services[i][1];
         if (act === 'rest') SCREENS.town.rest(g);
         else if (act === 'shop') { o.sub = 'shop'; o.cursor = 0; o.mode = 'buy'; SCREENS.town.ensureStock(g); }
         else if (act === 'smith') { o.sub = 'smith'; o.cursor = 0; }
         else if (act === 'alchemy') { o.sub = 'alchemy'; o.cursor = 0; }
+        else if (act === 'recruit') { o.sub = 'recruit'; o.cursor = 0; SCREENS.town.ensureRecruits(g); }
         else if (act === 'train') { o.sub = 'train'; o.cursor = 0; }
         else if (act === 'folk') { g.openNpcs(o.site); return; }
         else if (act === 'speak') SCREENS.town.speak(g);
@@ -699,6 +708,47 @@
       });
       g.render();
     },
+    // ---- recruit companions (party max 2) ----
+    ensureRecruits: function (g) {
+      const site = g.overlay.site; const key = 'd' + g.day;
+      if (site._recruitKey === key && site._recruits) return;
+      const rng = new TLU.RNG(g.seed + ':recruit:' + site.x + ',' + site.y + ':' + g.day);
+      site._recruits = TLU.Companions.recruitOffer(rng, g.player.level + (site.level || 1) - 1);
+      site._recruitKey = key;
+    },
+    renderRecruit: function (g) {
+      const o = g.overlay, p = g.player, site = o.site;
+      const offer = site._recruits || [];
+      const items = offer.map(function (c) {
+        return { label: c.glyph + ' ' + esc(c.name) + ' the ' + c.roleName, hint: 'Lv ' + c.level + ' · HP ' + c.maxHp + ' · ' + c.cost + 'g', color: c.color };
+      });
+      if (!items.length) items.push({ label: '(none available today)', disabled: true });
+      let html = '<div class="panel"><div class="menu-title">⚑ Recruit · ' + p.gold + 'g · Party ' + (p.party ? p.party.length : 0) + '/2</div>' +
+        '<div class="town-desc">Sellswords and the Churn-touched gather in the tavern, looking for a Kindled to follow.</div>' +
+        UI.renderMenu({ items: items, cursor: o.cursor }) +
+        '<div class="menu-foot">Enter: hire · Esc: back</div></div>';
+      return html;
+    },
+    keyRecruit: function (g, k) {
+      const o = g.overlay, p = g.player, site = o.site;
+      if (k === 'Escape') { o.sub = null; o.cursor = 0; g.render(); return; }
+      const offer = site._recruits || [];
+      if (!offer.length) { g.render(); return; }
+      menuNav(o, k, offer.length, function (i) {
+        const c = offer[i];
+        p.party = p.party || [];
+        if (p.party.length >= 2) { g.msg('Your party is full (2).'); return; }
+        if (p.gold < c.cost) { g.msg('Not enough gold to hire ' + c.name + '.'); return; }
+        p.gold -= c.cost;
+        const hired = Object.assign({}, c); delete hired.cost;
+        hired.alive = true; hired.hp = hired.maxHp; hired.statuses = {};
+        p.party.push(hired);
+        offer.splice(i, 1);
+        g.msg('%c⚑ ' + hired.name + ' the ' + hired.roleName + ' joins your party!', 'good');
+        if (o.cursor >= offer.length) o.cursor = Math.max(0, offer.length - 1);
+      });
+      g.render();
+    },
   };
 
   // ---- DIALOG ----
@@ -741,6 +791,15 @@
           '<div class="cb-status">' + statusTags(e) + '</div></div>';
       });
       html += '</div>';
+      // allies (companions)
+      if (c.allies && c.allies.length) {
+        html += '<div class="cb-allies">';
+        c.allies.forEach(function (a) {
+          html += '<div class="cb-ally' + (a.alive ? '' : ' dead') + '"><span class="cb-aname" style="color:' + a.color + '">' + esc(a.glyph + ' ' + a.name) + ' <i>' + a.roleName + '</i></span>' +
+            (a.alive ? UI.bar(a.hp, a.maxHp, '#3a8a4a') : '<span class="slain">DOWNED</span>') + '</div>';
+        });
+        html += '</div>';
+      }
       // player panel
       html += '<div class="cb-player"><div class="cb-pname">@ ' + esc(p.name) + ' · Lv' + p.level + ' ' + statusTags(p) + '</div>' +
         '<div class="cb-bars">HP ' + UI.bar(p.hp, p.maxHp, '#c0392b') + 'Anima ' + UI.bar(p.stormlight, p.maxStormlight, '#7e6bff') + '</div></div>';

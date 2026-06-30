@@ -22,7 +22,7 @@ vm.createContext(ctx);
 
 const root = path.join(__dirname, '..');
 const files = [
-  'src/rng.js', 'src/data/lore.js', 'src/data/skills.js', 'src/data/perks.js', 'src/data/items.js',
+  'src/rng.js', 'src/data/lore.js', 'src/data/skills.js', 'src/data/perks.js', 'src/data/companions.js', 'src/data/items.js',
   'src/data/abilities.js', 'src/data/bestiary.js', 'src/data/quests.js',
   'src/world.js', 'src/dungeon.js', 'src/player.js', 'src/combat.js', 'src/save.js',
 ];
@@ -154,6 +154,23 @@ for (let i = 0; i < 40; i++) {
   if (r.result !== 'victory' && r.result !== 'defeat') ok('battle ' + i + ' resolves', false);
 }
 ok('hero wins most level-appropriate fights (' + wins + '/' + battles + ')', wins >= battles * 0.6);
+
+// ---- companions fight alongside ----
+const ally0 = TLU.Companions.generate(new TLU.RNG('ally'), 5, 'warrior');
+ok('companion generated', ally0.kind === 'ally' && ally0.maxHp > 0 && ally0.atk > 0);
+(function () {
+  const cap = TLU.Player.newPlayer({ name: 'Cap', order: 'stoneward', weaponSkill: 'blunt', seed: 'cap' });
+  TLU.Player.gainXp(cap, 20000, noop); cap.hp = cap.maxHp; cap.stormlight = cap.maxStormlight;
+  const a = TLU.Companions.generate(new TLU.RNG('a2'), cap.level, 'channeler');
+  const enemies = TLU.Bestiary.spawnGroup(new TLU.RNG('eg'), 'plains', cap.level);
+  let ended = null;
+  const c = new TLU.Combat(stubGame(), { rng: new TLU.RNG('cb'), player: cap, enemies: enemies, allies: [a], level: cap.level, biome: 'plains', isBoss: false, canFlee: false, log: function () {}, onEnd: function (cc) { ended = cc.result; } });
+  c.start();
+  let guard = 0;
+  while (!c.over && guard++ < 2000) { if (c.awaitingPlayer) { const t = c.aliveEnemies()[0]; c.playerAct({ type: 'attack', target: t }); } else break; }
+  ok('ally is on the combat roster', c.allies.length === 1);
+  ok('ally combat resolves cleanly', ended === 'victory' || ended === 'defeat');
+})();
 
 // ---- final boss fight with a geared, high-level hero ----
 const champ = TLU.Player.newPlayer({ name: 'Champion', order: 'windrunner', weaponSkill: 'blades', seed: 'c' });

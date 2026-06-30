@@ -168,6 +168,11 @@ html, body {
 .cb-name { font-size: 11.5px; margin: 4px 0; height: 28px; display:flex; align-items:center; justify-content:center; }
 .slain { color: var(--bad); font-size: 11px; }
 .cb-status { margin-top: 4px; min-height: 16px; }
+.cb-allies { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.cb-ally { flex: 1; min-width: 200px; background: var(--panel); border: 1px solid #2c4a30; border-radius: 6px; padding: 6px 10px; }
+.cb-ally.dead { opacity: 0.4; }
+.cb-aname { font-size: 12px; }
+.cb-aname i { color: var(--dim); font-style: normal; font-size: 11px; }
 .cb-player { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; margin-bottom: 12px; }
 .cb-pname { color: var(--gold); margin-bottom: 6px; }
 .cb-bars { display: grid; grid-template-columns: 30px 1fr 38px 1fr; gap: 4px 8px; align-items: center; font-size: 11px; color: var(--dim); }
