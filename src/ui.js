@@ -59,7 +59,8 @@
       ? (game.world.tiles[p.wy] && game.world.tiles[p.wy][p.wx] ? game.world.tiles[p.wy][p.wx].name : '')
       : (game.dungeon.site ? game.dungeon.site.name + ' — Floor ' + game.dungeon.depth : 'Ruin');
     html += '<div class="loc">◉ ' + esc(loc) + '</div>';
-    html += '<div class="time">' + (game.storm && game.storm.active ? '⛈ THE CHURN' : '☀ Day ' + game.day) + '</div>';
+    const fc = game.churnForecast ? game.churnForecast() : { text: '☀ Day ' + game.day, cls: '' };
+    html += '<div class="time churn-' + (fc.cls || 'none') + '">' + esc(fc.text) + ' · Day ' + game.day + '</div>';
     el.innerHTML = html;
   }
 

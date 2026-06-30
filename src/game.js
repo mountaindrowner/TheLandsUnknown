@@ -16,7 +16,8 @@
     this.logLines = [];
     this.turnCount = 0;
     this.day = 1;
-    this.storm = { active: false, timer: 60, front: 999 };
+    // The Churn: a roaming front that sweeps east→west on a readable schedule.
+    this.storm = { active: false, x: 999, dir: -1, timer: 45, speed: 1.6 };
     this.disp = null;
   }
 
@@ -96,7 +97,7 @@
     TLU.Player.refreshAbilities(this.player);
     this.ensureCodex();
     this.turnCount = data.turnCount || 0;
-    this.storm = data.storm || this.storm;
+    this.storm = (data.storm && typeof data.storm.x === 'number') ? data.storm : { active: false, x: 999, dir: -1, timer: 45, speed: 1.6 };
     this.day = data.day || 1;
     this.questLog = data.questLog || {};
     this.mode = 'world'; this.state = 'play'; this.overlay = null;
@@ -139,18 +140,59 @@
     const p = this.player;
     // light regen while travelling
     p.hp = Math.min(p.maxHp, p.hp + 1 + (p.hpRegen || 0));
-    const sl = this.storm.active ? 3 : 1;
+    // Anima regen — the Arts quicken inside the Churn (and far more for a Churn-Rider)
+    let sl = 1;
+    if (this.inChurn(p.wx)) sl = 6 + ((p.perkFlags && p.perkFlags.churnrider) ? 8 : 0);
+    else if (this.storm.active) sl = 2;
     p.stormlight = Math.min(p.maxStormlight, p.stormlight + sl + (p.stormRegen || 0));
-    p.food = Math.max(0, p.food - 0.4);
+    p.food = Math.max(0, p.food - ((p.perkFlags && p.perkFlags.forager) ? 0.25 : 0.4));
     if (p.food <= 0 && this.turnCount % 4 === 0) { p.hp = Math.max(1, p.hp - 2); this.msg('%cYou are starving. Eat a ration ([I]).', 'bad'); }
-    // storm cycle
-    this.storm.timer--;
-    if (this.storm.timer <= 0) {
-      this.storm.active = !this.storm.active;
-      if (this.storm.active) { this.storm.timer = 14; this.storm.front = 0; this.msg('%c⛈ The Churn sweeps in from the east! The Arts flow freely, but the wilds grow deadly.', 'storm'); }
-      else { this.storm.timer = 90 + (this.turnCount % 40); this.storm.front = 999; this.day++; this.msg('%c☀ The Churn recedes. Dawn breaks on day ' + this.day + '.', 'note'); }
+    this.churnStep();
+  };
+
+  // ---------- the Churn (roaming front) ----------
+  Game.prototype.CHURN_BAND = 3;
+  Game.prototype.inChurn = function (x) { return this.storm.active && Math.abs(x - this.storm.x) <= this.CHURN_BAND; };
+  Game.prototype.churnStep = function () {
+    const s = this.storm, w = this.world;
+    if (s.active) {
+      s.x += s.dir * s.speed;
+      this.revealChurnColumn(Math.round(s.x));
+      if (s.x < -2) {
+        s.active = false; s.timer = 55 + (this.turnCount % 40); this.day++;
+        this.msg('%c☀ The Churn passes beyond the western sea. The land lies still. (Day ' + this.day + ')', 'note');
+      }
+    } else {
+      s.timer--;
+      if (s.timer <= 0) {
+        s.active = true; s.x = w.w + 1; s.dir = -1;
+        this.msg('%c⛈ The Churn rises in the EAST and begins its march. The Arts quicken — but the wilds turn deadly in its path.', 'storm');
+      }
     }
-    if (this.storm.active) this.storm.front = Math.max(0, this.storm.front - 4);
+  };
+  // the Churn lays the land bare in its path; uncovers sites for the explorer
+  Game.prototype.revealChurnColumn = function (cx) {
+    const w = this.world, p = this.player;
+    for (let dx = -1; dx <= 1; dx++) {
+      const x = cx + dx; if (x < 0 || x >= w.w) continue;
+      for (let y = 0; y < w.h; y++) if (!p.visited[x + ',' + y]) p.visited[x + ',' + y] = 1;
+    }
+    // announce a newly-uncovered site (one per step, to avoid spam)
+    for (const site of w.sites) {
+      if (Math.abs(site.x - cx) < 1 && !site._uncovered) {
+        site._uncovered = true;
+        if (site.type !== 'town') { this.msg('%c◹ The Churn lays bare ' + site.name + ' — ' + this.dirWord(site.x - p.wx, site.y - p.wy) + '.', 'skill'); break; }
+      }
+    }
+  };
+  // HUD forecast text
+  Game.prototype.churnForecast = function () {
+    const s = this.storm, p = this.player;
+    if (!s.active) return { text: '☀ Churn dormant · stirs in ~' + Math.max(0, Math.round(s.timer)), cls: '' };
+    if (this.inChurn(p.wx)) return { text: '⛈ YOU STAND IN THE CHURN', cls: 'churn' };
+    const d = Math.round(s.x - p.wx);
+    if (d > 0) return { text: '⛈ Churn ' + d + ' tiles EAST → (incoming)', cls: '' };
+    return { text: '⛈ Churn ' + Math.abs(d) + ' tiles WEST ← (passed)', cls: '' };
   };
 
   Game.prototype.maybeEncounter = function () {
@@ -158,8 +200,9 @@
     const t = w.tiles[p.wy][p.wx];
     let chance = 0.12;
     if (t.road) chance = 0.04;
-    if (this.storm.active) chance += 0.06;
+    if (this.inChurn(p.wx)) chance += 0.14; else if (this.storm.active) chance += 0.04;
     chance += (BIOME_DANGER[t.biome] || 0) * 0.015;
+    if (p.perkFlags && p.perkFlags.pathfinder) chance *= 0.6;
     if (!this.rng) this.rng = new TLU.RNG(this.seed + ':enc');
     if (this.rng.chance(chance)) {
       const lvl = this.encounterLevel(t);
@@ -171,7 +214,7 @@
   Game.prototype.encounterLevel = function (t) {
     const p = this.player;
     const eastFactor = (p.wx / this.world.w) * 4;
-    const danger = (BIOME_DANGER[t.biome] || 0) + eastFactor + (this.storm.active ? 2 : 0);
+    const danger = (BIOME_DANGER[t.biome] || 0) + eastFactor + (this.inChurn(p.wx) ? 4 : 0);
     const lvl = Math.round(p.level * 0.7 + danger * 0.7 + this.rng.float(-1, 1.5));
     return Math.max(1, Math.min(20, lvl));
   };

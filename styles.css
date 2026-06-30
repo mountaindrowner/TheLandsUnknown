@@ -68,6 +68,7 @@ html, body {
 .qbody { color: var(--dim); font-size: 11.5px; margin-top: 3px; line-height: 1.4; }
 .loc { margin-top: 8px; font-size: 12px; color: #b9c2e0; }
 .time { font-size: 12px; color: var(--storm); }
+.time.churn-churn { color: #ff7adf; font-weight: bold; animation: pulse 1s infinite; }
 #controls { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 10px; font-size: 11.5px; color: var(--dim); line-height: 1.7; }
 .ctrl-h { color: var(--gold); margin-bottom: 4px; }
 

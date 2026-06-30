@@ -60,7 +60,11 @@
         let glyph = t.glyph, color = t.color, bg = t.bg;
         if (t.road && !t.site) { glyph = '+'; color = '#8a7a55'; }
         if (t.site) { glyph = t.site.glyph; color = t.site.color; bg = '#0a0a12'; }
-        if (game.storm && game.storm.active && mx >= game.storm.front) { bg = '#160c22'; }
+        if (game.storm && game.storm.active) {
+          const dxF = mx - game.storm.x;
+          if (Math.abs(dxF) <= 3) { bg = '#3a1455'; if (Math.abs(dxF) <= 1) bg = '#5a1f7a'; }   // the front
+          else if (dxF < 0) bg = '#160c22';                                                       // the wake
+        }
         if (!seen) { color = dim(color, 0.42); bg = dim(bg || '#05060a', 0.5); glyph = t.site ? t.site.glyph : glyph; }
         disp.put(sx, sy, glyph, color, bg);
       }
@@ -128,6 +132,11 @@
       const t = w.tiles[y][x];
       ctx.fillStyle = t.site ? t.site.color : dim(t.color, 0.8);
       ctx.fillRect(x * sx, y * sy, Math.ceil(sx), Math.ceil(sy));
+    }
+    // the Churn front as a vertical band
+    if (game.storm && game.storm.active && game.storm.x >= 0 && game.storm.x <= w.w) {
+      ctx.fillStyle = 'rgba(150,80,220,0.55)';
+      ctx.fillRect(Math.round(game.storm.x * sx) - 1, 0, Math.max(2, Math.ceil(sx * 2)), H);
     }
     ctx.fillStyle = '#fff36b';
     ctx.fillRect(game.player.wx * sx - 1, game.player.wy * sy - 1, 3, 3);

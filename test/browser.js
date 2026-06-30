@@ -71,6 +71,18 @@ function serve() {
   await press('Enter');
   ok('talent chosen', await page.evaluate(() => Object.keys(window.GAME.player.perks).length) > perksBefore);
   await press('Escape');
+  // the Churn: force the front onto the player and verify forecast + effects
+  const churn = await page.evaluate(() => {
+    const g = window.GAME;
+    g.storm = { active: true, x: g.player.wx, dir: -1, speed: 1.6, timer: 10 };
+    const inc = g.inChurn(g.player.wx);
+    g.player.stormlight = 0;
+    g.worldTurn();
+    g.render();
+    return { inc: inc, fc: g.churnForecast().text, anima: g.player.stormlight };
+  });
+  ok('Churn front detected + forecast', churn.inc === true && /CHURN/i.test(churn.fc));
+  ok('Churn supercharges Anima regen', churn.anima >= 5);
 
   // ----- teleport to a town and exercise services -----
   await page.evaluate(() => {
