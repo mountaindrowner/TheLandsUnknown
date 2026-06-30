@@ -128,6 +128,18 @@
       if (c) camps.push(c);
     }
 
+    // --- Landmarks / curiosities (one-time discoveries for explorers) ---
+    const landmarks = [];
+    const lmPool = (TLU.Dialogue && TLU.Dialogue.LANDMARKS) ? rng.shuffle(TLU.Dialogue.LANDMARKS) : [];
+    for (let i = 0; i < lmPool.length; i++) {
+      const def = lmPool[i];
+      const lm = placeSite({
+        type: 'landmark', kind: def.kind, glyph: def.glyph, color: def.color, name: def.name,
+        level: 2 + i, discovered: false,
+      }, 5);
+      if (lm) landmarks.push(lm);
+    }
+
     // --- Mini-boss lair ---
     const lair = placeSite({ type: 'lair', glyph: '☠', color: '#ff6a3d', name: 'Varen\'s Warcamp', level: 8, boss: 'highlord_reaver', cleared: false }, 8);
 
@@ -158,7 +170,7 @@
 
     return {
       seed: seedStr, w: W, h: H, tiles: tiles, sites: sites,
-      towns: towns, vaults: vaults, camps: camps, lair: lair, aharietiam: aha,
+      towns: towns, vaults: vaults, camps: camps, landmarks: landmarks, lair: lair, aharietiam: aha,
       start: { x: start.x, y: start.y },
       biomeAt: function (x, y) { return (tiles[y] && tiles[y][x]) ? tiles[y][x].biome : 'plains'; },
       siteAt: function (x, y) { return (tiles[y] && tiles[y][x]) ? tiles[y][x].site : null; },

@@ -154,6 +154,16 @@ function serve() {
   // leave town
   if ((await state()).ov === 'town') { await page.evaluate(() => { window.GAME.overlay.cursor = 7; }); await press('Enter'); }
 
+  // ----- landmark discovery (explorer payoff) -----
+  await page.evaluate(() => {
+    const g = window.GAME; const lm = g.world.landmarks[0];
+    g.player.wx = lm.x; g.player.wy = lm.y; g.render();
+  });
+  await press('Enter');                            // examine the landmark
+  ok('landmark discovery opens', (await state()).ov === 'landmark');
+  ok('discovery counted', await page.evaluate(() => window.GAME.player.discoveries) >= 1);
+  await press('Enter');                            // close
+
   // ----- dungeon delve: enter the nearest vault -----
   await page.evaluate(() => {
     const g = window.GAME; const v = g.world.vaults[0];

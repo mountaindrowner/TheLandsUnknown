@@ -79,7 +79,7 @@
     if (en) { game.touchEnemy(parseInt(en.getAttribute('data-eidx'), 10)); return true; }
     // tap-to-advance for text screens (dialog, help, chargen name step)
     const o = game.overlay;
-    if (o && (o.type === 'dialog' || o.type === 'help' || (o.type === 'chargen' && o.step === 2))) { game.key('Enter'); return true; }
+    if (o && (o.type === 'dialog' || o.type === 'help' || o.type === 'landmark' || (o.type === 'chargen' && o.step === 2))) { game.key('Enter'); return true; }
     return false;
   }
 

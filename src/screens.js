@@ -852,7 +852,14 @@
         }).join('') : '<div class="cx-empty">Slay the creatures of Aurenmark to fill these pages.</div>';
       } else if (o.tab === 3) {
         const keys = Object.keys(p.codex.places).filter(function (t) { return p.codex.places[t]; });
-        body = keys.length ? keys.map(function (t) { return '<div class="cx-entry"><div class="cx-h">' + esc(g.placeName(t)) + '</div><div class="cx-b">' + esc(D.CODEX.places[t]) + '</div></div>'; }).join('') : '<div class="cx-empty">Explore the world to chart its places.</div>';
+        body = keys.length ? keys.map(function (t) { return '<div class="cx-entry"><div class="cx-h">' + esc(g.placeName(t)) + '</div><div class="cx-b">' + esc(D.CODEX.places[t]) + '</div></div>'; }).join('') : '';
+        const lms = p.codex.landmarks || {};
+        const lmKeys = Object.keys(lms);
+        if (lmKeys.length) {
+          body += '<div class="cx-h">Discoveries (' + lmKeys.length + ')</div>';
+          body += lmKeys.map(function (k) { return '<div class="cx-entry"><div class="cx-h" style="color:#ffd86b">◹ ' + esc(lms[k].name) + '</div><div class="cx-b">' + esc(lms[k].lore) + '</div></div>'; }).join('');
+        }
+        if (!body) body = '<div class="cx-empty">Explore the world to chart its places.</div>';
       } else {
         body = (p.codex.rumors && p.codex.rumors.length) ? p.codex.rumors.slice().reverse().map(function (r) { return '<div class="cx-entry"><div class="cx-b">“' + esc(r) + '”</div></div>'; }).join('') : '<div class="cx-empty">Speak with townsfolk to gather rumors.</div>';
       }
@@ -940,6 +947,18 @@
       const e = TLU.Dialogue.pick(r, world);
       return e.title + ': ' + e.text;
     },
+  };
+
+  // ---- LANDMARK DISCOVERY ----
+  SCREENS.landmark = {
+    render: function (g) {
+      const o = g.overlay;
+      return '<div class="panel dialog landmark"><div class="menu-title" style="color:#ffd86b">◹ Discovery — ' + esc(o.name) + '</div>' +
+        '<div class="dlg-text">' + esc(o.lore) + '</div>' +
+        '<div class="lm-reward">✦ ' + esc(o.reward) + '</div>' +
+        '<div class="menu-foot">' + ((g.player.discoveries || 0)) + ' discoveries charted · Enter to continue</div></div>';
+    },
+    key: function (g, k) { if (k === 'Enter' || k === ' ' || k === 'Escape') { g.overlay = null; g.render(); } },
   };
 
   // ---- GAME OVER ----

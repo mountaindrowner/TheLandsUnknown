@@ -145,6 +145,7 @@ html, body {
 .dialog { min-width: 520px; max-width: 640px; }
 .dlg-text { font-size: 14px; line-height: 1.6; min-height: 60px; color: #e6e9f4; margin-bottom: 6px; }
 .npc-role { color: var(--dim); font-size: 12px; font-weight: normal; }
+.lm-reward { margin-top: 10px; color: var(--good); font-size: 14px; font-weight: bold; border-top: 1px solid var(--border); padding-top: 8px; }
 
 /* codex / journal */
 .codex { min-width: 640px; max-width: 760px; }

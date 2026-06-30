@@ -11,7 +11,7 @@
     const w = game.world;
     const siteStates = {};
     w.sites.forEach(function (s) {
-      siteStates[s.x + ',' + s.y] = { cleared: !!s.cleared, opened: !!s.opened, hasFragment: !!s.hasFragment };
+      siteStates[s.x + ',' + s.y] = { cleared: !!s.cleared, opened: !!s.opened, hasFragment: !!s.hasFragment, discovered: !!s.discovered, fragmentTaken: !!s.fragmentTaken };
     });
     return {
       v: 1,
@@ -51,7 +51,7 @@
     if (!data || !data.siteStates) return;
     game.world.sites.forEach(function (s) {
       const st = data.siteStates[s.x + ',' + s.y];
-      if (st) { s.cleared = st.cleared; s.opened = st.opened; s.hasFragment = st.hasFragment; }
+      if (st) { s.cleared = st.cleared; s.opened = st.opened; s.hasFragment = st.hasFragment; s.discovered = st.discovered; s.fragmentTaken = st.fragmentTaken; }
     });
   }
 

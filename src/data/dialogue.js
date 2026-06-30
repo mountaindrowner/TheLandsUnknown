@@ -225,6 +225,41 @@
       effect: function (g) { const d = Math.max(2, Math.round(g.player.maxHp * 0.06)); g.player.hp = Math.max(1, g.player.hp - d); g.msg('%cTainted water. You retch and lose ' + d + ' HP.', 'bad'); } },
   ];
 
+  // ---- overworld landmarks / curiosities (Explorer payoff) ----
+  // Each is a one-time discovery: lore + a reward resolved by the game.
+  const LANDMARKS = [
+    { kind: 'statue', name: 'The Weeping Colossus', glyph: '☥', color: '#9adfff',
+      lore: 'A statue of some forgotten Kindled, a hundred feet of weathered stone, its cheeks streaked where rain has run for centuries. At its base, offerings long turned to dust — and one that has not.',
+      reward: { type: 'item', level: 4, magic: 1 } },
+    { kind: 'shrine', name: 'A Sunken Shrine', glyph: '⩩', color: '#d9a7ff',
+      lore: 'A shrine half-drowned in a still black pool. You cannot read the script, but the air is thick with Anima, and breathing deepens it.',
+      reward: { type: 'anima' } },
+    { kind: 'battlefield', name: 'The Quiet Field', glyph: '‡', color: '#c0533b',
+      lore: 'An old battlefield the Churn never fully cleared. Rusted blades stand in the rockbud like a crop of iron. Some of the dead still clutch what they died for.',
+      reward: { type: 'gold', min: 30, max: 90 } },
+    { kind: 'crater', name: 'A Fallen Star', glyph: '✦', color: '#ffd86b',
+      lore: 'A crater of black glass, still faintly warm. Something fell from the sky here, long ago — and left a seed of itself behind.',
+      reward: { type: 'material', kind: 'shard' } },
+    { kind: 'hermit', name: "A Hermit's Cairn", glyph: 'Ω', color: '#caa86a',
+      lore: 'A hermit lived here once, alone with the Churn and his thoughts. He left no name, only a cairn, a journal of madness — and one useful lesson scratched on stone.',
+      reward: { type: 'perk' } },
+    { kind: 'standing_stones', name: 'The Standing Stones', glyph: '∏', color: '#8a8a8a',
+      lore: 'Nine stones in a ring, humming when the Churn nears. The old Kindled raised them to mark something — a grave, a prison, or a map. No one remembers which.',
+      reward: { type: 'item', level: 7, magic: 1 } },
+    { kind: 'wreck', name: 'A Beached Wreck', glyph: '⏚', color: '#67e08a',
+      lore: 'The bones of a great ship, carried inland by some long-ago Churn and left to rot a mile from any sea. The hold was never emptied.',
+      reward: { type: 'gold', min: 60, max: 140 } },
+    { kind: 'echofield', name: 'A Field of Echoes', glyph: '∴', color: '#ff8adf',
+      lore: 'Here the loosed dead gather thick, drifting like fireflies that whisper in voices you almost recognize. They do not harm you. They only want to be remembered.',
+      reward: { type: 'anima' } },
+    { kind: 'orchard', name: 'The Stone Orchard', glyph: '♣', color: '#3f7a3f',
+      lore: 'Trees petrified mid-blossom, an orchard the Churn caught and kept. Bitterleaf grows wild between the grey roots, potent and plentiful.',
+      reward: { type: 'material', kind: 'herb', qty: 3 } },
+    { kind: 'obelisk', name: 'A Black Obelisk', glyph: '█', color: '#7e6bff',
+      lore: 'A featureless black spire that drinks the light. The Hollowed mark such places; touching it, you feel watched — and the watcher leaves a gift, or a test.',
+      reward: { type: 'item', level: 10, magic: 2 } },
+  ];
+
   // ---- the discovery codex ----
   const CODEX = {
     world: [
@@ -287,8 +322,9 @@
 
   TLU.Dialogue = {
     ARCHETYPES: ARCHETYPES, RUMORS: RUMORS, SITE_RUMORS: SITE_RUMORS, BARKS: BARKS,
-    EVENTS: EVENTS, CODEX: CODEX, BESTIARY_LORE: BESTIARY_LORE,
+    EVENTS: EVENTS, CODEX: CODEX, BESTIARY_LORE: BESTIARY_LORE, LANDMARKS: LANDMARKS,
     rosterFor: rosterFor,
+    landmarkByKind: function (kind) { return LANDMARKS.find(function (l) { return l.kind === kind; }); },
     pick: function (rng, arr) { return arr[rng.int(0, arr.length - 1)]; },
   };
 })(window.TLU = window.TLU || {});

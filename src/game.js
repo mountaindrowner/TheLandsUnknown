@@ -232,8 +232,39 @@
 
   Game.prototype.enterSite = function (site) {
     if (site.type === 'town') { this.openTown(site); return; }
+    if (site.type === 'landmark') { this.openLandmark(site); return; }
     // dungeon-like sites
     this.enterDungeon(site);
+  };
+
+  // ---------- landmarks (one-time discoveries) ----------
+  Game.prototype.openLandmark = function (site) {
+    const def = TLU.Dialogue.landmarkByKind(site.kind);
+    if (!def) { this.msg('There is nothing here now.'); return; }
+    if (site.discovered) { this.msg('%cYou have already explored ' + site.name + '. The Churn has taken the rest.', 'note'); return; }
+    site.discovered = true;
+    const p = this.player;
+    p.discoveries = (p.discoveries || 0) + 1;
+    this.ensureCodex();
+    p.codex.landmarks = p.codex.landmarks || {};
+    p.codex.landmarks[site.kind] = { name: site.name, lore: def.lore };
+    const reward = this.grantReward(def.reward, site.level);
+    this.overlay = { type: 'landmark', name: site.name, lore: def.lore, reward: reward };
+    this.save();
+    this.render();
+  };
+  Game.prototype.grantReward = function (spec, level) {
+    const p = this.player;
+    if (!this.rng) this.rng = new TLU.RNG(this.seed + ':enc');
+    const rng = this.rng;
+    spec = spec || {};
+    if (spec.type === 'gold') { const g = rng.int(spec.min, spec.max) + (level || 1) * 4; TLU.Player.addGold(p, g); return '+' + g + ' gold'; }
+    if (spec.type === 'anima') { p.stormlight = p.maxStormlight; return 'Your Anima floods to full (' + p.maxStormlight + ')'; }
+    if (spec.type === 'heal') { TLU.Player.fullHeal(p); return 'HP & Anima fully restored'; }
+    if (spec.type === 'material') { const it = TLU.Items.material(spec.kind, spec.qty || 1); TLU.Player.addItem(p, it); return 'You gather ' + it.name + (spec.qty > 1 ? ' ×' + spec.qty : ''); }
+    if (spec.type === 'item') { const it = TLU.Items.genEquipment(rng, spec.level || (level || 1), { magic: spec.magic || 0 }); TLU.Player.addItem(p, it); return 'You find ' + it.name; }
+    if (spec.type === 'perk') { p.perkPoints = (p.perkPoints || 0) + 1; return 'A hard-won insight: +1 talent point! (Press [P])'; }
+    return 'Nothing of worth remains.';
   };
 
   Game.prototype.enterDungeon = function (site) {
