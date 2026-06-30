@@ -63,8 +63,11 @@ function serve() {
   await press('Enter'); await press('Enter');    // advance a couple of beats
   await press('Escape');                         // skip the rest -> chargen
   ok('chargen shows', (await title()).includes('Kindled'));
-  await press('ArrowDown'); await press('Enter'); // order
-  await press('Enter');                           // weapon
+  await press('ArrowDown'); await press('Enter'); // order -> appearance
+  ok('appearance gallery shows', (await page.locator('.cg-look-grid').count()) > 0);
+  await press('ArrowRight');                      // pick a different premade face
+  await press('Enter');                           // confirm face -> weapon
+  await press('Enter');                           // weapon -> name
   await press('Enter');                           // name -> begin
   await page.waitForTimeout(150);
   const s1 = await state();

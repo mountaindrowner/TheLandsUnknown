@@ -430,3 +430,19 @@ body.theme-folio .annals-code { background:#efe7d0; }
 .cg-ord-tag { color:var(--dim); font-style:italic; font-size:13px; margin-top:1px; }
 .cg-ord-desc { font-size:14px; line-height:1.5; margin-top:7px; }
 .cg-ord-att { margin-top:9px; font-size:13px; color:var(--storm); font-variant:small-caps; letter-spacing:.5px; }
+
+/* ---- appearance gallery (chargen step) ---- */
+.cg-look { display:flex; gap:18px; align-items:center; justify-content:center; margin:10px 0 6px; }
+.cg-look-big { width:150px; flex:none; }
+.cg-look-big .tlu-portrait { width:150px; }
+.cg-look-side { display:flex; flex-direction:column; gap:8px; min-width:160px; }
+.cg-look-ctrl { border:1px solid var(--border); border-radius:8px; padding:6px 12px; font-size:13px;
+  color:var(--dim); cursor:pointer; text-align:left; background:var(--panel); user-select:none; }
+.cg-look-ctrl b { color:var(--ink); }
+.cg-look-ctrl:hover { border-color:var(--gold); }
+.cg-confirm { text-align:center; color:var(--gold); font-variant:small-caps; letter-spacing:1px; border-color:var(--gold); }
+.cg-look-grid { display:grid; grid-template-columns:repeat(8, 1fr); gap:6px; margin:8px auto 4px; max-width:560px; }
+.cg-thumb { border:2px solid transparent; border-radius:8px; cursor:pointer; overflow:hidden; line-height:0; }
+.cg-thumb .tlu-portrait { width:100%; }
+.cg-thumb.sel { border-color:var(--gold); background:rgba(154,59,42,.12); }
+@media (max-width:560px){ .cg-look-grid { grid-template-columns:repeat(4, 1fr); } .cg-look { flex-direction:column; } }

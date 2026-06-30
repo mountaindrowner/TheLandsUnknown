@@ -76,6 +76,9 @@
       if (target.closest('[data-skip]')) game.endIntro(); else game.advanceIntro();
       return true;
     }
+    // chargen appearance gallery: tap a face to select it
+    const lk = target.closest('[data-look]');
+    if (lk && game.overlay) { game.overlay.lookIdx = parseInt(lk.getAttribute('data-look'), 10); game.render(); return true; }
     const mi = target.closest('[data-mi]');
     if (mi && !mi.classList.contains('disabled')) { game.touchMenuSelect(parseInt(mi.getAttribute('data-mi'), 10)); return true; }
     const tab = target.closest('.cx-tab[data-cxtab]');
@@ -84,7 +87,7 @@
     if (en) { game.touchEnemy(parseInt(en.getAttribute('data-eidx'), 10)); return true; }
     // tap-to-advance for text screens (dialog, help, chargen name step)
     const o = game.overlay;
-    if (o && (o.type === 'dialog' || o.type === 'help' || o.type === 'landmark' || o.type === 'echo' || (o.type === 'chargen' && o.step === 2))) { game.key('Enter'); return true; }
+    if (o && (o.type === 'dialog' || o.type === 'help' || o.type === 'landmark' || o.type === 'echo' || (o.type === 'chargen' && o.step === 3))) { game.key('Enter'); return true; }
     return false;
   }
 

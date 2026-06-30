@@ -15,9 +15,16 @@
       name: opts.name || 'Wanderer',
       orderId: opts.order || 'skyrender',
       order: order,
-      // stable seed for the generative ink portrait — outlives saves
-      artSeed: (opts.name || 'Wanderer') + '|' + (opts.order || 'skyrender') + '|' + (opts.seed || ''),
-      fem: new TLU.RNG('fem:' + (opts.name || 'Wanderer') + (opts.seed || '')).chance(0.5),
+      // chosen appearance for the generative ink portrait (outlives saves).
+      // look = { seed, fem, age }; falls back to a name-derived default.
+      look: opts.look || {
+        seed: (opts.name || 'Wanderer') + '|' + (opts.order || 'skyrender') + '|' + (opts.seed || ''),
+        fem: new TLU.RNG('fem:' + (opts.name || 'Wanderer') + (opts.seed || '')).chance(0.5),
+        age: 'prime',
+      },
+      // legacy alias kept for older saves / call sites
+      artSeed: (opts.look && opts.look.seed) || ((opts.name || 'Wanderer') + '|' + (opts.order || 'skyrender') + '|' + (opts.seed || '')),
+      fem: opts.look ? !!opts.look.fem : new TLU.RNG('fem:' + (opts.name || 'Wanderer') + (opts.seed || '')).chance(0.5),
       level: 1, xp: 0, xpNext: TLU.Skills.levelXpFor(1),
       // core attributes (raised on level-up)
       attr: { might: 5, finesse: 5, focus: 5, endurance: 5 },

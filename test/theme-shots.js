@@ -15,9 +15,9 @@ function serve() { return new Promise((r) => { const s = http.createServer((req,
   await page.evaluate(() => localStorage.clear());
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForTimeout(250);
-  // new game: New Game -> skip intro -> chargen
+  // new game: New Game -> skip intro -> chargen (order, appearance, weapon, name)
   await press('Enter'); await press('Escape');
-  await press('ArrowDown'); await press('Enter'); await press('Enter');
+  await press('ArrowDown'); await press('Enter'); await press('Enter'); await press('Enter');
   await page.locator('.title-screen').first().dispatchEvent('click'); await page.waitForTimeout(150);
   // explore + resolve any combat for a lived-in scene
   for (let i = 0; i < 22; i++) { await page.keyboard.press(['ArrowRight','ArrowDown','ArrowRight','ArrowUp'][i % 4]); await page.waitForTimeout(16);

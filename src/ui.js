@@ -37,9 +37,10 @@
   const _portCache = {};
   function heroPortrait(p) {
     if (!TLU.Art || !TLU.Art.portrait) return '';
-    const key = (p.artSeed || p.name) + '|' + p.level;
+    const look = p.look || { seed: p.artSeed || p.name, fem: p.fem, age: 'prime' };
+    const key = look.seed + '|' + look.fem + '|' + (look.age || 'prime') + '|' + p.orderId + '|' + p.level;
     if (_portCache[key]) return _portCache[key];
-    const svg = TLU.Art.portrait(p.artSeed || p.name, { role: ORDER_ROLE[p.orderId] || 'explorer', accent: '#9a3b2a', fem: p.fem, age: 'prime' });
+    const svg = TLU.Art.portrait(look.seed, { role: ORDER_ROLE[p.orderId] || 'explorer', accent: '#9a3b2a', fem: look.fem, age: look.age || 'prime' });
     _portCache[key] = svg;
     return svg;
   }

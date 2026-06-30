@@ -59,6 +59,8 @@
       name: TLU.genName(new TLU.RNG('name' + this.turnCount)),
       orderKeys: Object.keys(TLU.LORE.orders),
       orderIdx: 0,
+      // appearance step: a gallery of premade looks + options
+      lookSet: 0, lookIdx: 0, lookPres: 'any', lookAge: 'any', look: null,
       weapons: [['blades', 'Sword & Dagger'], ['blunt', 'Mace & Hammer'], ['polearm', 'Spear & Glaive'], ['archery', 'Bow']],
       weaponIdx: 0,
       seedStr: 'aurenmark-' + (Math.floor(performance.now()) ^ 0x5bd1e995),
@@ -68,7 +70,7 @@
   Game.prototype.beginGame = function (cfg) {
     this.seed = cfg.seed;
     this.world = TLU.World.generate(cfg.seed, {});
-    this.player = TLU.Player.newPlayer({ name: cfg.name, order: cfg.order, weaponSkill: cfg.weaponSkill, seed: cfg.seed });
+    this.player = TLU.Player.newPlayer({ name: cfg.name, order: cfg.order, weaponSkill: cfg.weaponSkill, seed: cfg.seed, look: cfg.look });
     const p = this.player;
     p.wx = this.world.start.x; p.wy = this.world.start.y;
     this.mode = 'world'; this.state = 'play'; this.overlay = null;

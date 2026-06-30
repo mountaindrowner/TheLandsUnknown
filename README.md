@@ -184,6 +184,10 @@ or fill the **Codex** bestiary to see it. A standalone gallery lives at `design/
   world and frames you as a tiny figure within it, then resolves into the choosing of an
   Order — narration fading in over generative dusk vistas (`src/art/scenes.js`). Replay it
   any time from the title's **The Tale**.
+- **Choose your face.** Character creation includes an appearance gallery — a row of
+  premade looks to pick from, with **reroll** for fresh sets and **presentation** / **age**
+  toggles. Your choice drives the generative ink portrait everywhere it appears (the HUD,
+  the character sheet, dialogue), and persists with your save and your dynasty.
 - **Procedural open world.** A value-noise continent with nine biomes, holds (towns),
   drowned Riftvaults, reaver camps, roads, the roaming Churn, and a far-eastern danger gradient —
   every world is reproducible from its seed.

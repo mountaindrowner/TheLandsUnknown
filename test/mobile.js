@@ -66,7 +66,10 @@ function serve() {
   ok('intro cinematic via tap', (await page.locator('.cine').count()) > 0);
   await tap('.cine-skip');                          // skip the cinematic -> chargen
   ok('chargen reached via tap', (await page.evaluate(() => window.GAME.state)) === 'chargen');
-  await tap('.menu-item[data-mi="1"]');            // choose 2nd Order
+  await tap('.menu-item[data-mi="1"]');            // choose 2nd Order -> appearance
+  await tap('.cg-thumb[data-look="2"]');           // tap a premade face
+  ok('appearance pick via tap', (await page.evaluate(() => window.GAME.overlay.lookIdx)) === 2);
+  await tap('.cg-confirm');                         // confirm face -> weapon
   await tap('.menu-item[data-mi="0"]');            // choose 1st weapon
   // name step has no list -> tap the panel to advance/begin
   await page.locator('.title-screen').first().dispatchEvent('click');

@@ -72,7 +72,7 @@
     const o = this.overlay; if (!o) return null;
     if (o.type === 'chargen') {
       if (o.step === 0) return { get: function () { return o.orderIdx; }, set: function (v) { o.orderIdx = v; } };
-      if (o.step === 1) return { get: function () { return o.weaponIdx; }, set: function (v) { o.weaponIdx = v; } };
+      if (o.step === 2) return { get: function () { return o.weaponIdx; }, set: function (v) { o.weaponIdx = v; } };
       return null;
     }
     if (typeof o.cursor === 'number') return { get: function () { return o.cursor; }, set: function (v) { o.cursor = v; } };
@@ -152,8 +152,9 @@
     return TLU.Art.portrait(seed, opts || {});
   }
   function playerPortrait(p, opts) {
-    return portraitSVG(p.artSeed || p.name, Object.assign({
-      role: ORDER_ROLE[p.orderId] || 'explorer', accent: '#9a3b2a', fem: p.fem, age: 'prime',
+    const look = p.look || { seed: p.artSeed || p.name, fem: p.fem, age: 'prime' };
+    return portraitSVG(look.seed, Object.assign({
+      role: ORDER_ROLE[p.orderId] || 'explorer', accent: '#9a3b2a', fem: look.fem, age: look.age || 'prime',
     }, opts || {}));
   }
   function companionPortrait(c, opts) {
@@ -163,6 +164,23 @@
   function npcPortrait(npc, opts) {
     return portraitSVG('npc:' + npc.name + ':' + npc.archKey, Object.assign({ role: ARCH_ROLE[npc.archKey] || 'folk', accent: npc.arch.color }, opts || {}));
   }
+  // build the gallery of premade looks for chargen, given current options
+  function lookOptions(o) {
+    const orderKey = o.orderKeys[o.orderIdx];
+    const role = ORDER_ROLE[orderKey] || 'channeler';
+    const accent = TLU.LORE.orders[orderKey].color;
+    const AGES = ['young', 'prime', 'prime', 'weathered', 'old'];
+    const out = [];
+    for (let i = 0; i < 8; i++) {
+      const seed = 'look:' + o.seedStr + ':' + o.lookSet + ':' + i;
+      const r = new TLU.RNG(seed + ':meta');
+      const fem = o.lookPres === 'fem' ? true : o.lookPres === 'masc' ? false : r.chance(0.5);
+      const age = o.lookAge === 'any' ? r.pick(AGES) : o.lookAge;
+      out.push({ seed: seed, fem: fem, age: age, role: role, accent: accent });
+    }
+    return out;
+  }
+
   // give a companion a generated face's traits so its bio matches the drawing
   function companionTraits(c) {
     const role = TLU.Art.PORTRAIT_ROLES[c.role] ? c.role : 'folk';
@@ -228,10 +246,36 @@
           '<div class="cg-ord-desc">' + esc(lore.desc || ord.blurb) + '</div>' +
           '<div class="cg-ord-att">✦ Attunements · ' + ord.attune.join(' &amp; ') + '</div></div></div>';
       } else if (o.step === 1) {
+        // ---- Appearance: a gallery of premade looks ----
+        body += '<div class="cg-q">Choose your face.</div>';
+        const looks = lookOptions(o);
+        if (o.lookIdx >= looks.length) o.lookIdx = 0;
+        const sel = looks[o.lookIdx];
+        const big = portraitSVG(sel.seed, { role: sel.role, accent: sel.accent, fem: sel.fem, age: sel.age });
+        body += '<div class="cg-look"><div class="cg-look-big pf">' + big + '</div>';
+        body += '<div class="cg-look-side">';
+        const presLabel = { any: 'Either', fem: 'Feminine', masc: 'Masculine' }[o.lookPres];
+        const ageLabel = { any: 'Any age', young: 'Young', prime: 'Prime', weathered: 'Weathered', old: 'Old' }[o.lookAge];
+        body += '<div class="cg-look-ctrl touch-btn" data-key="f">Look · <b>' + presLabel + '</b></div>';
+        body += '<div class="cg-look-ctrl touch-btn" data-key="g">Age · <b>' + ageLabel + '</b></div>';
+        body += '<div class="cg-look-ctrl touch-btn" data-key="Tab">↻ More faces</div>';
+        body += '<div class="cg-look-ctrl cg-confirm touch-btn" data-key="Enter">Confirm ▸</div>';
+        body += '</div></div>';
+        body += '<div class="cg-look-grid">';
+        looks.forEach(function (lk, i) {
+          const th = portraitSVG(lk.seed, { role: lk.role, accent: lk.accent, fem: lk.fem, age: lk.age, ring: true });
+          body += '<div class="cg-thumb' + (i === o.lookIdx ? ' sel' : '') + '" data-look="' + i + '">' + th + '</div>';
+        });
+        body += '</div>';
+        body += '<div class="menu-foot">←/→ pick a face · [F] look · [G] age · [Tab] reroll · Enter confirm</div>';
+      } else if (o.step === 2) {
         body += '<div class="cg-q">Choose your weapon focus:</div>';
         body += UI.renderMenu({ items: o.weapons.map(function (w) { return { label: w[1] }; }), cursor: o.weaponIdx });
       } else {
         body += '<div class="cg-q">Your name, Kindled?</div>';
+        const sel2 = o.look || lookOptions(o)[o.lookIdx];
+        body += '<div class="folio-figrow" style="justify-content:center"><div class="pf pf-sm">' +
+          portraitSVG(sel2.seed, { role: sel2.role, accent: sel2.accent, fem: sel2.fem, age: sel2.age }) + '</div></div>';
         body += '<div class="cg-name">' + esc(o.name) + ' <span class="dimk">(Tab to reroll)</span></div>';
         const ord = TLU.LORE.orders[o.orderKeys[o.orderIdx]];
         body += '<div class="cg-summary">' + ord.glyph + ' ' + ord.name + ' · ' + o.weapons[o.weaponIdx][1] + '</div>';
@@ -246,14 +290,27 @@
         menuNav({ get cursor() { return o.orderIdx; }, set cursor(v) { o.orderIdx = v; } }, k, o.orderKeys.length,
           function () { o.step = 1; }, function () { g.openTitle(); });
       } else if (o.step === 1) {
+        // appearance gallery
+        const N = 8;
+        if (k === 'ArrowLeft' || k === 'a' || k === 'h') o.lookIdx = (o.lookIdx + N - 1) % N;
+        else if (k === 'ArrowRight' || k === 'd' || k === 'l') o.lookIdx = (o.lookIdx + 1) % N;
+        else if (k === 'ArrowUp' || k === 'w') o.lookIdx = (o.lookIdx + N - 4) % N;
+        else if (k === 'ArrowDown' || k === 's') o.lookIdx = (o.lookIdx + 4) % N;
+        else if (k === 'f' || k === 'F') o.lookPres = { any: 'fem', fem: 'masc', masc: 'any' }[o.lookPres];
+        else if (k === 'g' || k === 'G') o.lookAge = { any: 'young', young: 'prime', prime: 'weathered', weathered: 'old', old: 'any' }[o.lookAge];
+        else if (k === 'Tab') { o.lookSet++; }
+        else if (k === 'Enter' || k === ' ') { o.look = lookOptions(o)[o.lookIdx]; o.step = 2; }
+        else if (k === 'Escape') { o.step = 0; }
+      } else if (o.step === 2) {
         menuNav({ get cursor() { return o.weaponIdx; }, set cursor(v) { o.weaponIdx = v; } }, k, o.weapons.length,
-          function () { o.step = 2; }, function () { o.step = 0; });
+          function () { o.step = 3; }, function () { o.step = 1; });
       } else {
         if (k === 'Tab') { o.name = TLU.genName(new TLU.RNG('name' + Math.floor(performance.now()))); }
         else if (k === 'Enter' || k === ' ') {
-          g.beginGame({ seed: o.seedStr, name: o.name, order: o.orderKeys[o.orderIdx], weaponSkill: o.weapons[o.weaponIdx][0] });
+          if (!o.look) o.look = lookOptions(o)[o.lookIdx];
+          g.beginGame({ seed: o.seedStr, name: o.name, order: o.orderKeys[o.orderIdx], weaponSkill: o.weapons[o.weaponIdx][0], look: { seed: o.look.seed, fem: o.look.fem, age: o.look.age } });
           return;
-        } else if (k === 'Escape') o.step = 1;
+        } else if (k === 'Escape') o.step = 2;
       }
       g.render();
     },
