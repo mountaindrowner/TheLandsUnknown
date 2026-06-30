@@ -35,6 +35,16 @@
     drops: 'artifact',
   };
 
+  // The authored hard finale — a superboss unlocked AFTER the main victory.
+  const SUPERBOSS = {
+    id: 'churnheart', name: 'Karth-Vael, the Heart of the Churn', glyph: '◉', color: '#ff2d78',
+    lvl: 22, hp: 2600, atk: 86, def: 34, spd: 14, xp: 6000, gold: [0, 0], boss: true, tags: ['void'],
+    desc: 'The first of the Hollow Ones, and the engine of the Churn itself — the wound at the centre of the world. To end it is to end the unmaking forever.',
+    phases: 3,
+    abilities: ['midnight_flood', 'quake', 'drain', 'terror', 'stormblast', 'spawn_shadow', 'gravlance'],
+    drops: 'artifact',
+  };
+
   // A mini-boss for the midgame.
   const MINIBOSS = {
     id: 'highlord_reaver', name: 'Varen, Warlord of Cinders', glyph: '☠', color: '#ff6a3d',
@@ -63,9 +73,14 @@
   TLU.Bestiary = {
     LIST: BESTIARY,
     FINAL_BOSS: FINAL_BOSS,
+    SUPERBOSS: SUPERBOSS,
     MINIBOSS: MINIBOSS,
     scale: scale,
-    byId: function (id) { return BESTIARY.find(function (b) { return b.id === id; }) || FINAL_BOSS; },
+    byId: function (id) {
+      if (id === 'churnheart') return SUPERBOSS;
+      if (id === 'midnight_mother') return FINAL_BOSS;
+      return BESTIARY.find(function (b) { return b.id === id; }) || FINAL_BOSS;
+    },
     // pick a template appropriate for biome & level, then scale it
     spawn: function (rng, biome, level) {
       let pool = BESTIARY.filter(function (b) {

@@ -1078,15 +1078,31 @@
 
   // ---- VICTORY ----
   SCREENS.win = {
+    options: function (g) {
+      if (g.overlay.grand) return [['Begin anew', 'title']];
+      return [['⬇ Descend into the Heart of the Churn — the TRUE finale', 'churnheart'], ['Rest your legend (return to title)', 'title']];
+    },
     render: function (g) {
-      return '<div class="title-screen endscreen victory"><div class="end-title win">★ The Last Storm Stilled ★</div>' +
-        '<div class="end-quote">Vethra, the Gloammother, unravels into fading light. The Churn gentles, and across Aurenmark the echoes wheel skyward in silent salute. You are the first of the Kindled reborn — and you have ended the eldest of the Hollow Ones.</div>' +
+      const grand = g.overlay.grand;
+      const title = grand ? '★✶★ THE CHURN UNMADE ★✶★' : '★ The Last Churn Stilled ★';
+      const tale = grand
+        ? 'Karth-Vael, the Heart of the Churn, comes apart in your hands — and with it, the unmaking itself. The storm that walked the world since the first dawn simply... stops. Aurenmark exhales. The dead, at last, rest. Your name will outlast every hold: you did not merely survive the Churn. You ended it. <b>This is the true ending.</b>'
+        : 'Vethra, the Gloammother, unravels into fading light, and the Churn gentles. You have ended the eldest of the waking Hollow Ones. But far below where she fell, something older still turns in its sleep — the Heart of the Churn itself. The unmaking is wounded, not ended. Will you descend?';
+      return '<div class="title-screen endscreen victory"><div class="end-title win">' + title + '</div>' +
+        '<div class="end-quote">' + tale + '</div>' +
         statsBlock(g) + annalsNote(g) +
-        UI.renderMenu({ items: [{ label: 'Begin anew', color: '#ffd86b' }], cursor: 0 }) +
-        '<div class="menu-foot">Remember the dead. Outlast the Churn. — Thank you for playing.</div></div>';
+        UI.renderMenu({ items: SCREENS.win.options(g).map(function (o) { return { label: o[0], color: o[1] === 'churnheart' ? '#ff4488' : '#ffd86b' }; }), cursor: g.overlay.cursor || 0 }) +
+        '<div class="menu-foot">Remember the dead. Outlast the Churn.' + (grand ? ' — Thank you for playing.' : '') + '</div></div>';
     },
     key: function (g, k) {
-      if (k === 'Enter' || k === ' ' || k === 'Escape') { g.openTitle(); g.render(); }
+      const o = g.overlay; o.cursor = o.cursor || 0;
+      const opts = SCREENS.win.options(g);
+      menuNav(o, k, opts.length, function (i) {
+        const act = opts[i][1];
+        if (act === 'churnheart') { g.churnheartFight(); return; }
+        g.openTitle(); g.render();
+      });
+      g.render();
     },
   };
 

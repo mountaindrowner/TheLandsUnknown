@@ -223,7 +223,7 @@
       e.atk = Math.round(e.atk * 1.12);
       e.spd += 1;
       this.log('%c☇ ' + e.name + ' surges with renewed fury! (Phase ' + newPhase + ')', 'boss');
-      if (e.id === 'midnight_mother') this.spawnAdd(e);
+      if (e.id === 'midnight_mother' || e.id === 'churnheart') this.spawnAdd(e);
     }
   };
 

@@ -526,11 +526,14 @@
       if (this.mode === 'dungeon') this.dungeon.floor.entities = this.dungeon.floor.entities.filter(function (e) { return e.alive; });
       // boss-specific outcomes
       const killedFinal = c.enemies.some(function (e) { return e.id === 'midnight_mother' && !e.alive; });
+      const killedSuper = c.enemies.some(function (e) { return e.id === 'churnheart' && !e.alive; });
       const killedMini = c.enemies.some(function (e) { return e.id === 'highlord_reaver' && !e.alive; });
       if (killedMini) { if (this.dungeon && this.dungeon.site) this.dungeon.site.cleared = true; loot.push(TLU.Items.UNIQUES.oathbringer()); }
+      if (killedSuper) { this.player.flags.churnheartSlain = true; TLU.Player.addItem(this.player, TLU.Items.UNIQUES.sunmaker()); }
       if (loot.length) { this.state = 'play'; this.openLoot(loot, 'Spoils of battle'); }
       else { this.state = 'play'; this.overlay = null; }
-      if (killedFinal) { this.victory(); return; }
+      if (killedSuper) { this.victory(true); return; }
+      if (killedFinal) { this.player.flags.vethraSlain = true; this.victory(false); return; }
       this.save();
     } else { // flee
       this.state = 'play'; this.overlay = null;
@@ -620,12 +623,21 @@
     this.overlay = { type: 'over', quote: quote, code: annal && TLU.Dynasty ? TLU.Dynasty.encode(annal) : '' };
     this.render();
   };
-  Game.prototype.victory = function () {
+  Game.prototype.victory = function (grand) {
     this.state = 'win';
-    const annal = this.recordAnnal(true, 'ended the Gloammother and stilled the Churn', 'They stood in the last Churn, and did not fall.');
+    const cause = grand ? 'unmade the Heart of the Churn and ended the unmaking forever' : 'ended the Gloammother and stilled the last Churn';
+    const epi = grand ? 'They walked into the wound of the world, and closed it.' : 'They stood in the last Churn, and did not fall.';
+    const annal = this.recordAnnal(true, cause, epi);
     TLU.Save.clear();
-    this.overlay = { type: 'win', code: annal && TLU.Dynasty ? TLU.Dynasty.encode(annal) : '' };
+    this.overlay = { type: 'win', grand: !!grand, code: annal && TLU.Dynasty ? TLU.Dynasty.encode(annal) : '' };
     this.render();
+  };
+  // the authored hard finale — fight the Heart of the Churn
+  Game.prototype.churnheartFight = function () {
+    const boss = TLU.Bestiary.scale(TLU.Bestiary.SUPERBOSS, TLU.Bestiary.SUPERBOSS.lvl);
+    this.discoverBestiary(boss);
+    this.msg('%cYou descend past where Vethra fell, into the wound at the centre of the world. Something vast and patient turns to face you...', 'boss');
+    this.startCombat([boss], { biome: 'aharietiam', level: 22, isBoss: true, canFlee: false });
   };
 
   // ---------- overlays open helpers ----------

@@ -301,6 +301,7 @@
     unmade_shard: 'A splinter of a Hollow One — a shard of an old god\'s malice. Where it walks, the dead grow restless and the living grow afraid.',
     highlord_reaver: 'Varen, Warlord of Cinders — the man uniting the Reaver bands beneath one black banner. He carries a stolen Riftshard and hunts the Kindled for sport.',
     midnight_mother: 'Vethra, the Gloammother — eldest of the waking Hollow Ones. A thing of living darkness that births murderous shadows to mimic and murder. She wears voices like cloaks. Do not listen.',
+    churnheart: 'Karth-Vael, the Heart of the Churn — the first Hollow One, and the engine of the unmaking itself. It does not wake; it has never slept. To stand before it is to stand at the wound in the centre of the world. To end it is to end the Churn forever.',
   };
 
   // ---- helpers ----

@@ -241,9 +241,19 @@ function serve() {
   await page.waitForTimeout(80);
   const bossEnded = await resolveCombat(page, press, state, 300);
   ok('final boss fight resolves', bossEnded);
-  const finalState = await page.evaluate(() => ({ s: window.GAME.state, ov: window.GAME.overlay && window.GAME.overlay.type }));
+  const finalState = await page.evaluate(() => ({ s: window.GAME.state, ov: window.GAME.overlay && window.GAME.overlay.type, grand: window.GAME.overlay && window.GAME.overlay.grand }));
   ok('VICTORY screen reached', finalState.s === 'win' && finalState.ov === 'win');
+  ok('victory offers the Churnheart descent', finalState.grand !== true);
   if (finalState.s === 'win') await page.screenshot({ path: path.join(ROOT, 'assets', 'screenshot-victory.png') });
+
+  // ----- AUTHORED HARD FINALE: descend into the Heart of the Churn -----
+  await press('Enter');                            // option 0 = Descend into the Churnheart
+  await page.waitForTimeout(120);
+  ok('Churnheart finale begins', (await state()).s === 'combat');
+  const grandEnded = await resolveCombat(page, press, state, 400);
+  ok('Churnheart finale resolves', grandEnded);
+  const grand = await page.evaluate(() => ({ s: window.GAME.state, grand: window.GAME.overlay && window.GAME.overlay.grand, slain: !!window.GAME.player.flags.churnheartSlain }));
+  ok('TRUE ending reached (Churn unmade)', grand.s === 'win' && grand.grand === true && grand.slain === true);
 
   ok('no console/page errors', errors.length === 0);
   if (errors.length) errors.slice(0, 12).forEach((e) => console.error('    ! ' + e));
