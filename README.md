@@ -188,11 +188,18 @@ or fill the **Codex** bestiary to see it. A standalone gallery lives at `design/
   premade looks to pick from, with **reroll** for fresh sets and **presentation** / **age**
   toggles. Your choice drives the generative ink portrait everywhere it appears (the HUD,
   the character sheet, dialogue), and persists with your save and your dynasty.
-- **An illustrated overworld.** The world map is drawn as an inked chart, not ASCII — each
-  biome a hand-symbol (water waves, ironbud tufts, hill bumps, stonewood trees, mountains,
-  crater rings, chasm hatch), holds/vaults/camps/ruins as framed map-pins, roads as trails,
-  the hero a hooded figure with a selection ring, and the Churn a hatched front sweeping the
-  page. Uncharted ground stays blank parchment; it fills in as you explore. (`src/render.js`)
+- **An illustrated overworld, in three hand-drawn map styles** (cycle with **M**):
+  - **Field Chart** — a colourful inked working map: biome washes, hand-symbols (water
+    waves, ironbud tufts, hill bumps, stonewood trees, mountains, crater rings), ink
+    coastlines, framed map-pins, road trails.
+  - **Old Vellum** — antique copperplate cartography: an engraved horizontal-hatch sea with
+    coastline halos, sepia land, profile mountain ranges, banner & star markers, and a
+    compass rose. "Here be dragons."
+  - **Survey Map** — a topographic chart: a graticule grid, **contour lines computed from
+    the terrain** (thick index contours along coasts), elevation tinting, and geometric
+    survey markers.
+  The hero is a hooded figure with a selection ring; the Churn a hatched front sweeping the
+  page; uncharted ground stays blank parchment and fills in as you explore. (`src/render.js`)
 - **Procedural open world.** A value-noise continent with nine biomes, holds (towns),
   drowned Riftvaults, reaver camps, roads, the roaming Churn, and a far-eastern danger gradient —
   every world is reproducible from its seed.

@@ -32,9 +32,14 @@ const OUT = path.join(ROOT, 'assets', 'design');
   });
   await page.waitForTimeout(150);
   await page.screenshot({ path: path.join(OUT, 'overworld-map.png') });
-  // a tighter crop of just the map canvas
-  const map = await page.$('#map-wrap');
-  if (map) await map.screenshot({ path: path.join(OUT, 'overworld-canvas.png') });
+
+  // one crop of the map canvas per style
+  for (const style of ['chart', 'vellum', 'survey']) {
+    await page.evaluate((s) => { window.TLU.Render.setMapStyle(s); window.GAME.render(); }, style);
+    await page.waitForTimeout(120);
+    const map = await page.$('#map-wrap');
+    if (map) await map.screenshot({ path: path.join(OUT, 'overworld-' + style + '.png') });
+  }
 
   console.log(errs.length ? ('ERRORS:\n' + errs.slice(0, 8).join('\n')) : 'no errors');
   await browser.close(); srv.close();

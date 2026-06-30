@@ -51,6 +51,13 @@
       case 'q': case 'Q': this.openQuests(); break;
       case 'p': case 'P': this.openPerks(); break;
       case 'L': this.openCodex(); break;
+      case 'm': case 'M':
+        if (this.mode === 'world' && TLU.Render && TLU.Render.cycleMapStyle) {
+          const s = TLU.Render.cycleMapStyle();
+          this.msg('%c❖ Map style: ' + (TLU.Render.mapStyleNames[s] || s), 'note');
+          this.render();
+        }
+        break;
       case '?': case '/': this.openHelp(); break;
       case 'Escape': this.overlay = { type: 'system', cursor: 0 }; this.render(); break;
     }
