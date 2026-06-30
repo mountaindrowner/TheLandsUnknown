@@ -119,8 +119,10 @@
     } else if (action.type === 'ability') {
       const ab = TLU.Abilities[action.id];
       if (ab) {
-        if ((ab.cost || 0) > p.stormlight) { this.log('Not enough Anima!'); this.awaitingPlayer = true; return; }
-        p.stormlight -= (ab.cost || 0);
+        let cost = ab.cost || 0;
+        if (p.perkFlags && p.perkFlags.artDiscount) cost = Math.ceil(cost * (1 - p.perkFlags.artDiscount));
+        if (cost > p.stormlight) { this.log('Not enough Anima!'); this.awaitingPlayer = true; return; }
+        p.stormlight -= cost;
         ctx.target = action.target && action.target.alive ? action.target : this.aliveEnemies()[0];
         this.log('%c' + p.name + ' invokes ' + ab.name + '!', 'cast');
         ab.effect(ctx);
@@ -205,6 +207,7 @@
     let missChance = 0;
     if (ts.evade) missChance += 0.45;
     if (ts.blur) missChance += 0.4;
+    if (target.kind === 'player' && target.perkFlags && target.perkFlags.evasive) missChance += target.perkFlags.evasive;
     if (this.rng.chance(missChance)) { this.log(attacker.name + ' misses ' + target.name + '!'); return 0; }
     // block (shields)
     let mitigateBlock = 1;
@@ -214,6 +217,8 @@
 
     let base = atkOf(attacker) * (opts.mult || 1);
     if (attacker.statuses && attacker.statuses.rage) base *= 1.3;
+    const apf = attacker.kind === 'player' ? (attacker.perkFlags || {}) : {};
+    if (apf.berserker && attacker.hp < attacker.maxHp / 3) base *= (1 + apf.berserker);
     let raw = base * this.rng.float(0.85, 1.18);
 
     // crit
@@ -233,7 +238,16 @@
     dmg = Math.max(1, Math.round(dmg));
     this._raw(target, dmg, 'phys');
     this.log((crit ? '%c' : '') + attacker.name + (opts.label ? ' ' + opts.label + 's' : ' hits') + ' ' + target.name + ' for ' + dmg + (crit ? '! CRIT' : '.'), crit ? 'crit' : null);
+    // melee perks: lifesteal & stagger (player attacker only)
+    if (apf.lifesteal && dmg > 0 && attacker.hp > 0) this.heal(attacker, Math.max(1, Math.round(dmg * apf.lifesteal)), null);
+    if (apf.stagger && target.hp > 0 && this.rng.chance(apf.stagger)) { this.applyStatus(target, 'stun', 1); this.log('%c' + target.name + ' is staggered!', 'block'); }
     this._onDamaged(attacker, target);
+    // riposte: defender counterattacks (player only, no recursion — counter target lacks the flag)
+    if (target.kind === 'player' && target.hp > 0 && target.perkFlags && target.perkFlags.riposte &&
+        attacker.alive && attacker.hp > 0 && !opts._counter && this.rng.chance(target.perkFlags.riposte)) {
+      this.log('%c' + target.name + ' ripostes!', 'good');
+      this.attack(target, attacker, { mult: 0.7, label: 'counter', _counter: true });
+    }
     return dmg;
   };
 
@@ -248,6 +262,7 @@
       TLU.Skills.surgeSkills.forEach(function (id) { if (user.skills[id]) bestSurge = Math.max(bestSurge, user.skills[id].level); });
       power = user.attr.focus * 1.7 + bestSurge * 1.6 + (user._bonus ? user._bonus.dmg * 0.4 : 0);
     } else power = user.atk * 0.9;
+    if (user.kind === 'player' && user.perkFlags && user.perkFlags.artPower) power *= (1 + user.perkFlags.artPower);
     let raw = power * (mult || 1) * this.rng.float(0.88, 1.15);
     const def = defenseOf(target) * 0.4; // magic half-ignores armor
     let dmg = Math.max(1, Math.round(raw * (60 / (60 + Math.max(0, def)))));
@@ -275,13 +290,17 @@
       this.rewards.xp += target.xp || 0;
       const g = target.gold ? this.rng.int(target.gold[0], target.gold[1]) : 0;
       this.rewards.gold += g;
+      // perk: Second Wind — heal on kill
+      const pf = this.player.perkFlags || {};
+      if (attacker && attacker.kind === 'player' && pf.killheal && this.player.hp > 0) this.heal(this.player, Math.round(this.player.maxHp * pf.killheal), null);
+      const mf = pf.magicFind ? 1 : 0;
       // drops
       if (target.drops) {
         const lvl = target.level || this.level;
-        if (target.drops === 'weapon') this.rewards.loot.push(TLU.Items.genEquipment(this.rng, lvl, { kind: 'weapon' }));
+        if (target.drops === 'weapon') this.rewards.loot.push(TLU.Items.genEquipment(this.rng, lvl, { kind: 'weapon', magic: mf }));
         else if (target.drops === 'gem') this.rewards.loot.push(TLU.Items.gem(this.rng.pick(TLU.LORE.gems), 1));
-        else if (target.drops === 'rare') this.rewards.loot.push(TLU.Items.genEquipment(this.rng, lvl + 1, { magic: 1 }));
-        else if (target.drops === 'legendary') this.rewards.loot.push(TLU.Items.genEquipment(this.rng, lvl + 2, { magic: 2 }));
+        else if (target.drops === 'rare') this.rewards.loot.push(TLU.Items.genEquipment(this.rng, lvl + 1, { magic: 1 + mf }));
+        else if (target.drops === 'legendary') this.rewards.loot.push(TLU.Items.genEquipment(this.rng, lvl + 2, { magic: 2 + mf }));
         else if (target.drops === 'artifact') {/* handled by quest */}
       }
       if (this.rng.chance(0.35)) this.rewards.loot.push(TLU.Items.rollLoot(this.rng, target.level || this.level, 0)[0]);

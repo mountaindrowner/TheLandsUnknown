@@ -506,6 +506,7 @@
   };
   Game.prototype.openInventory = function () { if (this.state !== 'play') return; this.overlay = { type: 'inventory', cursor: 0, tab: 'all' }; this.render(); };
   Game.prototype.openCharacter = function () { if (this.state !== 'play') return; this.overlay = { type: 'character', cursor: 0 }; this.render(); };
+  Game.prototype.openPerks = function () { if (this.state !== 'play') return; this.overlay = { type: 'perks', cursor: 0 }; this.render(); };
   Game.prototype.openQuests = function () { if (this.state !== 'play') return; this.overlay = { type: 'quests', cursor: 0 }; this.render(); };
   Game.prototype.openHelp = function () { this.overlay = { type: 'help', back: this.state }; this.render(); };
 

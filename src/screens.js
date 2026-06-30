@@ -46,6 +46,7 @@
       case 'i': case 'I': this.openInventory(); break;
       case 'c': case 'C': this.openCharacter(); break;
       case 'q': case 'Q': this.openQuests(); break;
+      case 'p': case 'P': this.openPerks(); break;
       case 'L': this.openCodex(); break;
       case '?': case '/': this.openHelp(); break;
       case 'Escape': this.overlay = { type: 'system', cursor: 0 }; this.render(); break;
@@ -154,7 +155,7 @@
       html += '<pre class="logo">' + esc(art) + '</pre>';
       html += '<div class="tagline">' + esc(TLU.LORE.subtitle) + '</div>';
       html += UI.renderMenu({ items: g.overlay.items.map(function (it) { return { label: it.label, color: it.color }; }), cursor: g.overlay.cursor });
-      html += '<div class="menu-foot">↑/↓ move · Enter select · A churn-wracked open world of rift & wisp</div>';
+      html += '<div class="menu-foot">↑/↓ move · Enter select · A churn-wracked open world of rift & echo</div>';
       html += '</div>';
       return html;
     },
@@ -241,7 +242,7 @@
       const rows = [
         ['Move', '↑↓←→ / WASD / HJKL (+ YUBN diagonals)'],
         ['Interact / Enter site / Stairs', 'Enter or E'],
-        ['Inventory', 'I'], ['Character & level-up', 'C'], ['Quests', 'Q'],
+        ['Inventory', 'I'], ['Character & level-up', 'C'], ['Quests', 'Q'], ['Talents', 'P'],
         ['Pause / Save / Quit', 'Esc'], ['This help', '?'],
         ['Codex / Journal', 'L'],
         ['—', '—'],
@@ -359,14 +360,50 @@
       html += '<div class="ch-h">Arts Known</div><div class="ab-list">';
       p.knownAbilities.forEach(function (id) { const ab = TLU.Abilities[id]; html += '<span class="ab">' + ab.name + ' <i>(' + (ab.cost || 0) + ')</i></span>'; });
       html += '</div>';
-      html += '<div class="menu-foot">↑/↓ select attribute · Enter spend point · Esc close</div></div>';
+      html += '<div class="menu-foot">↑/↓ select attribute · Enter spend point · [P] perks · Esc close</div></div>';
       return html;
     },
     key: function (g, k) {
       const o = g.overlay, p = g.player;
       const attrs = ['might', 'finesse', 'focus', 'endurance'];
+      if (k === 'p' || k === 'P') { g.openPerks(); return; }
       menuNav(o, k, 4, function (i) { if (P.spendAttr(p, attrs[i])) g.msg('%c' + attrs[i] + ' raised to ' + p.attr[attrs[i]] + '.', 'good'); },
         function () { g.overlay = null; });
+      g.render();
+    },
+  };
+
+  // ---- PERKS (talent choices) ----
+  SCREENS.perks = {
+    render: function (g) {
+      const p = g.player; const pts = p.perkPoints || 0;
+      let html = '<div class="panel"><div class="menu-title">Talents' + (pts > 0 ? ' <span class="alert">(' + pts + ' to choose)</span>' : '') + '</div>';
+      if (pts > 0) {
+        const offer = TLU.Perks.offer(p, pts);
+        if (offer.length) {
+          html += '<div class="menu-sub">Choose a talent:</div>';
+          html += UI.renderMenu({ items: offer.map(function (id) { const pk = TLU.Perks.LIST[id]; return { label: pk.name, hint: pk.desc }; }), cursor: g.overlay.cursor });
+        } else { html += '<div class="cx-empty">No new talents available — raise your skills to unlock more.</div>'; }
+      } else {
+        html += '<div class="menu-sub">Reach the next level to earn a talent.</div>';
+      }
+      const owned = Object.keys(p.perks || {});
+      html += '<div class="ch-h">Talents earned (' + owned.length + ')</div><div class="ab-list">';
+      if (!owned.length) html += '<span class="cx-empty" style="padding:6px">None yet.</span>';
+      owned.forEach(function (id) { const pk = TLU.Perks.LIST[id]; if (pk) html += '<span class="ab" title="' + esc(pk.desc) + '">' + esc(pk.name) + '</span>'; });
+      html += '</div><div class="menu-foot">↑/↓ choose · Enter take · Esc close</div></div>';
+      return html;
+    },
+    key: function (g, k) {
+      const o = g.overlay, p = g.player; const pts = p.perkPoints || 0;
+      if (pts <= 0) { if (k === 'Escape' || k === 'Enter' || k === 'p' || k === 'P') { g.overlay = null; g.render(); } return; }
+      const offer = TLU.Perks.offer(p, pts);
+      if (!offer.length) { if (k === 'Escape') { g.overlay = null; } g.render(); return; }
+      if (o.cursor >= offer.length) o.cursor = offer.length - 1;
+      menuNav(o, k, offer.length, function (i) {
+        const id = offer[i];
+        if (P.addPerk(p, id)) { g.msg('%c★ Talent gained: ' + TLU.Perks.LIST[id].name, 'level'); o.cursor = 0; }
+      }, function () { g.overlay = null; });
       g.render();
     },
   };

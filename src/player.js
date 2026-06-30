@@ -19,6 +19,7 @@
       // core attributes (raised on level-up)
       attr: { might: 5, finesse: 5, focus: 5, endurance: 5 },
       attrPoints: 0,
+      perks: {}, perkPoints: 0,
       hp: 0, maxHp: 0,
       stormlight: 0, maxStormlight: 0,
       food: 100,
@@ -78,6 +79,16 @@
         else bonus[k] = (bonus[k] || 0) + it.bonus[k];
       }
     });
+    // fold in perks (passive bonuses + combat flags)
+    p.perkFlags = {};
+    if (p.perks) {
+      for (const id in p.perks) {
+        const pk = TLU.Perks && TLU.Perks.LIST[id];
+        if (!pk) continue;
+        if (pk.bonus) TLU.Items.mergeBonus(bonus, pk.bonus);
+        if (pk.flags) for (const f in pk.flags) p.perkFlags[f] = pk.flags[f];
+      }
+    }
     p._bonus = bonus; p._element = element;
 
     const wpn = p.equip.weapon;
@@ -104,7 +115,7 @@
     const lightLv = p.skills.light.level, heavyLv = p.skills.heavy.level;
     armorSkillLv = Math.max(lightLv, heavyLv);
     p.defense = Math.round(armorDef + bonus.def + a.endurance * 0.5 + armorSkillLv * 0.6);
-    p.blockChance = Math.min(0.6, blockChance + p.skills.block.level * 0.01);
+    p.blockChance = Math.min(0.7, blockChance + (bonus.block || 0) + p.skills.block.level * 0.01);
 
     // Speed (turn order) & crit
     const wSpeed = wpn ? wpn.speed : 10;
@@ -184,10 +195,11 @@
       p.xp -= p.xpNext;
       p.level++;
       p.attrPoints += 2;
+      p.perkPoints = (p.perkPoints || 0) + 1;
       p.xpNext = TLU.Skills.levelXpFor(p.level);
       recompute(p);
       p.hp = p.maxHp; p.stormlight = p.maxStormlight;
-      if (log) log('%c— You have reached level ' + p.level + '! (2 attribute points) —', 'level');
+      if (log) log('%c— Level ' + p.level + '! +2 attributes, +1 perk. Press [C]/[P]. —', 'level');
     }
   }
 
@@ -196,6 +208,16 @@
     p.attr[attrId]++;
     p.attrPoints--;
     recompute(p);
+    return true;
+  }
+
+  function addPerk(p, id) {
+    if (!TLU.Perks || !TLU.Perks.LIST[id]) return false;
+    if ((p.perkPoints || 0) <= 0 || (p.perks && p.perks[id])) return false;
+    p.perks = p.perks || {};
+    p.perks[id] = 1;
+    p.perkPoints--;
+    recompute(p); refreshAbilities(p);
     return true;
   }
 
@@ -222,7 +244,7 @@
   TLU.Player = {
     newPlayer: newPlayer, recompute: recompute, equip: equip, unequip: unequip,
     refreshAbilities: refreshAbilities, trainSkill: trainSkill, gainXp: gainXp,
-    spendAttr: spendAttr, addItem: addItem, removeItem: removeItem, addGold: addGold,
+    spendAttr: spendAttr, addPerk: addPerk, addItem: addItem, removeItem: removeItem, addGold: addGold,
     fullHeal: fullHeal, SLOTS: SLOTS,
   };
 })(window.TLU = window.TLU || {});

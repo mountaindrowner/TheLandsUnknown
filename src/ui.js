@@ -50,6 +50,7 @@
     html += '<span>◈ Frags <b>' + p.fragments + '/4</b></span>';
     html += '</div>';
     if (p.attrPoints > 0) html += '<div class="alert">★ ' + p.attrPoints + ' attribute points! Press [C]</div>';
+    if (p.perkPoints > 0) html += '<div class="alert">★ ' + p.perkPoints + ' talent' + (p.perkPoints > 1 ? 's' : '') + ' to choose! Press [P]</div>';
     // active quest
     const aq = activeQuestText(game);
     if (aq) html += '<div class="quest"><div class="qhead">✸ ' + esc(aq.name) + '</div><div class="qbody">' + esc(aq.text) + '</div></div>';

@@ -190,7 +190,7 @@
 
   // ambient barks shown occasionally while travelling
   const BARKS = [
-    'A windwisp pirouettes past your head and is gone.',
+    'A wind-echo pirouettes past your head and is gone.',
     'Far off, thunder that is not thunder rolls beneath the horizon.',
     'The rockbuds close their shells as your shadow falls across them.',
     'A flock of skyeels ribbons across the clouds, fleeing something unseen.',
@@ -208,7 +208,7 @@
   // effect(game) runs immediately; events keep the world surprising.
   const EVENTS = [
     { id: 'wisp_gift', weight: 3, text: 'A bright echo alights on your hand and bursts, pouring warmth into you.',
-      effect: function (g) { const p = g.player; const s = Math.min(p.maxStormlight - p.stormlight, 25); p.stormlight += s; g.msg('%cThe wisp\'s gift: +' + s + ' Anima.', 'good'); } },
+      effect: function (g) { const p = g.player; const s = Math.min(p.maxStormlight - p.stormlight, 25); p.stormlight += s; g.msg('%cThe echo\'s gift: +' + s + ' Anima.', 'good'); } },
     { id: 'cairn_loot', weight: 3, text: 'A traveler\'s cairn, undisturbed. Beneath the stones, a parcel wrapped in oilcloth.',
       effect: function (g) { const it = TLU.Items.rollLoot(g.rng, Math.max(1, g.player.level), 0)[0]; if (it) { TLU.Player.addItem(g.player, it); g.msg('%cYou recover ' + it.name + ' from the cairn.', 'good'); } } },
     { id: 'coin_purse', weight: 3, text: 'Half-buried in the mud: a dead reaver, and a purse he no longer needs.',

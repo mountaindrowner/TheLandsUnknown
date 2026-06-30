@@ -64,6 +64,13 @@ function serve() {
   await press('ArrowRight'); await press('ArrowRight'); // switch tabs
   await press('Escape');
   await press('?'); ok('help opens', (await title()).includes('How to Play')); await press('Enter');
+  // perks: grant a talent point, open the screen, choose one
+  await page.evaluate(() => { window.GAME.player.perkPoints = 1; window.GAME.render(); });
+  await press('p'); ok('talents screen opens', (await title()).includes('Talents'));
+  const perksBefore = await page.evaluate(() => Object.keys(window.GAME.player.perks).length);
+  await press('Enter');
+  ok('talent chosen', await page.evaluate(() => Object.keys(window.GAME.player.perks).length) > perksBefore);
+  await press('Escape');
 
   // ----- teleport to a town and exercise services -----
   await page.evaluate(() => {

@@ -22,7 +22,7 @@ vm.createContext(ctx);
 
 const root = path.join(__dirname, '..');
 const files = [
-  'src/rng.js', 'src/data/lore.js', 'src/data/skills.js', 'src/data/items.js',
+  'src/rng.js', 'src/data/lore.js', 'src/data/skills.js', 'src/data/perks.js', 'src/data/items.js',
   'src/data/abilities.js', 'src/data/bestiary.js', 'src/data/quests.js',
   'src/world.js', 'src/dungeon.js', 'src/player.js', 'src/combat.js', 'src/save.js',
 ];
@@ -86,6 +86,18 @@ ok('player leveled up', p.level > lvl0);
 ok('player gained attr points', p.attrPoints > 0);
 TLU.Player.trainSkill(p, 'blades', 5000, noop);
 ok('blades skill rose', p.skills.blades.level > 5);
+
+// ---- perks ----
+ok('level-up grants perk points', p.perkPoints > 0);
+const offered = TLU.Perks.offer(p, p.perkPoints);
+ok('perks are offered', offered.length >= 1 && offered.length <= 3);
+const hp0 = p.maxHp;
+// force a known stat perk and a flag perk
+p.perkPoints = 5;
+ok('addPerk vital works', TLU.Player.addPerk(p, 'vital') && p.maxHp > hp0);
+ok('addPerk sets combat flags', TLU.Player.addPerk(p, 'lifedrinker') && p.perkFlags.lifesteal > 0);
+ok('cannot take same perk twice', !TLU.Player.addPerk(p, 'vital'));
+ok('addPerk channeler raises max anima', (function () { const a = p.maxStormlight; return TLU.Player.addPerk(p, 'channeler') && p.maxStormlight > a; })());
 
 // ---- combat: simulate many normal fights ----
 function stubGame(seed) {

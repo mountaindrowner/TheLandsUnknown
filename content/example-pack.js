@@ -52,7 +52,7 @@
 
     // --- ambient bark + a non-combat travel event ---
     barks: [
-      'A pale ice-wisp drifts past, trailing frost that melts before it lands.',
+      'A pale ice-echo drifts past, trailing frost that melts before it lands.',
     ],
     events: [
       { id: 'frost_spring', weight: 2,
