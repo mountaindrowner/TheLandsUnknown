@@ -34,7 +34,7 @@ const OUT = path.join(ROOT, 'assets', 'design');
   await page.screenshot({ path: path.join(OUT, 'overworld-map.png') });
 
   // one crop of the map canvas per style
-  for (const style of ['chart', 'vellum', 'survey']) {
+  for (const style of ['realm', 'chart', 'vellum', 'survey']) {
     await page.evaluate((s) => { window.TLU.Render.setMapStyle(s); window.GAME.render(); }, style);
     await page.waitForTimeout(120);
     const map = await page.$('#map-wrap');

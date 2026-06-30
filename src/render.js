@@ -50,11 +50,11 @@
   function themed() { return TLU.Theme && TLU.Theme.activeId !== 'storm'; }
 
   // ---- overworld viewport — a hand-drawn world map, in three styles ----
-  const MAP_STYLES = ['chart', 'vellum', 'survey'];
-  const MAP_STYLE_NAMES = { chart: 'Field Chart', vellum: 'Old Vellum', survey: 'Survey Map' };
-  let MAP_STYLE = (function () { try { return localStorage.getItem('tlu_mapstyle') || 'chart'; } catch (e) { return 'chart'; } })();
-  if (MAP_STYLES.indexOf(MAP_STYLE) < 0) MAP_STYLE = 'chart';
-  function setMapStyle(s) { if (MAP_STYLES.indexOf(s) < 0) s = 'chart'; MAP_STYLE = s; try { localStorage.setItem('tlu_mapstyle', s); } catch (e) {} }
+  const MAP_STYLES = ['realm', 'chart', 'vellum', 'survey'];
+  const MAP_STYLE_NAMES = { realm: 'Hand-Drawn Realm', chart: 'Field Chart', vellum: 'Old Vellum', survey: 'Survey Map' };
+  let MAP_STYLE = (function () { try { return localStorage.getItem('tlu_mapstyle') || 'realm'; } catch (e) { return 'realm'; } })();
+  if (MAP_STYLES.indexOf(MAP_STYLE) < 0) MAP_STYLE = 'realm';
+  function setMapStyle(s) { if (MAP_STYLES.indexOf(s) < 0) s = 'realm'; MAP_STYLE = s; try { localStorage.setItem('tlu_mapstyle', s); } catch (e) {} }
   function cycleMapStyle() { setMapStyle(MAP_STYLES[(MAP_STYLES.indexOf(MAP_STYLE) + 1) % MAP_STYLES.length]); return MAP_STYLE; }
 
   // a charted, in-bounds tile or null
@@ -90,7 +90,8 @@
 
     if (MAP_STYLE === 'vellum') drawVellum(env);
     else if (MAP_STYLE === 'survey') drawSurvey(env);
-    else drawChart(env);
+    else if (MAP_STYLE === 'chart') drawChart(env);
+    else drawRealm(env);
 
     if (game.storm && game.storm.active) drawChurn(ctx, disp, game, ox, oy);
     drawHero(ctx, halfC * cell + cell / 2, halfR * cell + cell / 2, cell, ink, TC('#9a3b2a', 'accent'));
@@ -419,6 +420,110 @@
     else if (site.type === 'vault') { ctx.beginPath(); ctx.moveTo(cx, cy - u * 0.2); ctx.lineTo(cx + u * 0.2, cy + u * 0.16); ctx.lineTo(cx - u * 0.2, cy + u * 0.16); ctx.closePath(); ctx.fill(); ctx.stroke(); }
     else if (site.type === 'ruin' || site.type === 'lair') { ctx.beginPath(); ctx.arc(cx, cy, u * 0.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.moveTo(cx - u * 0.12, cy - u * 0.12); ctx.lineTo(cx + u * 0.12, cy + u * 0.12); ctx.moveTo(cx + u * 0.12, cy - u * 0.12); ctx.lineTo(cx - u * 0.12, cy + u * 0.12); ctx.stroke(); }
     else { ctx.beginPath(); ctx.arc(cx, cy, u * 0.16, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); ctx.fillStyle = ink; dot(ctx, cx, cy, u * 0.04); }
+    ctx.restore();
+  }
+
+  // ===== STYLE 0 (default): Hand-Drawn Realm — organic polygon map =====
+  // A jittered shared-corner mesh turns each tile into an irregular polygon.
+  // Edges are drawn ONLY at biome boundaries, so same-terrain cells merge
+  // into organic regions; coastlines become wobbly hand-inked curves.
+  function corner(env, cx, cy) {
+    const w = env.w;
+    if (!w._cj) w._cj = Object.create(null);
+    const key = (cx + 2048) * 100000 + (cy + 2048);
+    let c = w._cj[key]; if (c) return c;
+    const h = (TLU.hashSeed ? TLU.hashSeed(cx + '_' + cy + '_' + (env.game && env.game.seed)) : (((cx * 73856093) ^ (cy * 19349663)) >>> 0));
+    const ang = (h & 4095) / 4095 * Math.PI * 2;
+    const mag = 0.17 + ((h >>> 12) & 255) / 255 * 0.27;   // 0.17 .. 0.44 tile
+    c = { x: cx + Math.cos(ang) * mag, y: cy + Math.sin(ang) * mag };
+    w._cj[key] = c; return c;
+  }
+  function cpx(env, c) { return [(c.x - env.ox) * env.cell, (c.y - env.oy) * env.cell]; }
+  function bgroup(t) {
+    if (!t) return 'none';
+    switch (t.glyph) {
+      case '~': case '.': return 'sea';
+      case '▲': return 'mtn'; case 'n': return 'hill'; case '♣': return 'forest';
+      case '=': return 'plateau'; case 'o': return 'crater'; case '§': return 'churn'; case ':': return 'desert';
+      default: return 'plain';
+    }
+  }
+  function drawEdge(env, a, b, col, lw) {
+    const ctx = env.ctx, A = cpx(env, a), B = cpx(env, b);
+    const mx = (A[0] + B[0]) / 2, my = (A[1] + B[1]) / 2, dx = B[0] - A[0], dy = B[1] - A[1];
+    const len = Math.hypot(dx, dy) || 1, bow = ((((a.x * 53 + a.y * 131) % 1) + 1) % 1 - 0.5) * env.cell * 0.28;
+    ctx.strokeStyle = col; ctx.lineWidth = lw;
+    ctx.beginPath(); ctx.moveTo(A[0], A[1]);
+    ctx.quadraticCurveTo(mx + (-dy / len) * bow, my + (dx / len) * bow, B[0], B[1]); ctx.stroke();
+  }
+
+  function drawRealm(env) {
+    const { ctx, cell, base, ink, ink2 } = env;
+    ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+
+    // PASS 1 — polygon fills (each tile = its 4 jittered corners)
+    for (let sy = 0; sy < env.rows; sy++) for (let sx = 0; sx < env.cols; sx++) {
+      const mx = env.ox + sx, my = env.oy + sy, t = vtile(env, mx, my); if (!t) continue;
+      const TL = cpx(env, corner(env, mx, my)), TR = cpx(env, corner(env, mx + 1, my)),
+        BR = cpx(env, corner(env, mx + 1, my + 1)), BL = cpx(env, corner(env, mx, my + 1));
+      ctx.beginPath(); ctx.moveTo(TL[0], TL[1]); ctx.lineTo(TR[0], TR[1]); ctx.lineTo(BR[0], BR[1]); ctx.lineTo(BL[0], BL[1]); ctx.closePath();
+      ctx.fillStyle = isWater(t) ? mix(base, '#9fb6bd', 0.34) : mix(base, t.color, t.glyph === '§' ? 0.3 : 0.24);
+      ctx.fill();
+    }
+
+    // PASS 2 — edges only at boundaries (so like-terrain merges into regions)
+    const coastCol = ink, borderCol = mix(ink, base, 0.55);
+    for (let sy = 0; sy < env.rows; sy++) for (let sx = 0; sx < env.cols; sx++) {
+      const mx = env.ox + sx, my = env.oy + sy, t = vtile(env, mx, my); if (!t) continue;
+      const g = bgroup(t), sea = g === 'sea';
+      // right edge
+      const rRaw = rtile(env, mx + 1, my), rSeen = vtile(env, mx + 1, my);
+      if (rRaw && ((sea) !== (bgroup(rRaw) === 'sea'))) drawEdge(env, corner(env, mx + 1, my), corner(env, mx + 1, my + 1), coastCol, Math.max(1.3, cell * 0.075));
+      else if (rSeen && !sea && bgroup(rSeen) !== 'sea' && bgroup(rSeen) !== g) drawEdge(env, corner(env, mx + 1, my), corner(env, mx + 1, my + 1), borderCol, Math.max(0.7, cell * 0.03));
+      // down edge
+      const dRaw = rtile(env, mx, my + 1), dSeen = vtile(env, mx, my + 1);
+      if (dRaw && ((sea) !== (bgroup(dRaw) === 'sea'))) drawEdge(env, corner(env, mx, my + 1), corner(env, mx + 1, my + 1), coastCol, Math.max(1.3, cell * 0.075));
+      else if (dSeen && !sea && bgroup(dSeen) !== 'sea' && bgroup(dSeen) !== g) drawEdge(env, corner(env, mx, my + 1), corner(env, mx + 1, my + 1), borderCol, Math.max(0.7, cell * 0.03));
+    }
+
+    // PASS 3 — sea hatch near the coast, for a charted-water feel
+    ctx.strokeStyle = mix(ink, '#3f5a70', 0.5); ctx.lineWidth = Math.max(0.6, cell * 0.03);
+    for (let sy = 0; sy < env.rows; sy++) for (let sx = 0; sx < env.cols; sx++) {
+      const mx = env.ox + sx, my = env.oy + sy, t = vtile(env, mx, my); if (!isWater(t)) continue;
+      let coast = false; for (const d of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nb = rtile(env, mx + d[0], my + d[1]); if (nb && bgroup(nb) !== 'sea') { coast = true; break; } }
+      if (!coast) continue;
+      const cn = corner(env, mx, my), C = cpx(env, { x: cn.x + 0.5, y: cn.y + 0.5 });
+      ctx.globalAlpha = 0.5; ctx.beginPath(); ctx.moveTo(C[0] - cell * 0.3, C[1]); ctx.lineTo(C[0] + cell * 0.3, C[1]); ctx.stroke(); ctx.globalAlpha = 1;
+    }
+
+    // PASS 4 — terrain icons sprinkled across the regions (hash-gated so they
+    // read as hand-placed, not tiled). Reuses the relief icon set.
+    for (let sy = 0; sy < env.rows; sy++) for (let sx = 0; sx < env.cols; sx++) {
+      const mx = env.ox + sx, my = env.oy + sy, t = vtile(env, mx, my); if (!t || isWater(t) || t.site || t.road) continue;
+      if (t.glyph === '"') continue; // leave open plains uncluttered
+      const g = bgroup(t);
+      const gate = (((mx * 92821 + my * 53987) >>> 3) & 7);     // 0..7, deterministic
+      const keep = (g === 'mtn' || g === 'forest') ? gate < 6 : gate < 4; // ranges/woods denser
+      if (!keep) continue;
+      const ct = corner(env, mx, my), cen = cpx(env, { x: ct.x + 0.5, y: ct.y + 0.5 });
+      vellumRelief(ctx, cen[0] - cell / 2, cen[1] - cell / 2, cell, t.glyph, mix(ink, t.color, 0.35), ink);
+    }
+
+    // PASS 5 — roads as an organic dashed trail through cell centres
+    ctx.strokeStyle = mix(ink, '#9a7a48', 0.5); ctx.lineWidth = Math.max(1.4, cell * 0.1); ctx.setLineDash([cell * 0.32, cell * 0.26]);
+    for (let sy = 0; sy < env.rows; sy++) for (let sx = 0; sx < env.cols; sx++) {
+      const mx = env.ox + sx, my = env.oy + sy, t = vtile(env, mx, my); if (!t || !t.road || t.site) continue;
+      const ct = corner(env, mx, my), C = cpx(env, { x: ct.x + 0.5, y: ct.y + 0.5 });
+      for (const d of [[1, 0], [0, 1]]) { const nb = vtile(env, mx + d[0], my + d[1]); if (nb && nb.road) { const cn2 = corner(env, mx + d[0], my + d[1]), N = cpx(env, { x: cn2.x + 0.5, y: cn2.y + 0.5 }); ctx.beginPath(); ctx.moveTo(C[0], C[1]); ctx.lineTo(N[0], N[1]); ctx.stroke(); } }
+    }
+    ctx.setLineDash([]);
+
+    // PASS 6 — pins at cell centres
+    for (let sy = 0; sy < env.rows; sy++) for (let sx = 0; sx < env.cols; sx++) {
+      const mx = env.ox + sx, my = env.oy + sy, t = vtile(env, mx, my); if (!t || !t.site) continue;
+      const ct = corner(env, mx, my), cen = cpx(env, { x: ct.x + 0.5, y: ct.y + 0.5 });
+      drawPin(ctx, cen[0] - cell / 2, cen[1] - cell / 2, cell, t.site, base, ink);
+    }
     ctx.restore();
   }
 
