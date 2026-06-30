@@ -72,9 +72,12 @@
       [cx - 78, 200], [cx - 70, 176], [cx - 40, 162], [cx - 20, 156],
       [cx, 153], [cx + 20, 156], [cx + 40, 162], [cx + 70, 176], [cx + 78, 200],
     ], { close: true, fill: PAL.paper2, w: lw, amt: 1.1 });
-    // collar fold lines
-    body += A.stroke(rng, [[cx - 30, 166], [cx - 10, 178], [cx, 182]], { w: 1.2, amt: 0.6, stroke: PAL.ink2 });
-    body += A.stroke(rng, [[cx + 30, 166], [cx + 10, 178], [cx, 182]], { w: 1.2, amt: 0.6, stroke: PAL.ink2 });
+    // garment: a rounded collar across the chest + a center seam, so the
+    // bust reads as clothed shoulders rather than a blank wedge
+    body += A.stroke(rng, [[cx - 34, 170], [cx - 14, 182], [cx, 186], [cx + 14, 182], [cx + 34, 170]], { w: 1.4, amt: 0.5, stroke: PAL.ink2 });
+    body += A.stroke(rng, [[cx, 186], [cx + 1, 200]], { w: 1.1, amt: 0.4, stroke: PAL.ink2, op: 0.65 });
+    body += A.stroke(rng, [[cx - 30, 166], [cx - 12, 178], [cx, 182]], { w: 1.1, amt: 0.5, stroke: PAL.ink2, op: 0.8 });
+    body += A.stroke(rng, [[cx + 30, 166], [cx + 12, 178], [cx, 182]], { w: 1.1, amt: 0.5, stroke: PAL.ink2, op: 0.8 });
     // neck
     body += A.stroke(rng, [[cx - 14, chinY - 6], [cx - 13, 160]], { w: lw, amt: 0.5 });
     body += A.stroke(rng, [[cx + 14, chinY - 6], [cx + 13, 160]], { w: lw, amt: 0.5 });
@@ -159,6 +162,8 @@
     else mPts = [[cx - mw, my + (curve < 0 ? 1 : 0)], [cx, my + curve], [cx + mw, my + (curve < 0 ? 1 : 0)]];
     body += A.stroke(rng, mPts, { w: 1.8, amt: 0.3 });
     if (t.mouth !== 'set') body += A.stroke(rng, [[cx - mw + 2, my - 3], [cx, my - 2], [cx + mw - 2, my - 3]], { w: 0.9, amt: 0.2, stroke: PAL.ink2 });
+    // a soft lower-lip line gives the mouth volume (skip under a beard)
+    if (t.fhair === 'none' || t.fhair === 'stubble') body += A.stroke(rng, [[cx - mw + 3, my + 3], [cx, my + 4.6], [cx + mw - 3, my + 3]], { w: 0.8, amt: 0.2, stroke: PAL.ink2, op: 0.5 });
 
     // ---- facial hair ----
     if (t.fhair === 'stubble') body += A.stipple(rng, cx, my + 8, jaw - 4, 14, 90, { op: 0.5, r: 0.55 });

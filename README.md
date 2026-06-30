@@ -160,9 +160,14 @@ no bitmaps, no network, no build step, just geometry composed from a number:
   combined combinatorially into an essentially infinite, internally-consistent cast. The same
   seed always draws the same face, so a hero keeps one face across saves and worlds, and a
   dead hero's **echo** returns wearing the same hollow cowl.
-- **Specimen plates** (`beast.js`) — the Bestiary plates each creature as an inked profile on
-  a hatched groundline, its form assembled from the creature's tags (rift / stone / beast /
-  reaver / swarm) and seeded by its id, so a Rockmite is always *that* Rockmite.
+- **Specimen plates** (`beast.js`) — the same method, a different skeleton: each creature is a
+  parametric **body plan** (posture, spine, head mass) with orthogonal trait axes — head type,
+  eye arrangement, crest, hide, legs, tail, jaw — rolled independently and drawn with the same
+  curves + inked jitter + hatching. Tags (rift / stone / reaver / swarm) *bias* the axes, so a
+  family resemblance emerges while every individual varies; seeded by its id.
+- **The doctrine** — the reasoning behind why this reads as *designed*, not generated, is
+  written down in [`design/ART_DOCTRINE.md`](design/ART_DOCTRINE.md), as a reusable spec for
+  any future generated subject.
 - **A generated voice** (`lexicon.js`) — each face comes with an **epithet** ("the Ashbound",
   "Warden of the Last Gate") and a two-line biographer's note whose physical details are
   pulled from the portrait's own traits — so the words describe the picture: *"a pale scar
