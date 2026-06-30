@@ -32,11 +32,24 @@
       '<span class="barlabel">' + Math.round(cur) + ' / ' + Math.round(max) + '</span></div>';
   }
 
+  // ---- generative hero portrait (cached by seed+level; folio frontispiece) ----
+  const ORDER_ROLE = { windrunner: 'skirmisher', stoneward: 'warden', edgedancer: 'skirmisher', truthwatcher: 'channeler', dustbringer: 'channeler' };
+  const _portCache = {};
+  function heroPortrait(p) {
+    if (!TLU.Art || !TLU.Art.portrait) return '';
+    const key = (p.artSeed || p.name) + '|' + p.level;
+    if (_portCache[key]) return _portCache[key];
+    const svg = TLU.Art.portrait(p.artSeed || p.name, { role: ORDER_ROLE[p.orderId] || 'explorer', accent: '#9a3b2a', fem: p.fem, age: 'prime' });
+    _portCache[key] = svg;
+    return svg;
+  }
+
   // ---- HUD sidebar ----
   function renderHUD(game) {
     const p = game.player; if (!p) return;
     const el = $('stats'); if (!el) return;
     let html = '';
+    html += '<div class="hud-portrait">' + heroPortrait(p) + '</div>';
     html += '<div class="pname">' + esc(p.name) + '</div>';
     html += '<div class="psub" style="color:' + p.order.color + '">' + p.order.glyph + ' ' + esc(p.order.name) + ' · Lv ' + p.level + '</div>';
     html += '<div class="statrow">HP</div>' + bar(p.hp, p.maxHp, '#c0392b');

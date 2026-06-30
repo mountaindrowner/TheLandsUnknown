@@ -142,6 +142,35 @@ The game **auto-saves** as you travel and on major events.
 
 ---
 
+## The Folio look — a generative inked cast
+
+The whole game wears **Folio**: paper, ink, oxblood, and a serif hand, styled like a
+travelling naturalist's field journal (in the lineage of *Return of the Obra Dinn* and
+antique cartography). It's the default theme; press **T** to cycle the others.
+
+What makes it unusual is that the cast is **drawn by the machine, not by hand.** A small
+deterministic engine (`src/art/`) expands a seed into ink line-art rendered as inline SVG —
+no bitmaps, no network, no build step, just geometry composed from a number:
+
+- **Portraits** (`portrait.js`) — every companion, townsfolk, echo and your own hero get a
+  unique engraved bust drawn from a *deep trait model*: skull shape, brow, eyes, gaze, nose,
+  mouth, hair & headwear, facial hair, age-lines, scars, war-paint, earrings, throat-gems —
+  combined combinatorially into an essentially infinite, internally-consistent cast. The same
+  seed always draws the same face, so a hero keeps one face across saves and worlds, and a
+  dead hero's **echo** returns wearing the same hollow cowl.
+- **Specimen plates** (`beast.js`) — the Bestiary plates each creature as an inked profile on
+  a hatched groundline, its form assembled from the creature's tags (void / stone / beast /
+  reaver / swarm) and seeded by its id, so a Rockmite is always *that* Rockmite.
+- **A generated voice** (`lexicon.js`) — each face comes with an **epithet** ("the Ashbound",
+  "Warden of the Last Gate") and a two-line biographer's note whose physical details are
+  pulled from the portrait's own traits — so the words describe the picture: *"a pale scar
+  splits one brow; keeps a charcoal tally of the dead on one bracer."*
+
+Open the **Character** sheet, **Recruit** at a hold, talk to **townsfolk**, meet an **echo**,
+or fill the **Codex** bestiary to see it. A standalone gallery lives at `design/faces.html`.
+
+---
+
 ## What's in it
 
 - **Procedural open world.** A value-noise continent with nine biomes, holds (towns),
@@ -192,6 +221,11 @@ src/
     dialogue.js       # NPC archetypes, rumors, codex, barks, events, landmarks
     perks.js          # level-up talent pool
     companions.js     # recruitable follower roles
+  art/                # the Folio generative ink-illustration engine
+    ink.js            # deterministic SVG toolkit (seeded jitter strokes, hatching, stipple)
+    portrait.js       # generative inked bust portraits from a seed + deep trait model
+    beast.js          # generative naturalist specimen plates for the bestiary
+    lexicon.js        # generative epithets + field-journal biographies
   content/
     registry.js       # content-pack loader/merger (the modding framework)
   world.js            # overworld generation (biomes, sites, roads)

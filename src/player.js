@@ -15,6 +15,9 @@
       name: opts.name || 'Wanderer',
       orderId: opts.order || 'windrunner',
       order: order,
+      // stable seed for the generative ink portrait — outlives saves
+      artSeed: (opts.name || 'Wanderer') + '|' + (opts.order || 'windrunner') + '|' + (opts.seed || ''),
+      fem: new TLU.RNG('fem:' + (opts.name || 'Wanderer') + (opts.seed || '')).chance(0.5),
       level: 1, xp: 0, xpNext: TLU.Skills.levelXpFor(1),
       // core attributes (raised on level-up)
       attr: { might: 5, finesse: 5, focus: 5, endurance: 5 },

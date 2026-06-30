@@ -141,6 +141,34 @@
     return '<span style="color:' + I.rarityColor(it.rarity) + '">' + n + '</span>';
   }
 
+  // ---- generative ink-portrait helpers (Folio) -------------------------
+  const ORDER_ROLE = { windrunner: 'skirmisher', stoneward: 'warden', edgedancer: 'skirmisher', truthwatcher: 'channeler', dustbringer: 'channeler' };
+  const ARCH_ROLE = { guard: 'warden', warden_scholar: 'channeler', drillmaster: 'warrior', priest: 'channeler', smith: 'warrior', merchant: 'folk', innkeeper: 'folk', wanderer: 'explorer', urchin: 'folk' };
+
+  function art() { return TLU.Art; }
+  // a portrait <svg> for any actor; opts forwarded to TLU.Art.portrait
+  function portraitSVG(seed, opts) {
+    if (!TLU.Art || !TLU.Art.portrait) return '';
+    return TLU.Art.portrait(seed, opts || {});
+  }
+  function playerPortrait(p, opts) {
+    return portraitSVG(p.artSeed || p.name, Object.assign({
+      role: ORDER_ROLE[p.orderId] || 'explorer', accent: '#9a3b2a', fem: p.fem, age: 'prime',
+    }, opts || {}));
+  }
+  function companionPortrait(c, opts) {
+    const role = TLU.Art.PORTRAIT_ROLES[c.role] ? c.role : 'folk';
+    return portraitSVG('ally:' + c.name + ':' + c.role + ':' + c.level, Object.assign({ role: role }, opts || {}));
+  }
+  function npcPortrait(npc, opts) {
+    return portraitSVG('npc:' + npc.name + ':' + npc.archKey, Object.assign({ role: ARCH_ROLE[npc.archKey] || 'folk', accent: npc.arch.color }, opts || {}));
+  }
+  // give a companion a generated face's traits so its bio matches the drawing
+  function companionTraits(c) {
+    const role = TLU.Art.PORTRAIT_ROLES[c.role] ? c.role : 'folk';
+    return TLU.Art.traits('ally:' + c.name + ':' + c.role + ':' + c.level, { role: role });
+  }
+
   // ============================================================
   // SCREENS
   // ============================================================
@@ -344,7 +372,13 @@
     render: function (g) {
       const p = g.player;
       const attrs = ['might', 'finesse', 'focus', 'endurance'];
-      let html = '<div class="panel"><div class="menu-title">' + esc(p.name) + ' · ' + p.order.glyph + ' ' + p.order.name + ' · Level ' + p.level + '</div>';
+      const epithet = (TLU.Art && TLU.Art.epithet) ? TLU.Art.epithet(p.artSeed || p.name) : '';
+      let html = '<div class="panel"><div class="menu-title">' + esc(p.name) + (epithet ? ' ' + esc(epithet) : '') + '</div>';
+      html += '<div class="folio-figrow"><div class="pf pf-md">' + playerPortrait(p, { caption: 'Lv ' + p.level }) + '</div><div class="col">';
+      html += '<div class="fig-sub">' + p.order.glyph + ' ' + esc(p.order.name) + ' · Level ' + p.level + '</div>';
+      html += '<div class="fig-bio">' + esc(p.order.blurb || '') + '</div>';
+      html += '<div class="ch-d" style="margin-top:6px">HP ' + p.maxHp + ' · Anima ' + p.maxStormlight + ' · Atk ' + p.attack + ' · Def ' + p.defense + '</div>';
+      html += '</div></div>';
       html += '<div class="char-grid"><div>';
       html += '<div class="ch-h">Attributes' + (p.attrPoints > 0 ? ' <span class="alert">(' + p.attrPoints + ' to spend — Enter)</span>' : '') + '</div>';
       attrs.forEach(function (a, i) {
@@ -723,15 +757,28 @@
     },
     renderRecruit: function (g) {
       const o = g.overlay, p = g.player, site = o.site;
+      SCREENS.town.ensureRecruits(g);
       const offer = site._recruits || [];
-      const items = offer.map(function (c) {
-        return { label: c.glyph + ' ' + esc(c.name) + ' the ' + c.roleName, hint: 'Lv ' + c.level + ' · HP ' + c.maxHp + ' · ' + c.cost + 'g', color: c.color };
-      });
-      if (!items.length) items.push({ label: '(none available today)', disabled: true });
       let html = '<div class="panel"><div class="menu-title">⚑ Recruit · ' + p.gold + 'g · Party ' + (p.party ? p.party.length : 0) + '/2</div>' +
-        '<div class="town-desc">Sellswords and the Churn-touched gather in the tavern, looking for a Kindled to follow.</div>' +
-        UI.renderMenu({ items: items, cursor: o.cursor }) +
-        '<div class="menu-foot">Enter: hire · Esc: back</div></div>';
+        '<div class="town-desc">Sellswords and the Churn-touched gather in the tavern, looking for a Kindled to follow.</div>';
+      if (!offer.length) {
+        html += '<div class="cx-empty">None will follow you today. Return another day.</div>';
+      } else {
+        html += '<div class="recruit-list">';
+        offer.forEach(function (c, i) {
+          const tr = companionTraits(c);
+          const ep = TLU.Art.epithet('ally:' + c.name + ':' + c.role);
+          const bio = TLU.Art.bio('ally:' + c.name + ':' + c.role + ':' + c.level, { role: tr.role, traits: tr, fem: tr.fem });
+          html += '<div class="rec-card' + (i === o.cursor ? ' sel' : '') + '" data-mi="' + i + '">' +
+            companionPortrait(c) +
+            '<div class="rec-meta"><div class="fig-name" style="color:' + c.color + '">' + esc(c.name) + ' ' + esc(ep) + '</div>' +
+            '<div class="fig-sub">' + esc(c.roleName) + ' · Lv ' + c.level + ' · HP ' + c.maxHp + ' · Atk ' + c.atk + '</div>' +
+            '<div class="fig-bio">' + esc(bio) + '</div>' +
+            '<div class="ch-d" style="color:#9a3b2a;margin-top:4px">' + c.cost + ' gold</div></div></div>';
+        });
+        html += '</div>';
+      }
+      html += '<div class="menu-foot">↑/↓ choose · Enter hire · Esc back</div></div>';
       return html;
     },
     keyRecruit: function (g, k) {
@@ -912,7 +959,14 @@
         const ids = Object.keys(p.codex.bestiary).filter(function (id) { return p.codex.bestiary[id]; });
         body = ids.length ? ids.map(function (id) {
           const b = TLU.Bestiary.byId(id);
-          return '<div class="cx-entry"><div class="cx-h" style="color:' + (b.color || '#fff') + '">' + esc(b.name) + '</div><div class="cx-b">' + esc(D.BESTIARY_LORE[id] || '') + '</div></div>';
+          const plate = (TLU.Art && TLU.Art.beastPlate) ? TLU.Art.beastPlate(id, {
+            tags: b.tags || [], faction: b.faction, big: !!b.boss || (b.lvl || 0) >= 9, lvl: b.lvl, accent: '#9a3b2a',
+          }) : '';
+          const note = (TLU.Art && TLU.Art.beastNote) ? TLU.Art.beastNote(id) : '';
+          return '<div class="cx-entry plate-card"><div class="tlu-plate-wrap">' + plate + '</div>' +
+            '<div><div class="cx-h" style="color:#9a3b2a">' + esc(b.name) + ' <span class="fig-sub">· Lv ' + (b.lvl || '?') + '</span></div>' +
+            '<div class="cx-b">' + esc(D.BESTIARY_LORE[id] || '') + '</div>' +
+            '<div class="cx-b" style="font-style:italic;margin-top:4px">' + esc(note) + '</div></div></div>';
         }).join('') : '<div class="cx-empty">Slay the creatures of Aurenmark to fill these pages.</div>';
       } else if (o.tab === 3) {
         const keys = Object.keys(p.codex.places).filter(function (t) { return p.codex.places[t]; });
@@ -970,7 +1024,8 @@
       const o = g.overlay, npc = o.npc;
       const topics = SCREENS.npc.topics(npc);
       let html = '<div class="panel dialog"><div class="menu-title" style="color:' + npc.arch.color + '">' + npc.arch.glyph + ' ' + esc(npc.name) + ' <span class="npc-role">— ' + npc.arch.role + '</span></div>';
-      html += '<div class="dlg-text">' + esc(o.line) + '</div>';
+      html += '<div class="folio-figrow"><div class="pf pf-sm">' + npcPortrait(npc) + '</div><div class="col">';
+      html += '<div class="dlg-text">' + esc(o.line) + '</div></div></div>';
       html += UI.renderMenu({ items: topics.map(function (t) { return { label: t[0] }; }), cursor: o.cursor });
       html += '<div class="menu-foot">Enter: choose · Esc: leave</div></div>';
       return html;
@@ -1032,11 +1087,13 @@
       const tale = a.won
         ? esc(a.name) + ', a ' + esc(a.orderName) + ' of legend, reached Level ' + a.level + ' and ' + esc(a.cause) + '.'
         : esc(a.name) + ', a ' + esc(a.orderName) + ', reached Level ' + a.level + ' before they ' + esc(a.cause) + ' on day ' + a.day + '.';
-      return '<div class="panel dialog echo"><div class="menu-title" style="color:#b9a7ff">φ An Echo Stirs — ' + esc(a.name) + '</div>' +
+      const ghost = portraitSVG('echo:' + a.name + ':' + a.orderName + ':' + a.level, { kind: 'echo', accent: '#7a6a9c' });
+      return '<div class="panel dialog echo"><div class="menu-title" style="color:#9a3b2a">φ An Echo Stirs — ' + esc(a.name) + '</div>' +
+        '<div class="folio-figrow"><div class="pf pf-md">' + ghost + '</div><div class="col">' +
         '<div class="dlg-text">A figure of pale light takes shape from the drifting dead. ' + tale +
         (a.epitaph ? '<br><br><i>“' + esc(a.epitaph) + '”</i>' : '') +
         '<br><br>The echo presses a fragment of its legacy into your hands.</div>' +
-        '<div class="lm-reward">✦ You receive: ' + esc(g.overlay.boon) + '</div>' +
+        '<div class="lm-reward">✦ You receive: ' + esc(g.overlay.boon) + '</div></div></div>' +
         '<div class="menu-foot">Enter to continue</div></div>';
     },
     key: function (g, k) { if (k === 'Enter' || k === ' ' || k === 'Escape') { g.overlay = null; g.render(); } },

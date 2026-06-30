@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>The Lands Unknown — Generative Ink Cast</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=EB+Garamond:ital@0;1&display=swap" />
+<style>
+  body { margin:0; background:#e2d6b9; color:#2a2620; font-family:'EB Garamond',Georgia,serif;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E"); }
+  h1 { font-variant:small-caps; letter-spacing:1px; color:#9a3b2a; margin:0 0 4px; }
+  .sub { color:#74694e; font-style:italic; margin:0 0 18px; }
+  .wrap { padding:26px 30px; }
+  h2 { font-variant:small-caps; color:#9a3b2a; border-bottom:1px solid #c4b894; padding-bottom:4px; margin:26px 0 14px; }
+  .grid { display:flex; flex-wrap:wrap; gap:18px; }
+  .card { width:160px; }
+  .card svg { width:160px; height:auto; filter:drop-shadow(0 2px 5px rgba(60,50,30,.28)); }
+  .nm { font-variant:small-caps; color:#9a3b2a; font-size:15px; text-align:center; margin-top:2px; }
+  .bio { color:#5a5240; font-size:12px; line-height:1.4; text-align:center; }
+  .plates { display:flex; flex-wrap:wrap; gap:18px; }
+  .plate { width:240px; }
+  .plate svg { width:240px; height:auto; filter:drop-shadow(0 2px 5px rgba(60,50,30,.28)); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>The Lands Unknown — The Generative Cast</h1>
+  <p class="sub">Every face, beast, and biography below was drawn from a number. No two are hand-made; none repeat.</p>
+  <div id="root"></div>
+</div>
+
+<script src="../src/rng.js"></script>
+<script src="../src/art/ink.js"></script>
+<script src="../src/art/portrait.js"></script>
+<script src="../src/art/beast.js"></script>
+<script src="../src/art/lexicon.js"></script>
+<script>
+  const A = TLU.Art;
+  const root = document.getElementById('root');
+  const roles = ['warrior','warden','skirmisher','channeler','explorer','folk'];
+  const ages = ['young','prime','weathered','old'];
+
+  function section(title){ const h=document.createElement('h2'); h.textContent=title; root.appendChild(h); const g=document.createElement('div'); g.className='grid'; root.appendChild(g); return g; }
+
+  // 1) a broad cast — many seeds, varied roles/ages
+  let g = section('Companions & folk — 18 strangers');
+  for (let i=0;i<18;i++){
+    const seed = 'cast'+i+'x';
+    const role = roles[i%roles.length];
+    const t = A.traits(seed, { role });
+    const svg = A.portrait(seed, { traits:t, role, accent:'#9a3b2a', caption:'Lv '+(1+i) });
+    const ep = A.epithet(seed);
+    const bio = A.bio(seed,{role,traits:t,fem:t.fem});
+    const c=document.createElement('div'); c.className='card';
+    c.innerHTML = svg + '<div class="nm">'+ep+'</div><div class="bio">'+bio+'</div>';
+    g.appendChild(c);
+  }
+
+  // 2) the same seed across roles — show the trait model's range
+  g = section('One seed, every calling');
+  roles.forEach(function(role){
+    const seed = 'same-soul';
+    const t = A.traits(seed,{role});
+    const svg = A.portrait(seed,{traits:t, role, accent:'#9a3b2a', caption:role});
+    const c=document.createElement('div'); c.className='card'; c.innerHTML=svg;
+    g.appendChild(c);
+  });
+
+  // 3) echoes (the dead returning)
+  g = section('Echoes — the dead, returning');
+  for (let i=0;i<6;i++){
+    const svg = A.portrait('echo'+i, { kind:'echo', accent:'#7a6a9c', caption:'an echo' });
+    const c=document.createElement('div'); c.className='card'; c.innerHTML=svg;
+    g.appendChild(c);
+  }
+
+  // 4) specimen plates
+  const h=document.createElement('h2'); h.textContent='Bestiary — specimen plates'; root.appendChild(h);
+  const pg=document.createElement('div'); pg.className='plates'; root.appendChild(pg);
+  const beasts = [
+    ['cremling',{lvl:1}],['wild_axehound',{}],['chull',{tags:['stone']}],
+    ['reaver_raider',{faction:'reavers'}],['midnight_essence',{tags:['void']}],
+    ['thunderclast',{tags:['stone','void'],big:true}],['voidechoes_knight',{tags:['void'],big:true}],
+    ['churnheart',{tags:['void'],big:true}],
+  ];
+  beasts.forEach(function(b){
+    const svg = A.beastPlate(b[0], Object.assign({accent:'#9a3b2a', caption:b[0]}, b[1]));
+    const c=document.createElement('div'); c.className='plate'; c.innerHTML=svg;
+    pg.appendChild(c);
+  });
+</script>
+</body>
+</html>

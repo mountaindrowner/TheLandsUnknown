@@ -71,7 +71,7 @@
     if (b) { game.key(b.getAttribute('data-key')); return true; }
     const ov = document.getElementById('overlay');
     if (!ov || !ov.classList.contains('show')) return false;
-    const mi = target.closest('.menu-item[data-mi]');
+    const mi = target.closest('[data-mi]');
     if (mi && !mi.classList.contains('disabled')) { game.touchMenuSelect(parseInt(mi.getAttribute('data-mi'), 10)); return true; }
     const tab = target.closest('.cx-tab[data-cxtab]');
     if (tab) { game.touchCodexTab(parseInt(tab.getAttribute('data-cxtab'), 10)); return true; }

@@ -331,3 +331,70 @@ body.theme-bauhaus .log-note, body.theme-bauhaus .log-cast, body.theme-bauhaus .
 body.theme-bauhaus .bar { background:#222; border-color:#ededed; }
 body.theme-bauhaus .barlabel { color:#0b0b0b; text-shadow:none; }
 body.theme-bauhaus .menu-title { letter-spacing:2px; text-transform:uppercase; }
+
+/* ============================================================
+ * FOLIO — the inked field-journal system (DEFAULT)
+ * Paper, ink, oxblood, and a serif hand. The whole HUD reads as a
+ * traveller's journal; generative portraits & plates live inside it.
+ * ============================================================ */
+body.theme-folio {
+  --bg:#e2d6b9; --panel:#f1e9d5; --panel2:#f3ecd9; --border:#c4b894;
+  --ink:#2a2620; --dim:#74694e; --gold:#9a3b2a; --storm:#3f6173; --good:#5d6b3a; --bad:#9a3b2a;
+  font-family:'EB Garamond', Georgia, 'Times New Roman', serif; font-size:15.5px;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E"),
+    radial-gradient(120% 80% at 50% -10%, #efe7d0, #e2d6b9 80%);
+  color:#2a2620;
+}
+body.theme-folio #map-wrap { border-color:#c4b894; box-shadow:0 4px 20px rgba(60,50,30,.22), inset 0 0 50px rgba(120,100,60,.06); }
+body.theme-folio #map, body.theme-folio #minimap { background:#f3ecd9; }
+body.theme-folio #stats, body.theme-folio #controls, body.theme-folio .log { background:#f1e9d5; border-color:#c4b894; border-radius:8px; }
+body.theme-folio #overlay.show { background:rgba(52,43,28,.52); backdrop-filter:blur(2px) sepia(.12); }
+body.theme-folio .panel, body.theme-folio .title-screen {
+  background:#f3ecd9; border:1px solid #c4b894; border-radius:10px; color:#2a2620;
+  box-shadow:0 10px 36px rgba(60,50,30,.28), inset 0 0 0 4px #f3ecd9, inset 0 0 0 5px #d8caa4;
+}
+body.theme-folio .menu-title, body.theme-folio .end-title { color:#9a3b2a; font-variant:small-caps; letter-spacing:.6px; font-size:19px; border-color:#d8caa4; text-shadow:none; }
+body.theme-folio .ch-h, body.theme-folio .qc-h, body.theme-folio .cx-h, body.theme-folio .ctrl-h, body.theme-folio .qhead { color:#9a3b2a; font-variant:small-caps; letter-spacing:.4px; border-color:#d8caa4; }
+body.theme-folio .menu-item.sel, body.theme-folio .ch-attr.sel { background:rgba(154,59,42,.13); }
+body.theme-folio .mi-cursor, body.theme-folio .alert { color:#9a3b2a; }
+body.theme-folio .bar { background:#e2d6b9; border-color:#c4b894; }
+body.theme-folio .barlabel { color:#2a2620; text-shadow:none; }
+body.theme-folio .gridstats b, body.theme-folio .skl { color:#2a2620; }
+body.theme-folio .pname { color:#9a3b2a; }
+body.theme-folio .logo { color:#2a2620; text-shadow:none; font-size:14px; }
+body.theme-folio .tagline { color:#9a3b2a; letter-spacing:3px; font-variant:small-caps; }
+body.theme-folio .ab, body.theme-folio .qcard { background:#efe7d0; border-color:#c4b894; }
+body.theme-folio .ab i { color:#3f6173; }
+body.theme-folio .cx-entry { border-left-color:#c4b894; }
+body.theme-folio .cx-tab { border-color:#c4b894; color:#74694e; }
+body.theme-folio .cx-tab.on { background:#9a3b2a; border-color:#9a3b2a; color:#f3ecd9; font-weight:normal; }
+body.theme-folio .menu-foot { border-color:#d8caa4; color:#74694e; }
+body.theme-folio .cg-name { color:#2a2620; font-variant:small-caps; letter-spacing:1px; }
+body.theme-folio .cg-blurb, body.theme-folio .cg-summary { color:#74694e; }
+body.theme-folio .logline { color:#74694e; }
+body.theme-folio .log-head, body.theme-folio .log-level, body.theme-folio .log-good, body.theme-folio .log-skill { color:#5d6b3a; }
+body.theme-folio .log-bad, body.theme-folio .log-kill, body.theme-folio .log-boss, body.theme-folio .log-storm { color:#9a3b2a; }
+body.theme-folio .log-crit { color:#b08a3c; font-weight:bold; }
+body.theme-folio .log-note, body.theme-folio .log-cast, body.theme-folio .log-ecast, body.theme-folio .log-block, body.theme-folio .log-dot { color:#3f6173; }
+body.theme-folio .annals-code { background:#efe7d0; }
+
+/* ---- generative ink art: portraits & specimen plates (always on) ---- */
+.folio-figrow { display:flex; gap:16px; align-items:flex-start; margin-bottom:6px; }
+.folio-figrow > .col { flex:1; min-width:0; }
+.tlu-portrait, .tlu-plate { display:block; height:auto; filter:drop-shadow(0 2px 5px rgba(60,50,30,.28)); }
+.pf { flex:none; }
+.pf-lg .tlu-portrait { width:152px; } .pf-md .tlu-portrait { width:108px; } .pf-sm .tlu-portrait { width:64px; }
+.pf .tlu-portrait { width:108px; }
+.hud-portrait { width:96px; margin:0 auto 4px; }
+.hud-portrait .tlu-portrait { width:96px; }
+.fig-name { font-variant:small-caps; letter-spacing:.5px; color:#9a3b2a; font-size:16px; }
+.fig-sub { color:#74694e; font-size:13px; font-style:italic; }
+.fig-bio { color:#5a5240; font-size:13.5px; line-height:1.5; margin-top:6px; }
+.plate-card { display:flex; gap:18px; align-items:center; }
+.plate-card .tlu-plate { width:230px; flex:none; }
+.recruit-list { display:flex; flex-direction:column; gap:14px; }
+.rec-card { display:flex; gap:14px; align-items:center; padding:8px; border:1px solid #c4b894; border-radius:8px; background:#efe7d0; cursor:pointer; }
+.rec-card.sel { background:rgba(154,59,42,.12); border-color:#9a3b2a; }
+.rec-card .tlu-portrait { width:76px; }
+.rec-meta { flex:1; min-width:0; }

@@ -31,7 +31,14 @@
   };
 
   const THEMES = {
-    storm: { id: 'storm', name: 'Stormglass (default)', evokes: 'the original storm-violet HUD', cls: '' },
+    folio: {
+      id: 'folio', name: 'Folio (default)', evokes: "an explorer's inked field journal — Obra Dinn / antique cartography",
+      cls: 'theme-folio', mapBg: '#f3ecd9',
+      ramp: ['#241f18', '#3c3528', '#574d3a', '#736449', '#8c7c58', '#a3936a'], // ink (low-lum src) -> faint sepia
+      roles: { player: '#9a3b2a', site: '#9a3b2a', accent: '#9a3b2a', enemy: '#7a4a2a',
+               hp: '#9a3b2a', anima: '#3f6173', xp: '#6b7a4a', boss: '#7a1f14' },
+    },
+    storm: { id: 'storm', name: 'Stormglass', evokes: 'the original storm-violet HUD', cls: '' },
 
     phosphor: {
       id: 'phosphor', name: 'Phosphor', evokes: 'a vintage amber CRT terminal (Pip-Boy / DEC VT)',
@@ -56,7 +63,7 @@
     },
   };
 
-  let activeId = 'storm';
+  let activeId = 'folio';
 
   function active() { return THEMES[activeId] || THEMES.storm; }
 
@@ -77,15 +84,15 @@
     if (!THEMES[id]) id = 'storm';
     activeId = id;
     if (typeof document !== 'undefined' && document.body) {
-      document.body.classList.remove('theme-phosphor', 'theme-almanac', 'theme-bauhaus');
+      document.body.classList.remove('theme-folio', 'theme-phosphor', 'theme-almanac', 'theme-bauhaus');
       const c = THEMES[id].cls; if (c) document.body.classList.add(c);
     }
     try { localStorage.setItem('tlu_theme', id); } catch (e) {}
     if (game && game.render) game.render();
     return THEMES[id];
   }
-  function load() { let id = 'storm'; try { id = localStorage.getItem('tlu_theme') || 'storm'; } catch (e) {} apply(id); return id; }
-  function order() { return ['storm', 'phosphor', 'almanac', 'bauhaus']; }
+  function load() { let id = 'folio'; try { id = localStorage.getItem('tlu_theme') || 'folio'; } catch (e) {} apply(id); return id; }
+  function order() { return ['folio', 'storm', 'phosphor', 'almanac', 'bauhaus']; }
   function cycle(game) {
     const o = order(); const next = o[(o.indexOf(activeId) + 1) % o.length];
     const t = apply(next, game);

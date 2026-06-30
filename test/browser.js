@@ -50,7 +50,7 @@ function serve() {
   const themes = await page.evaluate(() => {
     const out = [];
     for (let i = 0; i < 4; i++) { window.TLU.Theme.cycle(window.GAME); out.push(window.TLU.Theme.activeId + '|' + document.body.className); }
-    window.TLU.Theme.apply('storm');
+    window.TLU.Theme.apply('folio');   // restore the default for the rest of the run + screenshots
     return out;
   });
   ok('themes cycle + set body class', themes.some(function (s) { return /phosphor\|.*theme-phosphor/.test(s); }) &&
