@@ -76,6 +76,7 @@
     this.revealWorld(p.wx, p.wy, 4);
     this.ensureCodex();
     this.discoverBiome(p.wx, p.wy);
+    this.placeEchoSite();
     this.logLines = [];
     this.msg('%c' + TLU.LORE.title + ' — ' + TLU.LORE.subtitle, 'head');
     this.msg('You wake on the Rockbud Plains, echoes circling like curious sparks.');
@@ -233,8 +234,56 @@
   Game.prototype.enterSite = function (site) {
     if (site.type === 'town') { this.openTown(site); return; }
     if (site.type === 'landmark') { this.openLandmark(site); return; }
+    if (site.type === 'echo') { this.openEcho(site); return; }
     // dungeon-like sites
     this.enterDungeon(site);
+  };
+
+  // ---------- asynchronous dynasties: a past hero returns as an echo ----------
+  Game.prototype.placeEchoSite = function () {
+    if (!TLU.Dynasty) return;
+    const rng = new TLU.RNG(this.seed + ':echo');
+    const annal = TLU.Dynasty.pickEcho(rng);
+    if (!annal) return;
+    const w = this.world;
+    for (let tries = 0; tries < 300; tries++) {
+      const x = rng.int(5, w.w - 5), y = rng.int(5, w.h - 5);
+      if (w.passable(x, y) && !w.siteAt(x, y)) {
+        const site = { type: 'echo', annal: annal, x: x, y: y, glyph: 'φ', color: '#b9a7ff', name: 'Echo of ' + annal.name, discovered: false };
+        w.tiles[y][x].site = site; w.sites.push(site); this.echoSite = site;
+        return;
+      }
+    }
+  };
+  Game.prototype.openEcho = function (site) {
+    const a = site.annal; const p = this.player;
+    if (site.discovered) { this.msg('%cThe echo of ' + a.name + ' has faded back into the Churn.', 'note'); return; }
+    site.discovered = true;
+    let boon = [];
+    if (a.item) {
+      const it = JSON.parse(JSON.stringify(a.item)); it.uid = TLU.Items.uid();
+      TLU.Player.addItem(p, it);
+      boon.push('their ' + (it.upgrade ? '+' + it.upgrade + ' ' : '') + it.name);
+    } else {
+      p.perkPoints = (p.perkPoints || 0) + 1;
+      boon.push('a hard-won insight (+1 talent)');
+    }
+    // the echo may walk with you a while
+    if ((p.party || []).length < 2) {
+      const rng = new TLU.RNG(this.seed + ':echoc:' + site.x + ',' + site.y);
+      const comp = TLU.Companions.generate(rng, Math.max(1, a.level || 3), 'channeler');
+      comp.name = a.name + '’s Echo'; comp.color = '#b9a7ff'; comp.glyph = 'φ'; comp.roleName = 'Echo';
+      p.party = p.party || []; p.party.push(comp);
+      boon.push(comp.name + ' joins your party');
+    }
+    this.overlay = { type: 'echo', annal: a, boon: boon.join(' · ') };
+    this.save();
+    this.render();
+  };
+  // record the current hero into the Annals
+  Game.prototype.recordAnnal = function (won, cause, epitaph) {
+    if (!TLU.Dynasty) return null;
+    return TLU.Dynasty.record(this.player, { day: this.day, cause: cause, epitaph: epitaph, won: won, t: this.turnCount });
   };
 
   // ---------- landmarks (one-time discoveries) ----------
@@ -567,13 +616,15 @@
     this.player.stats.deaths++;
     this.state = 'over';
     const quote = new TLU.RNG('death' + this.turnCount).pick(TLU.LORE.deathQuotes);
-    this.overlay = { type: 'over', quote: quote };
+    const annal = this.recordAnnal(false, 'fell in the marches', quote);
+    this.overlay = { type: 'over', quote: quote, code: annal && TLU.Dynasty ? TLU.Dynasty.encode(annal) : '' };
     this.render();
   };
   Game.prototype.victory = function () {
     this.state = 'win';
-    this.overlay = { type: 'win' };
+    const annal = this.recordAnnal(true, 'ended the Gloammother and stilled the Churn', 'They stood in the last Churn, and did not fall.');
     TLU.Save.clear();
+    this.overlay = { type: 'win', code: annal && TLU.Dynasty ? TLU.Dynasty.encode(annal) : '' };
     this.render();
   };
 

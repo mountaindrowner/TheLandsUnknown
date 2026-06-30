@@ -5,6 +5,11 @@
 (function (TLU) {
   'use strict';
   function boot() {
+    // import a shared legend into the Annals from ?legend=<code>
+    try {
+      const m = location.search.match(/[?&]legend=([^&]+)/);
+      if (m && TLU.Dynasty) { const a = TLU.Dynasty.importCode(decodeURIComponent(m[1])); if (a) console.log('[Annals] imported legend: ' + a.name); }
+    } catch (e) {}
     const canvas = document.getElementById('map');
     const disp = new TLU.Render.Display(canvas, { cell: 20, cols: 45, rows: 30, font: '"Cascadia Code", "DejaVu Sans Mono", monospace' });
     const game = new TLU.Game();

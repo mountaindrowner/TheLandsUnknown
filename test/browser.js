@@ -84,6 +84,25 @@ function serve() {
   ok('Churn front detected + forecast', churn.inc === true && /CHURN/i.test(churn.fc));
   ok('Churn supercharges Anima regen', churn.anima >= 5);
 
+  // ----- asynchronous dynasties: record → encode/decode → echo spawns + grants a boon -----
+  const dyn = await page.evaluate(() => {
+    const T = window.TLU, G = window.GAME;
+    T.Dynasty.clear();
+    const an = T.Dynasty.record(G.player, { day: G.day, cause: 'fell testing', epitaph: 'gg' });
+    const code = T.Dynasty.encode(an);
+    const dec = T.Dynasty.decode(code);
+    T.Dynasty.importCode(code);
+    G.placeEchoSite();
+    const echo = G.world.sites.find(function (s) { return s.type === 'echo'; });
+    const partyBefore = G.player.party.length;
+    let opened = false;
+    if (echo) { G.openEcho(echo); opened = !!(G.overlay && G.overlay.type === 'echo'); }
+    return { count: T.Dynasty.load().length, codeOk: !!code && dec && dec.name === an.name, opened: opened, gained: G.player.party.length > partyBefore };
+  });
+  ok('annal recorded + encodes/decodes', dyn.codeOk && dyn.count >= 1);
+  ok('echo of a past hero spawns + grants boon', dyn.opened && dyn.gained);
+  await press('Enter'); // close the echo overlay
+
   // ----- teleport to a town and exercise services -----
   await page.evaluate(() => {
     const g = window.GAME; const t = g.world.towns[0];

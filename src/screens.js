@@ -1020,7 +1020,30 @@
     key: function (g, k) { if (k === 'Enter' || k === ' ' || k === 'Escape') { g.overlay = null; g.render(); } },
   };
 
+  // ---- ECHO OF A PAST HERO (asynchronous dynasty) ----
+  SCREENS.echo = {
+    render: function (g) {
+      const a = g.overlay.annal;
+      const tale = a.won
+        ? esc(a.name) + ', a ' + esc(a.orderName) + ' of legend, reached Level ' + a.level + ' and ' + esc(a.cause) + '.'
+        : esc(a.name) + ', a ' + esc(a.orderName) + ', reached Level ' + a.level + ' before they ' + esc(a.cause) + ' on day ' + a.day + '.';
+      return '<div class="panel dialog echo"><div class="menu-title" style="color:#b9a7ff">φ An Echo Stirs — ' + esc(a.name) + '</div>' +
+        '<div class="dlg-text">A figure of pale light takes shape from the drifting dead. ' + tale +
+        (a.epitaph ? '<br><br><i>“' + esc(a.epitaph) + '”</i>' : '') +
+        '<br><br>The echo presses a fragment of its legacy into your hands.</div>' +
+        '<div class="lm-reward">✦ You receive: ' + esc(g.overlay.boon) + '</div>' +
+        '<div class="menu-foot">Enter to continue</div></div>';
+    },
+    key: function (g, k) { if (k === 'Enter' || k === ' ' || k === 'Escape') { g.overlay = null; g.render(); } },
+  };
+
   // ---- GAME OVER ----
+  function annalsNote(g) {
+    if (!g.overlay.code) return '';
+    return '<div class="annals-note">✶ Your legend joins the Annals — it will return as an echo (φ) in worlds to come.' +
+      '<div class="annals-code" title="Share this legend">' + esc(g.overlay.code) + '</div>' +
+      '<span class="dimk">Share this code, or append ?legend=&lt;code&gt; to the URL to seed it into another world.</span></div>';
+  }
   function statsBlock(g) {
     const p = g.player;
     return '<div class="end-stats">' +
@@ -1036,7 +1059,7 @@
     render: function (g) {
       const cont = TLU.Save.hasSave();
       return '<div class="title-screen endscreen death"><div class="end-title">✟ You Have Fallen ✟</div>' +
-        '<div class="end-quote">' + esc(g.overlay.quote || '') + '</div>' + statsBlock(g) +
+        '<div class="end-quote">' + esc(g.overlay.quote || '') + '</div>' + statsBlock(g) + annalsNote(g) +
         UI.renderMenu({ items: cont ? [{ label: 'Reload last camp', color: '#7ec8ff' }, { label: 'Return to title' }] : [{ label: 'Return to title' }], cursor: g.overlay.cursor || 0 }) +
         '<div class="menu-foot">The Churn moves on. Will you?</div></div>';
     },
@@ -1058,7 +1081,7 @@
     render: function (g) {
       return '<div class="title-screen endscreen victory"><div class="end-title win">★ The Last Storm Stilled ★</div>' +
         '<div class="end-quote">Vethra, the Gloammother, unravels into fading light. The Churn gentles, and across Aurenmark the echoes wheel skyward in silent salute. You are the first of the Kindled reborn — and you have ended the eldest of the Hollow Ones.</div>' +
-        statsBlock(g) +
+        statsBlock(g) + annalsNote(g) +
         UI.renderMenu({ items: [{ label: 'Begin anew', color: '#ffd86b' }], cursor: 0 }) +
         '<div class="menu-foot">Remember the dead. Outlast the Churn. — Thank you for playing.</div></div>';
     },
