@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>The Lands Unknown — Graphical Art-Direction Lookbook</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=EB+Garamond:ital@0;1&family=Poppins:wght@400;500;600;700&display=swap');
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:#15151a; color:#ddd; font-family:'Poppins',system-ui,sans-serif; }
+  .pagehead { padding:22px 26px; }
+  .pagehead h1 { margin:0 0 4px; font-size:22px; }
+  .pagehead p { margin:0; color:#9aa; font-size:13px; }
+  .stylesec { padding:14px 26px 30px; }
+  .styletitle { font-size:18px; font-weight:700; margin:18px 0 2px; }
+  .styledesc { color:#9aa; font-size:12.5px; margin:0 0 14px; max-width:900px; }
+  .grid { display:flex; flex-wrap:wrap; gap:18px; }
+  .cell { }
+  .cell .label { font-size:11px; color:#888; text-transform:uppercase; letter-spacing:1px; margin:0 0 5px; }
+
+  /* a scene FRAME: fixed 900x560, holds bg + overlays + svg */
+  .frame { position:relative; width:900px; height:560px; border-radius:14px; overflow:hidden;
+           background:linear-gradient(180deg, var(--sky1), var(--sky2)); }
+  .frame svg { position:absolute; inset:0; width:100%; height:100%; display:block; }
+  .ov { position:absolute; inset:0; pointer-events:none; }
+  .grain { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E"); mix-blend-mode:overlay; opacity:.10; }
+  .vign { background:radial-gradient(120% 90% at 50% 38%, transparent 45%, rgba(0,0,0,.72) 100%); }
+
+  /* text defaults inside frames */
+  .frame text { font-family:'Poppins',sans-serif; }
+
+  /* ============ STYLE A — LUMEN (flat vector) ============ */
+  .style-lumen {
+    --sky1:#2a2c63; --sky2:#7b5fb0; --far:#4a4f9e; --mid:#6a5cb8; --near:#1f2249;
+    --water:#39c6cf; --tree:#4bbf86; --accent:#ff7d6b; --accent2:#36d6c4;
+    --ink:#1b1f3a; --ink2:#5a6398; --paper:#fbf6ec; --panel:#fbf6ec; --panelEdge:#e7dcc6;
+    --fig:#222547; --figEdge:#3a3f73; --rim:#ff9d6b; --disc:#ffd98a;
+    --hp:#ff6b6b; --anima:#5aa9ff; --xp:#5fe0a0; --shadow:rgba(20,16,40,.28);
+  }
+  .style-lumen text { font-family:'Poppins',sans-serif; }
+  .style-lumen .ink { fill:var(--ink); } .style-lumen .ink2 { fill:var(--ink2); }
+
+  /* ============ STYLE B — EMBER (painterly dark) ============ */
+  .style-ember {
+    --sky1:#140d0a; --sky2:#3a2014; --far:#241510; --mid:#3c2417; --near:#0a0605;
+    --water:#1d2e33; --tree:#120d09; --accent:#ff7a1a; --accent2:#48c6a2;
+    --ink:#ece0cb; --ink2:#9c8b70; --paper:#1b1410; --panel:#15100c; --panelEdge:#7a5a2e;
+    --fig:#070509; --figEdge:#241710; --rim:#ff8a32; --disc:#e07a2a;
+    --hp:#c0392b; --anima:#c89a3a; --xp:#7a8a4a; --shadow:rgba(0,0,0,.6);
+  }
+  .style-ember text { font-family:'Cinzel',serif; letter-spacing:.5px; }
+  .style-ember .h { text-transform:uppercase; letter-spacing:2px; }
+  .style-ember .ink { fill:var(--ink); } .style-ember .ink2 { fill:var(--ink2); }
+
+  /* ============ STYLE C — FOLIO (inked almanac) ============ */
+  .style-folio {
+    --sky1:#efe7d2; --sky2:#e2d7bd; --far:#c3b793; --mid:#a99a73; --near:#d8cca8;
+    --water:#aebb9f; --tree:#7c7a52; --accent:#9a3b2a; --accent2:#3f6173;
+    --ink:#2a2620; --ink2:#6f6650; --paper:#f3ecd9; --panel:#efe7d2; --panelEdge:#b9ad90;
+    --fig:#f3ecd9; --figEdge:#2a2620; --rim:#9a3b2a; --disc:#cdbf99;
+    --hp:#9a3b2a; --anima:#3f6173; --xp:#6b7a4a; --shadow:rgba(42,38,32,.18);
+  }
+  .style-folio { background:linear-gradient(180deg,var(--sky1),var(--sky2)); }
+  .style-folio text { font-family:'EB Garamond',Georgia,serif; }
+  .style-folio .h { font-variant:small-caps; letter-spacing:1px; }
+  .style-folio .ink { fill:var(--ink); } .style-folio .ink2 { fill:var(--ink2); }
+  .style-folio .paperov { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); }
+</style>
+</head>
+<body>
+<div class="pagehead">
+  <h1>The Lands Unknown — Graphical Art-Direction Lookbook</h1>
+  <p>Three minimalist directions, each scene mocked up. Pick one (or mix). Rendered vector mockups, not final in-engine art.</p>
+</div>
+<div id="root"></div>
+
+<!-- shared SVG defs (hatch pattern for folio, etc.) -->
+<svg width="0" height="0" style="position:absolute"><defs>
+  <pattern id="hatch" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+    <line x1="0" y1="0" x2="0" y2="6" stroke="#2a2620" stroke-width="1" opacity="0.5"/>
+  </pattern>
+  <pattern id="hatchA" width="5" height="5" patternTransform="rotate(-45)" patternUnits="userSpaceOnUse">
+    <line x1="0" y1="0" x2="0" y2="5" stroke="#2a2620" stroke-width="0.8" opacity="0.35"/>
+  </pattern>
+</defs></svg>
+
+<script>
+const W=900, H=560;
+
+/* ---------- reusable art helpers (return SVG inner strings) ---------- */
+// a cloaked hero/figure silhouette
+function fig(cx, cy, h, opt){ opt=opt||{};
+  const w=h*0.42, head=h*0.20;
+  const rim = opt.rim ? `<path d="M ${cx-w*0.5} ${cy} Q ${cx} ${cy-h*0.9} ${cx+w*0.5} ${cy}" fill="none" stroke="var(--rim)" stroke-width="3" opacity="0.8"/>` : '';
+  const gem = opt.gem===false ? '' : `<circle cx="${cx}" cy="${cy-h*0.42}" r="${h*0.05}" style="fill:var(--accent2)"/>`;
+  return `
+    <ellipse cx="${cx}" cy="${cy+4}" rx="${w*0.7}" ry="${h*0.07}" style="fill:var(--shadow)"/>
+    <path d="M ${cx-w*0.5} ${cy} Q ${cx-w*0.55} ${cy-h*0.62} ${cx-head*0.5} ${cy-h*0.72}
+             Q ${cx} ${cy-h*0.95} ${cx+head*0.5} ${cy-h*0.72}
+             Q ${cx+w*0.55} ${cy-h*0.62} ${cx+w*0.5} ${cy} Z"
+          style="fill:var(--fig);stroke:var(--figEdge);stroke-width:${opt.line||2}"/>
+    <circle cx="${cx}" cy="${cy-h*0.78}" r="${head*0.5}" style="fill:var(--fig);stroke:var(--figEdge);stroke-width:${opt.line||2}"/>
+    ${gem}${rim}`;
+}
+// a hunched beast silhouette
+function beast(cx, cy, h, opt){ opt=opt||{};
+  const w=h*1.1;
+  const eye = opt.eye!==false ? `<circle cx="${cx+w*0.28}" cy="${cy-h*0.55}" r="${h*0.05}" style="fill:var(--accent)"/>` : '';
+  return `<ellipse cx="${cx}" cy="${cy+4}" rx="${w*0.5}" ry="${h*0.08}" style="fill:var(--shadow)"/>
+    <path d="M ${cx-w*0.5} ${cy} Q ${cx-w*0.5} ${cy-h*0.5} ${cx-w*0.15} ${cy-h*0.5}
+             Q ${cx} ${cy-h*0.85} ${cx+w*0.35} ${cy-h*0.62}
+             L ${cx+w*0.5} ${cy-h*0.45} Q ${cx+w*0.52} ${cy} ${cx+w*0.4} ${cy} Z"
+          style="fill:var(--fig);stroke:var(--figEdge);stroke-width:${opt.line||2}"/>
+    <path d="M ${cx-w*0.45} ${cy} l ${h*0.07} ${-h*0.18} M ${cx-w*0.1} ${cy} l ${h*0.05} ${-h*0.16} M ${cx+w*0.3} ${cy} l ${h*0.05} ${-h*0.16}" stroke="var(--figEdge)" stroke-width="${opt.line||2}" fill="none"/>
+    ${eye}`;
+}
+// a tall jagged hollow / boss silhouette
+function hollow(cx, cy, h, opt){ opt=opt||{};
+  return `<ellipse cx="${cx}" cy="${cy+4}" rx="${h*0.4}" ry="${h*0.07}" style="fill:var(--shadow)"/>
+    <path d="M ${cx-h*0.34} ${cy} L ${cx-h*0.18} ${cy-h*0.55} L ${cx-h*0.26} ${cy-h*0.62}
+             L ${cx-h*0.08} ${cy-h*1.0} L ${cx} ${cy-h*0.8} L ${cx+h*0.08} ${cy-h*1.05}
+             L ${cx+h*0.24} ${cy-h*0.6} L ${cx+h*0.16} ${cy-h*0.5} L ${cx+h*0.34} ${cy} Z"
+          style="fill:var(--fig);stroke:var(--figEdge);stroke-width:${opt.line||2}"/>
+    <circle cx="${cx-h*0.07}" cy="${cy-h*0.66}" r="${h*0.045}" style="fill:var(--accent)"/>
+    <circle cx="${cx+h*0.07}" cy="${cy-h*0.66}" r="${h*0.045}" style="fill:var(--accent)"/>`;
+}
+// a simple tree
+function tree(cx, cy, s, fillVar){ fillVar=fillVar||'--tree';
+  return `<ellipse cx="${cx}" cy="${cy+2}" rx="${s*0.6}" ry="${s*0.12}" style="fill:var(--shadow)"/>
+    <rect x="${cx-s*0.06}" y="${cy-s*0.5}" width="${s*0.12}" height="${s*0.5}" style="fill:var(--figEdge)"/>
+    <path d="M ${cx} ${cy-s*1.4} L ${cx-s*0.5} ${cy-s*0.4} L ${cx+s*0.5} ${cy-s*0.4} Z" style="fill:var(${fillVar})"/>
+    <path d="M ${cx} ${cy-s*1.1} L ${cx-s*0.42} ${cy-s*0.1} L ${cx+s*0.42} ${cy-s*0.1} Z" style="fill:var(${fillVar})"/>`;
+}
+// a map pin: kind = town | vault | ruin | echo | camp
+function pin(cx, cy, kind){
+  const col = kind==='ruin' ? 'var(--accent)' : kind==='town' ? 'var(--disc)' : kind==='echo' ? 'var(--accent2)' : 'var(--ink)';
+  let icon='';
+  if(kind==='town') icon=`<path d="M ${cx-7} ${cy} L ${cx} ${cy-9} L ${cx+7} ${cy} Z" fill="#1a1410"/><rect x="${cx-5}" y="${cy-1}" width="10" height="7" fill="#1a1410"/>`;
+  else if(kind==='vault') icon=`<path d="M ${cx-7} ${cy-6} L ${cx+7} ${cy-6} L ${cx} ${cy+5} Z" fill="#fff" opacity="0.9"/>`;
+  else if(kind==='ruin') icon=`<path d="M ${cx-7} ${cy+5} L ${cx-7} ${cy-5} Q ${cx} ${cy-12} ${cx+7} ${cy-5} L ${cx+7} ${cy+5}" fill="none" stroke="#fff" stroke-width="2.5"/>`;
+  else if(kind==='echo') icon=`<circle cx="${cx}" cy="${cy}" r="5" fill="#fff" opacity="0.85"/>`;
+  else icon=`<path d="M ${cx-7} ${cy+5} L ${cx} ${cy-8} L ${cx+7} ${cy+5} Z" fill="#fff" opacity="0.85"/>`;
+  return `<ellipse cx="${cx}" cy="${cy+12}" rx="9" ry="3" style="fill:var(--shadow)"/>
+    <circle cx="${cx}" cy="${cy}" r="15" style="fill:${col}"/>
+    <circle cx="${cx}" cy="${cy}" r="15" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.5"/>
+    ${icon}`;
+}
+// a rounded card/panel
+function card(x,y,w,h,r){ r=r||14;
+  return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" style="fill:var(--panel);stroke:var(--panelEdge);stroke-width:1.5"/>`;
+}
+// a labelled stat/HP bar
+function bar(x,y,w,pct,colVar,label,val){
+  return `<rect x="${x}" y="${y}" width="${w}" height="11" rx="5.5" style="fill:var(--near);opacity:.6"/>
+    <rect x="${x}" y="${y}" width="${w*pct}" height="11" rx="5.5" style="fill:var(${colVar})"/>
+    ${label?`<text x="${x}" y="${y-4}" font-size="10" class="ink2">${label}</text>`:''}
+    ${val?`<text x="${x+w}" y="${y-4}" font-size="10" text-anchor="end" class="ink2">${val}</text>`:''}`;
+}
+// a portrait in a frame
+function portrait(x,y,w,h){
+  return `${card(x,y,w,h,10)}
+    <clipPath id="pc"><rect x="${x+4}" y="${y+4}" width="${w-8}" height="${h-8}" rx="7"/></clipPath>
+    <g clip-path="url(#pc)">
+      <rect x="${x+4}" y="${y+4}" width="${w-8}" height="${h-8}" style="fill:var(--mid)"/>
+      <circle cx="${x+w/2}" cy="${y+h*0.46}" r="${w*0.22}" style="fill:var(--fig)"/>
+      ${fig(x+w/2, y+h-10, h*0.9, {rim:true})}
+    </g>`;
+}
+
+/* ---------- scenes (return full SVG inner markup, 900x560) ---------- */
+const SCENES = {};
+
+SCENES.title = (st)=>`
+  <path d="M0 360 L160 250 L330 330 L520 230 L700 320 L900 250 L900 560 L0 560 Z" style="fill:var(--far)"/>
+  <path d="M0 430 L210 340 L430 420 L640 350 L900 420 L900 560 L0 560 Z" style="fill:var(--mid)"/>
+  <circle cx="640" cy="200" r="74" style="fill:var(--disc)" opacity="${st==='ember'?'0.9':'1'}"/>
+  ${st==='folio'?`<circle cx="640" cy="200" r="74" fill="url(#hatchA)"/>`:''}
+  <rect x="752" y="60" width="36" height="430" rx="18" style="fill:var(--accent2)" opacity="0.22"/>
+  <rect x="766" y="60" width="10" height="430" rx="5" style="fill:var(--accent2)" opacity="0.5"/>
+  <path d="M0 470 L240 396 L470 470 L720 405 L900 470 L900 560 L0 560 Z" style="fill:var(--near)"/>
+  ${tree(140,486,30)} ${tree(96,500,22)} ${tree(800,486,26)}
+  ${fig(330, 470, 96, {rim:st==='ember', line:st==='folio'?2.5:2})}
+  <text x="450" y="150" text-anchor="middle" font-size="58" font-weight="700" class="ink h" style="fill:var(--ink)">THE LANDS UNKNOWN</text>
+  <text x="450" y="186" text-anchor="middle" font-size="19" class="ink2">A Chronicle of the Churn</text>
+  ${card(360,250,180,170,16)}
+  <text x="450" y="284" text-anchor="middle" font-size="17" font-weight="600" style="fill:var(--accent)">New Journey</text>
+  <line x1="385" y1="300" x2="515" y2="300" stroke="var(--panelEdge)"/>
+  <text x="450" y="330" text-anchor="middle" font-size="15" class="ink">Continue</text>
+  <text x="450" y="360" text-anchor="middle" font-size="15" class="ink">Codex</text>
+  <text x="450" y="402" text-anchor="middle" font-size="11" class="ink2">↑ ↓  ·  Enter</text>`;
+
+SCENES.overworld = (st)=>`
+  <!-- map field -->
+  <rect x="0" y="0" width="640" height="560" style="fill:var(--mid)"/>
+  <path d="M0 120 Q160 80 320 130 T640 120 L640 0 L0 0 Z" style="fill:var(--far)"/>
+  <path d="M0 300 Q150 250 320 300 T640 290 L640 560 L0 560 Z" style="fill:var(--near)"/>
+  <path d="M120 0 Q180 200 120 360 T200 560" fill="none" stroke="var(--water)" stroke-width="16" opacity="0.9"/>
+  <g> ${tree(360,250,26,'--tree')} ${tree(400,270,22,'--tree')} ${tree(330,275,20,'--tree')} ${tree(420,240,18,'--tree')} </g>
+  <!-- the Churn front -->
+  <rect x="470" y="0" width="70" height="560" style="fill:var(--accent2)" opacity="0.18"/>
+  <rect x="498" y="0" width="10" height="560" style="fill:var(--accent2)" opacity="0.55"/>
+  ${pin(180,170,'town')} ${pin(360,330,'vault')} ${pin(560,120,'ruin')} ${pin(250,420,'echo')}
+  <!-- player marker -->
+  ${fig(300,300,54,{rim:st==='ember'})}
+  <circle cx="300" cy="276" r="30" fill="none" stroke="var(--accent)" stroke-width="2" opacity="0.6"/>
+  <!-- HUD: status card -->
+  ${card(20,20,300,118,12)}
+  ${portrait(30,30,84,98)}
+  <text x="128" y="52" font-size="17" font-weight="600" style="fill:var(--accent)">Selin</text>
+  <text x="128" y="70" font-size="11" class="ink2">Skyrender · Level 7</text>
+  ${bar(128,84,176,0.62,'--hp','HP','117/189')}
+  ${bar(128,104,176,1.0,'--anima','Anima','60/60')}
+  ${bar(128,124,176,0.4,'--xp','XP','')}
+  <!-- minimap -->
+  ${card(660,20,220,150,12)}
+  <text x="672" y="40" font-size="11" class="ink2 h" style="fill:var(--ink2)">KHARAVAR</text>
+  <rect x="672" y="48" width="196" height="110" rx="6" style="fill:var(--near)" opacity="0.5"/>
+  <circle cx="740" cy="100" r="3" style="fill:var(--accent)"/><circle cx="800" cy="70" r="3" style="fill:var(--disc)"/>
+  <rect x="780" y="48" width="6" height="110" style="fill:var(--accent2)" opacity="0.6"/>
+  <!-- quest panel -->
+  ${card(660,190,220,150,12)}
+  <text x="672" y="214" font-size="13" font-weight="600" style="fill:var(--accent)">✦ The Last Storm</text>
+  <text x="672" y="236" font-size="11" class="ink"><tspan x="672" dy="0">Seek the Wardens at the</tspan><tspan x="672" dy="15">nearest hold. They sense</tspan><tspan x="672" dy="15">the echoes that follow you.</tspan></text>
+  <text x="672" y="306" font-size="11" class="ink2">⛈ Churn 5 tiles E → incoming</text>
+  <text x="672" y="324" font-size="11" class="ink2">☀ Day 1</text>
+  <!-- controls hint -->
+  ${card(660,360,220,180,12)}
+  <text x="672" y="384" font-size="11" class="ink2 h" style="fill:var(--ink2)">CONTROLS</text>
+  <text x="672" y="408" font-size="11" class="ink">Move · ↑ ↓ ← →</text>
+  <text x="672" y="430" font-size="11" class="ink">Interact · Enter</text>
+  <text x="672" y="452" font-size="11" class="ink">Bag · I    Hero · C</text>
+  <text x="672" y="474" font-size="11" class="ink">Quests · Q   Codex · L</text>`;
+
+SCENES.combat = (st)=>`
+  <rect x="0" y="0" width="900" height="560" style="fill:var(--near)"/>
+  <path d="M0 200 Q450 120 900 200 L900 0 L0 0 Z" style="fill:var(--mid)"/>
+  <ellipse cx="450" cy="380" rx="430" ry="120" style="fill:var(--far)" opacity="0.5"/>
+  <!-- enemies (left) -->
+  ${beast(180,330,90,{line:st==='folio'?2.5:2})}
+  ${beast(300,300,70)}
+  ${hollow(120,300,120)}
+  <g transform="translate(60,210)">${card(0,0,150,16,8)}<rect x="3" y="3" width="${144*0.7}" height="10" rx="5" style="fill:var(--hp)"/><text x="75" y="-6" text-anchor="middle" font-size="11" class="ink2">Cragwrought</text></g>
+  <g transform="translate(245,225)">${card(0,0,110,14,7)}<rect x="3" y="3" width="${104*0.9}" height="8" rx="4" style="fill:var(--hp)"/></g>
+  <!-- party (right) -->
+  ${fig(680,360,96,{rim:st==='ember'})}
+  ${fig(770,330,80,{rim:st==='ember', gem:false})}
+  <!-- action menu + bars -->
+  ${card(40,430,520,110,14)}
+  <text x="62" y="460" font-size="15" font-weight="600" style="fill:var(--accent)">▶ Attack</text>
+  <text x="62" y="486" font-size="14" class="ink">✦ Channel</text>
+  <text x="62" y="510" font-size="14" class="ink">⚗ Item</text>
+  <text x="210" y="460" font-size="14" class="ink">⛨ Defend</text>
+  <text x="210" y="486" font-size="14" class="ink2">⚐ Flee</text>
+  <line x1="330" y1="446" x2="330" y2="524" stroke="var(--panelEdge)"/>
+  <text x="350" y="458" font-size="11" class="ink2">@ Selin · Lv7</text>
+  ${bar(350,468,190,0.62,'--hp','','HP 117/189')}
+  ${bar(350,492,190,1.0,'--anima','','Anima 60/60')}
+  <text x="350" y="528" font-size="10" class="ink2">Adoni the Channeler · ready</text>
+  ${card(580,430,280,110,14)}
+  <text x="600" y="458" font-size="12" class="ink2 h" style="fill:var(--ink2)">TURN ORDER</text>
+  <g>${[['Selin','--accent'],['Crag','--hp'],['Adoni','--anima'],['Whelp','--hp']].map((t,i)=>`<circle cx="${612+i*60}" cy="495" r="18" style="fill:var(${t[1]})"/><circle cx="${612+i*60}" cy="495" r="18" fill="none" stroke="#fff" stroke-width="1" opacity="0.4"/><text x="${612+i*60}" y="528" text-anchor="middle" font-size="9" class="ink2">${t[0]}</text>`).join('')}</g>`;
+
+SCENES.town = (st)=>`
+  <path d="M0 380 L900 360 L900 560 L0 560 Z" style="fill:var(--near)"/>
+  <!-- skyline -->
+  <g style="fill:var(--mid)">
+    <rect x="60" y="250" width="120" height="160"/><path d="M60 250 L120 200 L180 250 Z"/>
+    <rect x="210" y="290" width="90" height="120"/><path d="M210 290 L255 255 L300 290 Z"/>
+    <rect x="330" y="180" width="70" height="230"/><path d="M330 180 L365 130 L400 180 Z"/>
+    <rect x="430" y="300" width="110" height="110"/><path d="M430 300 L485 268 L540 300 Z"/>
+  </g>
+  <rect x="356" y="120" width="18" height="62" style="fill:var(--accent)"/><circle cx="365" cy="120" r="10" style="fill:var(--disc)"/>
+  <!-- windows / warm light -->
+  <g style="fill:var(--disc)" opacity="0.85">
+    <rect x="92" y="280" width="14" height="18"/><rect x="132" y="280" width="14" height="18"/><rect x="92" y="320" width="14" height="18"/>
+    <rect x="240" y="320" width="12" height="16"/><rect x="350" y="220" width="12" height="18"/><rect x="350" y="260" width="12" height="18"/>
+    <rect x="460" y="330" width="14" height="18"/><rect x="500" y="330" width="14" height="18"/>
+  </g>
+  <!-- gate + townsfolk -->
+  <path d="M150 410 L150 365 Q175 345 200 365 L200 410 Z" style="fill:var(--far)"/>
+  ${fig(250,470,70)} ${fig(330,478,58,{gem:false})}
+  <!-- title + service menu -->
+  <text x="40" y="60" font-size="30" font-weight="700" class="ink h" style="fill:var(--ink)">Vesmark</text>
+  <text x="42" y="84" font-size="13" class="ink2">A windward hold of the western plains</text>
+  ${card(600,40,270,480,16)}
+  <text x="620" y="74" font-size="14" class="ink2 h" style="fill:var(--ink2)">THE HOLD</text>
+  ${[['⌂  Rest at the inn','10g'],['$  Visit the merchant',''],['⚒  Visit the smith',''],['⚗  Visit the alchemist',''],['✦  Train skills',''],['☺  Speak with townsfolk',''],['⚑  Recruit a companion',''],['↩  Leave','']].map((t,i)=>`
+    <rect x="616" y="${96+i*48}" width="238" height="40" rx="9" style="fill:${i===0?'var(--accent)':'var(--near)'}" opacity="${i===0?'1':'0.4'}"/>
+    <text x="632" y="${121+i*48}" font-size="14" style="fill:${i===0?'#fff':'var(--ink)'}">${t[0]}</text>
+    ${t[1]?`<text x="844" y="${121+i*48}" text-anchor="end" font-size="12" style="fill:${i===0?'#fff':'var(--ink2)'}">${t[1]}</text>`:''}`).join('')}`;
+
+SCENES.inventory = (st)=>`
+  <rect x="0" y="0" width="900" height="560" style="fill:var(--sky2)" opacity="0.0"/>
+  <!-- left: paper doll -->
+  ${card(30,30,360,500,16)}
+  <text x="52" y="66" font-size="18" font-weight="700" style="fill:var(--accent)">Selin</text>
+  <text x="52" y="86" font-size="12" class="ink2">Skyrender · Level 7</text>
+  <g transform="translate(210,300)"><circle cx="0" cy="-40" r="56" style="fill:var(--mid)" opacity="0.5"/>${fig(0,90,210,{rim:st==='ember'})}</g>
+  ${[['Weapon',60,150],['Head',300,150],['Body',300,250],['Feet',300,350],['Off',60,250]].map(s=>`
+    <rect x="${s[1]}" y="${s[2]}" width="60" height="60" rx="10" style="fill:var(--near);stroke:var(--panelEdge);stroke-width:1.5" opacity="0.8"/>
+    <text x="${s[1]+30}" y="${s[2]+74}" text-anchor="middle" font-size="9" class="ink2">${s[0]}</text>`).join('')}
+  <path d="M74 162 l32 36 M82 160 l28 14" stroke="var(--accent)" stroke-width="5" stroke-linecap="round"/>
+  <rect x="312" y="162" width="36" height="36" rx="6" style="fill:var(--accent2)"/>
+  <!-- right: stats + grid + talents -->
+  ${card(410,30,460,250,16)}
+  <text x="432" y="62" font-size="14" class="ink2 h" style="fill:var(--ink2)">ATTRIBUTES &amp; DERIVED</text>
+  ${[['HP','189'],['Anima','60'],['Attack','26'],['Defense','17'],['Speed','21'],['Crit','12%']].map((s,i)=>`
+    <text x="${440+(i%3)*150}" y="${100+Math.floor(i/3)*40}" font-size="13" class="ink2">${s[0]}</text>
+    <text x="${440+(i%3)*150}" y="${122+Math.floor(i/3)*40}" font-size="20" font-weight="700" style="fill:var(--accent)">${s[1]}</text>`).join('')}
+  ${bar(432,200,416,0.62,'--hp','HP','117/189')}
+  ${bar(432,228,416,1.0,'--anima','Anima','60/60')}
+  ${card(410,300,460,230,16)}
+  <text x="432" y="332" font-size="14" class="ink2 h" style="fill:var(--ink2)">SATCHEL</text>
+  ${Array.from({length:18}).map((_,i)=>{const x=432+(i%6)*72, y=348+Math.floor(i/6)*54; const filled=i<8; const col=['--accent','--anima','--xp','--accent2'][i%4];
+    return `<rect x="${x}" y="${y}" width="58" height="46" rx="8" style="fill:var(--near);stroke:var(--panelEdge);stroke-width:1" opacity="0.7"/>${filled?`<circle cx="${x+29}" cy="${y+23}" r="12" style="fill:var(${col})"/>`:''}`;}).join('')}
+  <text x="432" y="522" font-size="11" class="ink2">Talents:</text>
+  ${['Duelist','Channeler','Lifedrinker'].map((t,i)=>`<rect x="${500+i*120}" y="510" width="110" height="20" rx="10" style="fill:var(--accent)" opacity="0.85"/><text x="${555+i*120}" y="524" text-anchor="middle" font-size="11" fill="#fff">${t}</text>`).join('')}`;
+
+SCENES.dialogue = (st)=>`
+  <path d="M0 300 Q450 230 900 300 L900 0 L0 0 Z" style="fill:var(--mid)"/>
+  <path d="M0 420 L900 400 L900 560 L0 560 Z" style="fill:var(--near)"/>
+  ${tree(720,430,40)} ${tree(800,440,30)}
+  <!-- NPC portrait framed -->
+  ${portrait(60,120,210,250)}
+  <text x="165" y="398" text-anchor="middle" font-size="13" class="ink2">a Stormpriest</text>
+  <!-- dialogue box -->
+  ${card(60,400,780,140,16)}
+  <rect x="60" y="382" width="220" height="34" rx="10" style="fill:var(--accent)"/>
+  <text x="170" y="405" text-anchor="middle" font-size="15" font-weight="600" fill="#fff" class="h">IRIDALRIC</text>
+  <text x="84" y="446" font-size="15" class="ink"><tspan x="84" dy="0">"The Churn gives and the Churn takes. You carry an echo at your</tspan><tspan x="84" dy="22">shoulder — the old light. I will not ask how, only that you use it well."</tspan></text>
+  <text x="84" y="516" font-size="13" style="fill:var(--accent)">▸ Ask about the Churn</text>
+  <text x="360" y="516" font-size="13" class="ink">▸ Ask for rumors</text>
+  <text x="560" y="516" font-size="13" class="ink2">▸ Farewell</text>`;
+
+/* ---------- build the gallery ---------- */
+const STYLES = [
+  ['lumen','① LUMEN — Flat Vector Minimalism','Evokes Monument Valley / Alto’s Odyssey / Kurzgesagt. Clean geometric flats, soft pastels, generous negative space, light floating UI cards. Friendly, modern, mobile-first.'],
+  ['ember','② EMBER — Painterly Dark Fantasy','Evokes Darkest Dungeon / Hellblade / gothic concept art. Near-black grounds, ember-orange + corpse-teal accents, silhouettes with rim-light, grain & vignette, carved serif type. Moody, premium, dramatic.'],
+  ['folio','③ FOLIO — Inked Almanac / Woodcut','Evokes Return of the Obra Dinn / Inscryption ink / antique cartography. Cream paper, sepia ink linework, cross-hatching, small-caps serif, a single oxblood spot colour. Literary, tactile, distinctive.'],
+];
+const SCENE_ORDER = [['title','Title'],['overworld','Overworld'],['combat','Combat'],['town','Town / Hold'],['inventory','Inventory & Character'],['dialogue','Dialogue']];
+const root = document.getElementById('root');
+for(const [sid,stitle,sdesc] of STYLES){
+  const sec = document.createElement('div'); sec.className='stylesec';
+  sec.innerHTML = `<div class="styletitle">${stitle}</div><div class="styledesc">${sdesc}</div>`;
+  const grid = document.createElement('div'); grid.className='grid';
+  for(const [scn,nm] of SCENE_ORDER){
+    const cell=document.createElement('div'); cell.className='cell';
+    const ov = sid==='ember' ? `<div class="ov grain"></div><div class="ov vign"></div>` : sid==='folio' ? `<div class="ov paperov"></div>` : '';
+    cell.innerHTML = `<div class="label">${nm}</div>
+      <div class="frame style-${sid}" data-shot="${sid}-${scn}">
+        <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice">${SCENES[scn](sid)}</svg>
+        ${ov}
+      </div>`;
+    grid.appendChild(cell);
+  }
+  sec.appendChild(grid); root.appendChild(sec);
+}
+</script>
+</body>
+</html>
