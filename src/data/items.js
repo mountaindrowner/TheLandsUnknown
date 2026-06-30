@@ -87,6 +87,15 @@
     return { id: 'gem_' + name.toLowerCase(), name: 'Infused ' + name, glyph: '*', type: 'gem', stormlight: 40, value: 35, stack: true };
   }
 
+  // Crafting materials — dropped by foes & dungeons, spent at the smith/alchemist.
+  const CRAFT_MATERIALS = {
+    scrap: { id: 'mat_scrap', name: 'Scrap Metal', glyph: '¤', type: 'material', tier: 1, value: 6, stack: true },
+    sinew: { id: 'mat_sinew', name: 'Beast Sinew', glyph: '¤', type: 'material', tier: 1, value: 5, stack: true },
+    herb:  { id: 'mat_herb',  name: 'Bitterleaf',  glyph: '♠', type: 'material', tier: 1, value: 4, stack: true },
+    dust:  { id: 'mat_dust',  name: 'Anima Dust',  glyph: '¤', type: 'material', tier: 2, value: 14, stack: true },
+    shard: { id: 'mat_shard', name: 'Riftsteel Shard', glyph: '¤', type: 'material', tier: 3, value: 28, stack: true },
+  };
+
   let UID = 1;
   function uid() { return 'i' + (UID++); }
 
@@ -203,11 +212,27 @@
   TLU.Items = {
     MATERIALS: MATERIALS, WEAPONS: WEAPONS, ARMORS: ARMORS,
     PREFIXES: PREFIXES, SUFFIXES: SUFFIXES, CONSUMABLES: CONSUMABLES,
+    CRAFT_MATERIALS: CRAFT_MATERIALS,
     UNIQUES: UNIQUES,
     genEquipment: genEquipment,
     makeGem: makeGem,
     mergeBonus: mergeBonus,
     uid: uid,
+    material: function (kind, qty) {
+      const m = CRAFT_MATERIALS[kind]; if (!m) return null;
+      return Object.assign({ uid: uid(), rarity: 'common' }, m, { qty: qty || 1 });
+    },
+    // pick a material appropriate to a slain foe
+    rollMaterial: function (rng, enemy) {
+      const lvl = (enemy && enemy.level) || 1;
+      const tags = (enemy && enemy.tags) || [];
+      let kind;
+      if (tags.indexOf('void') >= 0) kind = rng.pick(['dust', 'dust', 'shard']);
+      else if (enemy && (enemy.faction === 'reavers')) kind = rng.pick(['scrap', 'scrap', 'herb']);
+      else kind = rng.pick(['sinew', 'scrap', 'herb']);
+      if (lvl >= 8 && rng.chance(0.3)) kind = 'shard';
+      return TLU.Items.material(kind, 1);
+    },
     consumable: function (id, qty) {
       const c = CONSUMABLES[id];
       if (!c) return null;

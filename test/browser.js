@@ -76,26 +76,42 @@ function serve() {
   await page.evaluate(() => {
     const g = window.GAME; const t = g.world.towns[0];
     g.player.wx = t.x; g.player.wy = t.y; g.player.gold = 2000;
+    // give crafting materials so the smith/alchemist can be exercised
+    ['scrap','herb','dust','shard'].forEach((k) => window.TLU.Player.addItem(g.player, window.TLU.Items.material(k, 9)));
     g.render();
   });
   await press('Enter');                            // enter town
   ok('town menu opens', (await title()).length > 0 && (await state()).ov === 'town');
-
+  // services: rest0, shop1, smith2, alchemy3, train4, folk5, speak6, leave7
   // rest (cursor 0)
   await press('Enter'); await page.waitForTimeout(40);
-  // shop: services order = rest,shop,train,folk,speak,leave -> cursor to shop
+  // shop
   await page.evaluate(() => { window.GAME.overlay.cursor = 1; });
   await press('Enter'); ok('shop opens', (await title()).includes('Merchant'));
   await press('Enter');                            // buy first item
   await press('Tab');                              // switch to sell
   await press('Escape');                           // back to town
-  // train
+  // smith: reinforce a piece of gear
   await page.evaluate(() => { window.GAME.overlay.cursor = 2; });
+  await press('Enter'); ok('smith opens', (await title()).includes('Smith'));
+  const upBefore = await page.evaluate(() => { const e = window.GAME.player.equip; return (e.weapon && e.weapon.upgrade) || 0; });
+  await press('Enter');                            // reinforce first listed (equipped weapon)
+  ok('gear reinforced at smith', await page.evaluate(() => { const e = window.GAME.player.equip; return ((e.weapon && e.weapon.upgrade) || 0); }) > upBefore);
+  await press('Escape');
+  // alchemist: brew a potion
+  await page.evaluate(() => { window.GAME.overlay.cursor = 3; });
+  await press('Enter'); ok('alchemist opens', (await title()).includes('Alchemist'));
+  const potBefore = await page.evaluate(() => window.GAME.player.inventory.filter(i => i.id === 'potion').reduce((s, i) => s + (i.qty || 1), 0));
+  await press('Enter');                            // brew first recipe (Healing Draught)
+  ok('potion brewed at alchemist', await page.evaluate(() => window.GAME.player.inventory.filter(i => i.id === 'potion').reduce((s, i) => s + (i.qty || 1), 0)) > potBefore);
+  await press('Escape');
+  // train
+  await page.evaluate(() => { window.GAME.overlay.cursor = 4; });
   await press('Enter'); ok('trainer opens', (await title()).includes('Trainer'));
   await press('Enter');                            // train first skill
   await press('Escape');
   // townsfolk -> NPC -> talk -> rumor -> farewell
-  await page.evaluate(() => { window.GAME.overlay.cursor = 3; });
+  await page.evaluate(() => { window.GAME.overlay.cursor = 5; });
   await press('Enter'); ok('npc roster opens', (await title()).includes('folk of'));
   await press('Enter');                            // approach first NPC
   ok('npc conversation opens', (await state()).ov === 'npc');
@@ -116,15 +132,15 @@ function serve() {
   }
   await press('Enter');
   ok('returned to town after npc', (await state()).ov === 'town');
-  // galewarden speak (quest) -> advances main stage; click through dialog
-  await page.evaluate(() => { window.GAME.overlay.cursor = 4; });
+  // warden speak (quest) -> advances main stage; click through dialog
+  await page.evaluate(() => { window.GAME.overlay.cursor = 6; });
   await press('Enter');
-  ok('galewarden dialog opens', (await state()).ov === 'dialog');
+  ok('warden dialog opens', (await state()).ov === 'dialog');
   for (let i = 0; i < 8; i++) { if ((await state()).ov !== 'dialog') break; await press('Enter'); }
   const mainStage = await page.evaluate(() => window.GAME.player.questState.main.stage);
   ok('main quest advanced past intro', mainStage >= 1);
   // leave town
-  if ((await state()).ov === 'town') { await page.evaluate(() => { window.GAME.overlay.cursor = 5; }); await press('Enter'); }
+  if ((await state()).ov === 'town') { await page.evaluate(() => { window.GAME.overlay.cursor = 7; }); await press('Enter'); }
 
   // ----- dungeon delve: enter the nearest vault -----
   await page.evaluate(() => {

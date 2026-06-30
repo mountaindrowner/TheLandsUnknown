@@ -99,8 +99,8 @@
     p.maxHp = Math.round(40 + a.endurance * 7 + p.level * 6 + bonus.maxHp);
     p.maxStormlight = Math.round(30 + a.focus * 6 + bonus.maxStormlight);
 
-    // Attack
-    const wd = wpn ? wpn.dmg : 3;
+    // Attack (gear upgrades add +10% per reinforce level)
+    const wd = wpn ? Math.round(wpn.dmg * (1 + 0.10 * (wpn.upgrade || 0))) : 3;
     p.attack = Math.round(a.might * 1.4 + wd + bonus.dmg + weaponSkillLv * 0.8);
     p.weaponSkillId = wSkillId;
     p.armorPierce = (wpn ? wpn.armorPierce || 0 : 0) + bonus.armorPierce;
@@ -109,7 +109,7 @@
     let armorDef = 0, armorSkillLv = 0, blockChance = 0;
     ['head', 'body', 'feet', 'offhand'].forEach(function (slot) {
       const it = p.equip[slot];
-      if (it && it.def) { armorDef += it.def; }
+      if (it && it.def) { armorDef += Math.round(it.def * (1 + 0.10 * (it.upgrade || 0))); }
       if (it && it.block) blockChance += it.block;
     });
     const lightLv = p.skills.light.level, heavyLv = p.skills.heavy.level;

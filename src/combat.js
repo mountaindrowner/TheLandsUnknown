@@ -304,6 +304,8 @@
         else if (target.drops === 'artifact') {/* handled by quest */}
       }
       if (this.rng.chance(0.35)) this.rewards.loot.push(TLU.Items.rollLoot(this.rng, target.level || this.level, 0)[0]);
+      // crafting material drop
+      if (this.rng.chance(0.5)) this.rewards.loot.push(TLU.Items.rollMaterial(this.rng, target));
       // track kills
       this.game.onEnemyKilled && this.game.onEnemyKilled(target);
     } else {

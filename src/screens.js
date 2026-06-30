@@ -107,15 +107,18 @@
 
   function describeItem(it) {
     if (!it) return '';
-    let s = '<div class="idesc" style="color:' + I.rarityColor(it.rarity) + '">' + esc(it.name) + '</div>';
+    let s = '<div class="idesc" style="color:' + I.rarityColor(it.rarity) + '">' + (it.upgrade ? '+' + it.upgrade + ' ' : '') + esc(it.name) + '</div>';
     const lines = [];
+    const up = 1 + 0.10 * (it.upgrade || 0);
     if (it.type === 'weapon') {
       lines.push('Weapon · ' + (TLU.Skills.LIST[it.skill] ? TLU.Skills.LIST[it.skill].name : it.skill) + (it.hands === 2 ? ' (2H)' : ''));
-      lines.push('Damage ' + it.dmg + '  Speed ' + it.speed + '  Crit ' + Math.round((it.crit || 0) * 100) + '%');
+      lines.push('Damage ' + Math.round(it.dmg * up) + '  Speed ' + it.speed + '  Crit ' + Math.round((it.crit || 0) * 100) + '%');
       if (it.armorPierce) lines.push('Armor pierce ' + Math.round(it.armorPierce * 100) + '%');
     } else if (it.type === 'armor') {
       lines.push('Armor · ' + it.slot + (it.block ? ' (block ' + Math.round(it.block * 100) + '%)' : ''));
-      lines.push('Defense ' + it.def);
+      lines.push('Defense ' + Math.round(it.def * up));
+    } else if (it.type === 'material') {
+      lines.push('Crafting material · used at the smith / alchemist');
     } else if (it.type === 'consumable') {
       if (it.heal) lines.push('Restores ' + it.heal + ' HP');
       if (it.stormlight) lines.push('Restores ' + it.stormlight + ' Anima');
@@ -130,7 +133,7 @@
   }
 
   function itemLabel(it) {
-    let n = esc(it.name);
+    let n = (it.upgrade ? '+' + it.upgrade + ' ' : '') + esc(it.name);
     if (it.qty && it.qty > 1) n += ' ×' + it.qty;
     return '<span style="color:' + I.rarityColor(it.rarity) + '">' + n + '</span>';
   }
@@ -461,11 +464,13 @@
 
   // ---- TOWN ----
   SCREENS.town = {
-    services: [['Rest at the inn (10g)', 'rest'], ['Visit the merchant', 'shop'], ['Train skills', 'train'], ['Speak with the townsfolk', 'folk'], ['Speak with the Warden', 'speak'], ['Leave'.toString(), 'leave']],
+    services: [['Rest at the inn (10g)', 'rest'], ['Visit the merchant', 'shop'], ['Visit the smith', 'smith'], ['Visit the alchemist', 'alchemy'], ['Train skills', 'train'], ['Speak with the townsfolk', 'folk'], ['Speak with the Warden', 'speak'], ['Leave'.toString(), 'leave']],
     render: function (g) {
       const o = g.overlay, site = o.site;
       if (o.sub === 'shop') return SCREENS.town.renderShop(g);
       if (o.sub === 'train') return SCREENS.town.renderTrain(g);
+      if (o.sub === 'smith') return SCREENS.town.renderSmith(g);
+      if (o.sub === 'alchemy') return SCREENS.town.renderAlchemy(g);
       let html = '<div class="panel town"><div class="menu-title">⌂ ' + esc(site.name) + '</div>' +
         '<div class="town-desc">A churn-bunkered hold of the ' + (site.level > 6 ? 'eastern frontier' : 'western plains') + '. Travelers shelter behind its windward wall.</div>';
       html += UI.renderMenu({ items: SCREENS.town.services.map(function (s) { return { label: s[0] }; }), cursor: o.cursor });
@@ -476,10 +481,14 @@
       const o = g.overlay;
       if (o.sub === 'shop') return SCREENS.town.keyShop(g, k);
       if (o.sub === 'train') return SCREENS.town.keyTrain(g, k);
+      if (o.sub === 'smith') return SCREENS.town.keySmith(g, k);
+      if (o.sub === 'alchemy') return SCREENS.town.keyAlchemy(g, k);
       menuNav(o, k, SCREENS.town.services.length, function (i) {
         const act = SCREENS.town.services[i][1];
         if (act === 'rest') SCREENS.town.rest(g);
         else if (act === 'shop') { o.sub = 'shop'; o.cursor = 0; o.mode = 'buy'; SCREENS.town.ensureStock(g); }
+        else if (act === 'smith') { o.sub = 'smith'; o.cursor = 0; }
+        else if (act === 'alchemy') { o.sub = 'alchemy'; o.cursor = 0; }
         else if (act === 'train') { o.sub = 'train'; o.cursor = 0; }
         else if (act === 'folk') { g.openNpcs(o.site); return; }
         else if (act === 'speak') SCREENS.town.speak(g);
@@ -597,6 +606,96 @@
         P.recompute(p); P.refreshAbilities(p);
         g.msg('%c' + TLU.Skills.LIST[id].name + ' trained to ' + sk.level + '.', 'good');
         P.gainXp(p, 10, g.mkLog());
+      });
+      g.render();
+    },
+    // ---- smith: reinforce gear with materials + gold ----
+    matCount: function (p, kind) { const m = p.inventory.find(function (i) { return i.id === 'mat_' + kind; }); return m ? (m.qty || 1) : 0; },
+    spendMat: function (p, kind, n) { const m = p.inventory.find(function (i) { return i.id === 'mat_' + kind; }); if (m) P.removeItem(p, m, n); },
+    upgradeList: function (g) {
+      const p = g.player; const out = [];
+      P.SLOTS.forEach(function (s) { const it = p.equip[s]; if (it && (it.type === 'weapon' || it.type === 'armor')) out.push(it); });
+      p.inventory.forEach(function (it) { if (it.type === 'weapon' || it.type === 'armor') out.push(it); });
+      return out;
+    },
+    reinforceCost: function (it) {
+      const u = (it.upgrade || 0) + 1;
+      const cost = { gold: 30 * u + (it.level || 1) * 6, mats: { scrap: u } };
+      if (u >= 3) cost.mats.shard = u - 2;
+      return cost;
+    },
+    costStr: function (c) {
+      let parts = [c.gold + 'g'];
+      for (const k in c.mats) parts.push(c.mats[k] + ' ' + (TLU.Items.CRAFT_MATERIALS[k] ? TLU.Items.CRAFT_MATERIALS[k].name : k));
+      return parts.join(' + ');
+    },
+    renderSmith: function (g) {
+      const o = g.overlay, p = g.player;
+      const list = SCREENS.town.upgradeList(g);
+      const items = list.map(function (it) {
+        if ((it.upgrade || 0) >= 5) return { label: itemLabel(it), hint: 'MAX +5' };
+        return { label: itemLabel(it), hint: SCREENS.town.costStr(SCREENS.town.reinforceCost(it)) };
+      });
+      if (!items.length) items.push({ label: '(no gear to reinforce)', disabled: true });
+      const cur = list[o.cursor];
+      const mats = ['scrap', 'sinew', 'dust', 'shard'].map(function (k) { return SCREENS.town.matCount(p, k) + ' ' + TLU.Items.CRAFT_MATERIALS[k].name; }).join(' · ');
+      let body = '<div class="inv-wrap"><div class="inv-left">' + UI.renderMenu({ items: items, cursor: o.cursor }) +
+        '</div><div class="inv-right">' + describeItem(cur) + '</div></div>';
+      return '<div class="panel"><div class="menu-title">⚒ Smith · ' + p.gold + 'g</div>' +
+        '<div class="town-desc">' + esc(mats) + '</div>' + body +
+        '<div class="menu-foot">Enter: reinforce (+10% stats) · Esc: back</div></div>';
+    },
+    keySmith: function (g, k) {
+      const o = g.overlay, p = g.player;
+      if (k === 'Escape') { o.sub = null; o.cursor = 0; g.render(); return; }
+      const list = SCREENS.town.upgradeList(g);
+      if (!list.length) { g.render(); return; }
+      if (o.cursor >= list.length) o.cursor = list.length - 1;
+      menuNav(o, k, list.length, function (i) {
+        const it = list[i];
+        if ((it.upgrade || 0) >= 5) { g.msg('That is already reinforced to the maximum.'); return; }
+        const c = SCREENS.town.reinforceCost(it);
+        if (p.gold < c.gold) { g.msg('Not enough gold.'); return; }
+        for (const m in c.mats) { if (SCREENS.town.matCount(p, m) < c.mats[m]) { g.msg('You lack ' + TLU.Items.CRAFT_MATERIALS[m].name + '.'); return; } }
+        p.gold -= c.gold;
+        for (const m in c.mats) SCREENS.town.spendMat(p, m, c.mats[m]);
+        it.upgrade = (it.upgrade || 0) + 1;
+        it.value = Math.round((it.value || 10) * 1.15);
+        P.recompute(p);
+        g.msg('%c⚒ ' + it.name + ' reinforced to +' + it.upgrade + '!', 'good');
+        TLU.Player.trainSkill(p, 'alchemy', 2, g.mkLog());
+      });
+      g.render();
+    },
+    // ---- alchemist: brew consumables from ingredients ----
+    recipes: [
+      { out: 'potion', name: 'Healing Draught', gold: 18, mats: { herb: 1 } },
+      { out: 'potion_major', name: 'Greater Healing Draught', gold: 55, mats: { herb: 3 } },
+      { out: 'elixir_storm', name: 'Anima Elixir', gold: 35, mats: { dust: 1 } },
+      { out: 'antidote', name: 'Antidote', gold: 14, mats: { herb: 1 } },
+      { out: 'scroll_blast', name: 'Scroll of Churnblast', gold: 60, mats: { dust: 1, shard: 1 } },
+    ],
+    renderAlchemy: function (g) {
+      const o = g.overlay, p = g.player;
+      const items = SCREENS.town.recipes.map(function (r) { return { label: r.name, hint: SCREENS.town.costStr({ gold: r.gold, mats: r.mats }) }; });
+      const mats = ['herb', 'dust', 'shard'].map(function (k) { return SCREENS.town.matCount(p, k) + ' ' + TLU.Items.CRAFT_MATERIALS[k].name; }).join(' · ');
+      return '<div class="panel"><div class="menu-title">⚗ Alchemist · ' + p.gold + 'g</div>' +
+        '<div class="town-desc">' + esc(mats) + '</div>' +
+        UI.renderMenu({ items: items, cursor: o.cursor }) +
+        '<div class="menu-foot">Enter: brew · Esc: back</div></div>';
+    },
+    keyAlchemy: function (g, k) {
+      const o = g.overlay, p = g.player; const recipes = SCREENS.town.recipes;
+      if (k === 'Escape') { o.sub = null; o.cursor = 0; g.render(); return; }
+      menuNav(o, k, recipes.length, function (i) {
+        const r = recipes[i];
+        if (p.gold < r.gold) { g.msg('Not enough gold.'); return; }
+        for (const m in r.mats) { if (SCREENS.town.matCount(p, m) < r.mats[m]) { g.msg('You lack ' + TLU.Items.CRAFT_MATERIALS[m].name + '.'); return; } }
+        p.gold -= r.gold;
+        for (const m in r.mats) SCREENS.town.spendMat(p, m, r.mats[m]);
+        P.addItem(p, TLU.Items.consumable(r.out, 1));
+        g.msg('%c⚗ Brewed ' + r.name + '.', 'good');
+        TLU.Player.trainSkill(p, 'alchemy', 4, g.mkLog());
       });
       g.render();
     },
