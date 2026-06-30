@@ -86,7 +86,7 @@ New archetypes automatically join the town NPC rotation.
 bestiary: [
   { id: 'frost_wisp', name: 'Hoarfrost Wisp', glyph: 'i', color: '#aee3ff',
     lvl: 3, hp: 26, atk: 11, def: 2, spd: 15, xp: 16, gold: [0, 4],
-    biomes: ['coast','plains'], tags: ['void'],         // tags optional
+    biomes: ['coast','plains'], tags: ['rift'],         // tags optional
     abilities: ['stormblast'],                          // ids from Abilities/EnemyAbilities
     drops: 'gem',                                       // 'weapon'|'gem'|'rare'|'legendary'
     lore: 'Codex entry, shown after first kill.' }
@@ -101,7 +101,7 @@ them to each encounter. `biomes` controls where it spawns (overworld biome ids p
 |---|---|---|
 | `materials` | `[{id,name,mult,value,tier,color}]` | New material tiers (scale base stats). |
 | `weapons` / `armors` | `[{...}]` | New base item types (see `src/data/items.js` for shape). |
-| `prefixes` / `suffixes` | `[{id,name,tier,bonus}]` | Randomized affixes. `bonus` keys: `dmg, def, speed, maxHp, maxStormlight, crit, regen, stormRegen, armorPierce, voidbane, element`. |
+| `prefixes` / `suffixes` | `[{id,name,tier,bonus}]` | Randomized affixes. `bonus` keys: `dmg, def, speed, maxHp, maxCharge, crit, regen, chargeRegen, armorPierce, riftbane, element`. |
 | `consumables` | `{ id: {...} }` | Potions/scrolls/etc. |
 | `uniques` | `{ id: () => itemObject }` | Hand-authored artifacts. Each is a **factory function** returning a fresh item (call `TLU.Items.uid()` for its `uid`). |
 
@@ -122,7 +122,7 @@ quests: [
 |---|---|---|
 | `abilities` | player Surges | `{ id: { name, cost, school, target, unlock, order?, effect(ctx) } }`. |
 | `enemyAbilities` | enemy moves | `{ id: { name, target, effect(ctx) } }`. |
-| `skills` | skill list | `{ id: { name, group, desc } }`. `group` ∈ `combat, armor, surge, utility`. |
+| `skills` | skill list | `{ id: { name, group, desc } }`. `group` ∈ `combat, armor, attune, utility`. |
 
 `ctx` in an ability effect = `{ rng, user, target, enemies, allies, log, combat }`. The
 `combat` object exposes `attack, magicHit, heal, applyStatus, spawnAdd`.
@@ -141,10 +141,10 @@ Runs after all other merges. Use for anything the declarative fields don't cover
 TLU.Content.register({
   id: 'tidecaller-order',
   orders: {
-    tidecaller: { name: 'Tidecaller', surge: ['Flow','Bind'], glyph: '≈', color: '#3fd0d0',
+    tidecaller: { name: 'Tidecaller', attune: ['Flow','Bind'], glyph: '≈', color: '#3fd0d0',
                   blurb: 'Sea-sworn who turn water to weapon and wall.' },
   },
-  skills: { flow: { name: 'Flow', group: 'surge', desc: 'Command water and tide.' } },
+  skills: { flow: { name: 'Flow', group: 'attune', desc: 'Command water and tide.' } },
   abilities: {
     tide_lash: { name: 'Tide Lash', cost: 12, school: 'flow', target: 'enemy', unlock: 1, order: 'tidecaller',
       desc: 'A whip of seawater for frost damage.',
@@ -152,7 +152,7 @@ TLU.Content.register({
   },
 });
 ```
-The new Order appears in character creation; its surge skill levels through use and unlocks
+The new Order appears in character creation; its Attunement skill levels through use and unlocks
 its abilities — exactly like the built-in five.
 
 ---

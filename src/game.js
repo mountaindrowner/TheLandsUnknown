@@ -79,7 +79,7 @@
     this.placeEchoSite();
     this.logLines = [];
     this.msg('%c' + TLU.LORE.title + ' — ' + TLU.LORE.subtitle, 'head');
-    this.msg('You wake on the Rockbud Plains, echoes circling like curious sparks.');
+    this.msg('You wake on the Ironbud Plains, echoes circling like curious sparks.');
     this.msg('Seek the Wardens in a hold (⌂). Press [?] for help, [Enter] to interact.');
     this.save();
     this.render();
@@ -141,11 +141,11 @@
     const p = this.player;
     // light regen while travelling
     p.hp = Math.min(p.maxHp, p.hp + 1 + (p.hpRegen || 0));
-    // Anima regen — the Arts quicken inside the Churn (and far more for a Churn-Rider)
+    // Charge regen — the Attunements quicken inside the Churn (and far more for a Churn-Rider)
     let sl = 1;
     if (this.inChurn(p.wx)) sl = 6 + ((p.perkFlags && p.perkFlags.churnrider) ? 8 : 0);
     else if (this.storm.active) sl = 2;
-    p.stormlight = Math.min(p.maxStormlight, p.stormlight + sl + (p.stormRegen || 0));
+    p.charge = Math.min(p.maxCharge, p.charge + sl + (p.chargeRegen || 0));
     p.food = Math.max(0, p.food - ((p.perkFlags && p.perkFlags.forager) ? 0.25 : 0.4));
     if (p.food <= 0 && this.turnCount % 4 === 0) { p.hp = Math.max(1, p.hp - 2); this.msg('%cYou are starving. Eat a ration ([I]).', 'bad'); }
     this.churnStep();
@@ -167,7 +167,7 @@
       s.timer--;
       if (s.timer <= 0) {
         s.active = true; s.x = w.w + 1; s.dir = -1;
-        this.msg('%c⛈ The Churn rises in the EAST and begins its march. The Arts quicken — but the wilds turn deadly in its path.', 'storm');
+        this.msg('%c⛈ The Churn rises in the EAST and begins its march. The Attunements quicken — but the wilds turn deadly in its path.', 'storm');
       }
     }
   };
@@ -308,8 +308,8 @@
     const rng = this.rng;
     spec = spec || {};
     if (spec.type === 'gold') { const g = rng.int(spec.min, spec.max) + (level || 1) * 4; TLU.Player.addGold(p, g); return '+' + g + ' gold'; }
-    if (spec.type === 'anima') { p.stormlight = p.maxStormlight; return 'Your Anima floods to full (' + p.maxStormlight + ')'; }
-    if (spec.type === 'heal') { TLU.Player.fullHeal(p); return 'HP & Anima fully restored'; }
+    if (spec.type === 'charge') { p.charge = p.maxCharge; return 'Your Charge floods to full (' + p.maxCharge + ')'; }
+    if (spec.type === 'heal') { TLU.Player.fullHeal(p); return 'HP & Charge fully restored'; }
     if (spec.type === 'material') { const it = TLU.Items.material(spec.kind, spec.qty || 1); TLU.Player.addItem(p, it); return 'You gather ' + it.name + (spec.qty > 1 ? ' ×' + spec.qty : ''); }
     if (spec.type === 'item') { const it = TLU.Items.genEquipment(rng, spec.level || (level || 1), { magic: spec.magic || 0 }); TLU.Player.addItem(p, it); return 'You find ' + it.name; }
     if (spec.type === 'perk') { p.perkPoints = (p.perkPoints || 0) + 1; return 'A hard-won insight: +1 talent point! (Press [P])'; }
@@ -323,7 +323,7 @@
     if (site.final) bossKind = 'final';
     this.dungeon = { site: site, depth: 1, maxDepth: maxDepth, bossKind: bossKind };
     this.discoverPlace(site.type);
-    if (site.final) this.advanceMain('reach:aharietiam');
+    if (site.final) this.advanceMain('reach:deepvault');
     this.buildFloor(1);
     this.mode = 'dungeon'; this.state = 'play'; this.overlay = null;
     this.msg('%cYou enter ' + site.name + '.', 'head');
@@ -336,7 +336,7 @@
     const onBossFloor = (depth === this.dungeon.maxDepth) && this.dungeon.bossKind;
     const floor = TLU.Dungeon.genFloor(seed, {
       level: site.level, depth: depth, maxDepth: this.dungeon.maxDepth,
-      biome: site.type === 'camp' ? 'camp' : (site.final ? 'aharietiam' : 'vault'),
+      biome: site.type === 'camp' ? 'camp' : (site.final ? 'deepvault' : 'vault'),
       boss: onBossFloor ? this.dungeon.bossKind : null,
       hasFragment: site.hasFragment && depth === this.dungeon.maxDepth && !site.fragmentTaken,
     });
@@ -525,11 +525,11 @@
       // remove dead from dungeon floor
       if (this.mode === 'dungeon') this.dungeon.floor.entities = this.dungeon.floor.entities.filter(function (e) { return e.alive; });
       // boss-specific outcomes
-      const killedFinal = c.enemies.some(function (e) { return e.id === 'midnight_mother' && !e.alive; });
+      const killedFinal = c.enemies.some(function (e) { return e.id === 'gloammother' && !e.alive; });
       const killedSuper = c.enemies.some(function (e) { return e.id === 'churnheart' && !e.alive; });
       const killedMini = c.enemies.some(function (e) { return e.id === 'highlord_reaver' && !e.alive; });
-      if (killedMini) { if (this.dungeon && this.dungeon.site) this.dungeon.site.cleared = true; loot.push(TLU.Items.UNIQUES.oathbringer()); }
-      if (killedSuper) { this.player.flags.churnheartSlain = true; TLU.Player.addItem(this.player, TLU.Items.UNIQUES.sunmaker()); }
+      if (killedMini) { if (this.dungeon && this.dungeon.site) this.dungeon.site.cleared = true; loot.push(TLU.Items.UNIQUES.gravewind()); }
+      if (killedSuper) { this.player.flags.churnheartSlain = true; TLU.Player.addItem(this.player, TLU.Items.UNIQUES.cinderfall()); }
       if (loot.length) { this.state = 'play'; this.openLoot(loot, 'Spoils of battle'); }
       else { this.state = 'play'; this.overlay = null; }
       if (killedSuper) { this.victory(true); return; }
@@ -547,8 +547,8 @@
     p.kills[e.id] = (p.kills[e.id] || 0) + 1; p.stats.kills++;
     this.discoverBestiary(e);
     if (e.id === 'highlord_reaver') this.advanceMain('kill:highlord_reaver');
-    if (e.id === 'midnight_mother') this.advanceMain('kill:midnight_mother');
-    if (e.id === 'thunderclast') this.advanceSide();
+    if (e.id === 'gloammother') this.advanceMain('kill:gloammother');
+    if (e.id === 'cragwrought') this.advanceSide();
   };
 
   // ---------- quests ----------
@@ -625,7 +625,7 @@
   };
   Game.prototype.victory = function (grand) {
     this.state = 'win';
-    const cause = grand ? 'unmade the Heart of the Churn and ended the unmaking forever' : 'ended the Gloammother and stilled the last Churn';
+    const cause = grand ? 'undone the Heart of the Churn and ended the undoing forever' : 'ended the Gloammother and stilled the last Churn';
     const epi = grand ? 'They walked into the wound of the world, and closed it.' : 'They stood in the last Churn, and did not fall.';
     const annal = this.recordAnnal(true, cause, epi);
     TLU.Save.clear();
@@ -637,7 +637,7 @@
     const boss = TLU.Bestiary.scale(TLU.Bestiary.SUPERBOSS, TLU.Bestiary.SUPERBOSS.lvl);
     this.discoverBestiary(boss);
     this.msg('%cYou descend past where Vethra fell, into the wound at the centre of the world. Something vast and patient turns to face you...', 'boss');
-    this.startCombat([boss], { biome: 'aharietiam', level: 22, isBoss: true, canFlee: false });
+    this.startCombat([boss], { biome: 'deepvault', level: 22, isBoss: true, canFlee: false });
   };
 
   // ---------- overlays open helpers ----------

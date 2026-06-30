@@ -26,7 +26,7 @@
 
   // known source hexes -> semantic role (so bars/player retone without call-site changes)
   const HEXROLE = {
-    '#c0392b': 'hp', '#7e6bff': 'anima', '#3a8a4a': 'xp', '#3a8a4a ': 'xp',
+    '#c0392b': 'hp', '#7e6bff': 'charge', '#3a8a4a': 'xp', '#3a8a4a ': 'xp',
     '#fff36b': 'player', '#a33': 'enemy', '#ff2d78': 'boss',
   };
 
@@ -36,7 +36,7 @@
       cls: 'theme-folio', mapBg: '#f3ecd9',
       ramp: ['#241f18', '#3c3528', '#574d3a', '#736449', '#8c7c58', '#a3936a'], // ink (low-lum src) -> faint sepia
       roles: { player: '#9a3b2a', site: '#9a3b2a', accent: '#9a3b2a', enemy: '#7a4a2a',
-               hp: '#9a3b2a', anima: '#3f6173', xp: '#6b7a4a', boss: '#7a1f14' },
+               hp: '#9a3b2a', charge: '#3f6173', xp: '#6b7a4a', boss: '#7a1f14' },
     },
     storm: { id: 'storm', name: 'Stormglass', evokes: 'the original storm-violet HUD', cls: '' },
 
@@ -45,21 +45,21 @@
       cls: 'theme-phosphor', mapBg: '#080500',
       ramp: ['#241400', '#5e3a00', '#9a6400', '#c98200', '#ffb000', '#ffd87a'],
       roles: { player: '#fff3b0', site: '#ffd060', accent: '#ffb000', enemy: '#ff9a3a',
-               hp: '#d98a00', anima: '#ffb000', xp: '#7a5200', boss: '#ff7a00' },
+               hp: '#d98a00', charge: '#ffb000', xp: '#7a5200', boss: '#ff7a00' },
     },
     almanac: {
       id: 'almanac', name: 'Almanac', evokes: "a printed naturalist's field journal / e-ink reader",
       cls: 'theme-almanac', mapBg: '#e7e0cb',
       ramp: ['#2a2620', '#4a4233', '#6f6650', '#8f856a', '#b3a988'],   // dark ink (low lum src) -> faint
       roles: { player: '#8c2f1f', site: '#9a3b2a', accent: '#9a3b2a', enemy: '#7d4a2a',
-               hp: '#9a3b2a', anima: '#3f6173', xp: '#6b7a4a', boss: '#7a1f14' },
+               hp: '#9a3b2a', charge: '#3f6173', xp: '#6b7a4a', boss: '#7a1f14' },
     },
     bauhaus: {
       id: 'bauhaus', name: 'Bauhaus', evokes: 'Swiss / International-Typographic modernism — stark, one signal-red accent',
       cls: 'theme-bauhaus', mapBg: '#0b0b0b',
       ramp: ['#202020', '#3c3c3c', '#5e5e5e', '#8a8a8a', '#bdbdbd', '#ededed'],
       roles: { player: '#e4002b', site: '#e4002b', accent: '#e4002b', enemy: '#bdbdbd',
-               hp: '#e4002b', anima: '#ededed', xp: '#6e6e6e', boss: '#e4002b' },
+               hp: '#e4002b', charge: '#ededed', xp: '#6e6e6e', boss: '#e4002b' },
     },
   };
 

@@ -129,8 +129,8 @@
       if (ab) {
         let cost = ab.cost || 0;
         if (p.perkFlags && p.perkFlags.artDiscount) cost = Math.ceil(cost * (1 - p.perkFlags.artDiscount));
-        if (cost > p.stormlight) { this.log('Not enough Anima!'); this.awaitingPlayer = true; return; }
-        p.stormlight -= cost;
+        if (cost > p.charge) { this.log('Not enough Charge!'); this.awaitingPlayer = true; return; }
+        p.charge -= cost;
         ctx.target = action.target && action.target.alive ? action.target : this.aliveEnemies()[0];
         this.log('%c' + p.name + ' invokes ' + ab.name + '!', 'cast');
         ab.effect(ctx);
@@ -140,7 +140,7 @@
       this._useItem(p, action.item, action.target);
     } else if (action.type === 'defend') {
       this.applyStatus(p, 'guard', 2);
-      p.stormlight = Math.min(p.maxStormlight, p.stormlight + 6);
+      p.charge = Math.min(p.maxCharge, p.charge + 6);
       this.log(p.name + ' takes a defensive stance and draws breath.');
     } else if (action.type === 'flee') {
       const chance = this.isBoss ? 0 : 0.45 + (p.speed - this._avgEnemySpeed()) * 0.02;
@@ -161,7 +161,7 @@
   Combat.prototype._useItem = function (p, item, target) {
     if (!item) return;
     if (item.heal) { this.heal(p, item.heal, item.name); }
-    if (item.stormlight) { p.stormlight = Math.min(p.maxStormlight, p.stormlight + item.stormlight); this.log('%c+' + item.stormlight + ' Anima.', 'good'); }
+    if (item.charge) { p.charge = Math.min(p.maxCharge, p.charge + item.charge); this.log('%c+' + item.charge + ' Charge.', 'good'); }
     if (item.cure && p.statuses[item.cure]) { delete p.statuses[item.cure]; this.log('Cured ' + item.cure + '.'); }
     if (item.scroll === 'blast') { TLU.Abilities.scroll_blast.effect(this._ctx(p)); }
     TLU.Player.removeItem(p, item, 1);
@@ -174,7 +174,7 @@
     const p = this.player;
     if (a.art) {
       if (p.hp < p.maxHp * 0.4 && this.rng.chance(0.6)) { this.heal(p, Math.round(p.maxHp * 0.18), a.name + '’s mending'); return; }
-      this.magicHit(a, this.rng.pick(enemies), 1.2, 'storm', a.name + '’s Art');
+      this.magicHit(a, this.rng.pick(enemies), 1.2, 'arc', a.name + '’s Art');
       return;
     }
     if (a.guardy && this.rng.chance(0.22)) { this.applyStatus(a, 'guard', 2); this.log(a.name + ' raises a guard.'); return; }
@@ -202,8 +202,8 @@
     const abilities = (e.abilities || []).filter(function (id) { return TLU.EnemyAbilities[id]; });
     let useAbility = abilities.length && this.rng.chance(e.boss ? 0.7 : 0.4);
     // heal if low
-    if (e.hp < e.maxHp * 0.3 && abilities.indexOf('regenvoid') >= 0 && this.rng.chance(0.7)) {
-      TLU.EnemyAbilities.regenvoid.effect(ctx); return;
+    if (e.hp < e.maxHp * 0.3 && abilities.indexOf('regenrift') >= 0 && this.rng.chance(0.7)) {
+      TLU.EnemyAbilities.regenrift.effect(ctx); return;
     }
     if (useAbility) {
       const id = this.rng.pick(abilities);
@@ -223,7 +223,7 @@
       e.atk = Math.round(e.atk * 1.12);
       e.spd += 1;
       this.log('%c☇ ' + e.name + ' surges with renewed fury! (Phase ' + newPhase + ')', 'boss');
-      if (e.id === 'midnight_mother' || e.id === 'churnheart') this.spawnAdd(e);
+      if (e.id === 'gloammother' || e.id === 'churnheart') this.spawnAdd(e);
     }
   };
 
@@ -262,8 +262,8 @@
     const def = defenseOf(target) * (1 - Math.min(0.85, pierce));
     let dmg = raw * (60 / (60 + Math.max(0, def))) * mitigateBlock;
 
-    // element / voidbane vs void enemies
-    if (attacker.kind === 'player' && attacker.voidbane && target.tags && target.tags.indexOf('void') >= 0) dmg *= (1 + attacker.voidbane);
+    // element / riftbane vs rift enemies
+    if (attacker.kind === 'player' && attacker.riftbane && target.tags && target.tags.indexOf('rift') >= 0) dmg *= (1 + attacker.riftbane);
 
     dmg = Math.max(1, Math.round(dmg));
     this._raw(target, dmg, 'phys');
@@ -287,18 +287,18 @@
     if ((ts.blur && this.rng.chance(0.3))) { this.log(label + ' fizzles against ' + target.name + '.'); return 0; }
     let power;
     if (user.kind === 'player') {
-      const surge = user._element; // unused; compute from focus + best surge skill
+      // magic power derives from focus + best Attunement skill below
       let bestSurge = 0;
-      TLU.Skills.surgeSkills.forEach(function (id) { if (user.skills[id]) bestSurge = Math.max(bestSurge, user.skills[id].level); });
+      TLU.Skills.attuneSkills.forEach(function (id) { if (user.skills[id]) bestSurge = Math.max(bestSurge, user.skills[id].level); });
       power = user.attr.focus * 1.7 + bestSurge * 1.6 + (user._bonus ? user._bonus.dmg * 0.4 : 0);
     } else power = user.atk * 0.9;
     if (user.kind === 'player' && user.perkFlags && user.perkFlags.artPower) power *= (1 + user.perkFlags.artPower);
     let raw = power * (mult || 1) * this.rng.float(0.88, 1.15);
     const def = defenseOf(target) * 0.4; // magic half-ignores armor
     let dmg = Math.max(1, Math.round(raw * (60 / (60 + Math.max(0, def)))));
-    if (user.kind === 'player' && user.voidbane && target.tags && target.tags.indexOf('void') >= 0) dmg = Math.round(dmg * (1 + user.voidbane));
+    if (user.kind === 'player' && user.riftbane && target.tags && target.tags.indexOf('rift') >= 0) dmg = Math.round(dmg * (1 + user.riftbane));
     this._raw(target, dmg, element);
-    this.log('%c' + (label || 'Surge') + ' strikes ' + target.name + ' for ' + dmg + '.', 'cast');
+    this.log('%c' + (label || 'Attunement') + ' strikes ' + target.name + ' for ' + dmg + '.', 'cast');
     this._onDamaged(user, target);
     return dmg;
   };
@@ -363,7 +363,7 @@
   };
 
   Combat.prototype.spawnAdd = function (boss) {
-    const add = TLU.Bestiary.scale(TLU.Bestiary.byId('midnight_essence'), this.level);
+    const add = TLU.Bestiary.scale(TLU.Bestiary.byId('gloamspawn'), this.level);
     add.name = 'Gloam Shadow';
     add.statuses = {}; add.alive = true; add._id = 'add' + this.rng.int(0, 9999);
     this.enemies.push(add);

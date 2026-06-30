@@ -308,7 +308,7 @@
     body += A.stroke(rng, [[cx - 52, 200], [cx - 56, 96], [cx - 30, 44], [cx, 34], [cx + 30, 44], [cx + 56, 96], [cx + 52, 200]], { close: true, fill: PAL.paper2, w: 2.2, amt: 1.4 });
     // dissolving hatch within the cowl
     body += A.stroke(rng, [[cx - 44, 196], [cx - 48, 100], [cx - 26, 52], [cx, 44], [cx + 26, 52], [cx + 48, 100], [cx + 44, 196]], { close: true, fill: fh.ref, stroke: 'none', amt: 1 });
-    // the void of the hood
+    // the hollow of the hood
     var void_ = [[cx - 30, 150], [cx - 34, 86], [cx - 18, 60], [cx, 54], [cx + 18, 60], [cx + 34, 86], [cx + 30, 150], [cx, 138]];
     body += A.stroke(rng, void_, { close: true, fill: ink, stroke: 'none', amt: 1, op: 0.9 });
     // embered eyes

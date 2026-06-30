@@ -87,13 +87,13 @@ function serve() {
     const g = window.GAME;
     g.storm = { active: true, x: g.player.wx, dir: -1, speed: 1.6, timer: 10 };
     const inc = g.inChurn(g.player.wx);
-    g.player.stormlight = 0;
+    g.player.charge = 0;
     g.worldTurn();
     g.render();
-    return { inc: inc, fc: g.churnForecast().text, anima: g.player.stormlight };
+    return { inc: inc, fc: g.churnForecast().text, charge: g.player.charge };
   });
   ok('Churn front detected + forecast', churn.inc === true && /CHURN/i.test(churn.fc));
-  ok('Churn supercharges Anima regen', churn.anima >= 5);
+  ok('Churn supercharges Charge regen', churn.charge >= 5);
 
   // ----- asynchronous dynasties: record → encode/decode → echo spawns + grants a boon -----
   const dyn = await page.evaluate(() => {
@@ -119,7 +119,7 @@ function serve() {
     const g = window.GAME; const t = g.world.towns[0];
     g.player.wx = t.x; g.player.wy = t.y; g.player.gold = 2000;
     // give crafting materials so the smith/alchemist can be exercised
-    ['scrap','herb','dust','shard'].forEach((k) => window.TLU.Player.addItem(g.player, window.TLU.Items.material(k, 9)));
+    ['scrap','herb','dust','alloy'].forEach((k) => window.TLU.Player.addItem(g.player, window.TLU.Items.material(k, 9)));
     g.render();
   });
   await press('Enter');                            // enter town
@@ -208,7 +208,7 @@ function serve() {
     const g = window.GAME; const v = g.world.vaults[0];
     g.player.wx = v.x; g.player.wy = v.y;
     window.TLU.Player.gainXp(g.player, 8000, () => {});
-    g.player.hp = g.player.maxHp; g.player.stormlight = g.player.maxStormlight;
+    g.player.hp = g.player.maxHp; g.player.charge = g.player.maxCharge;
     g.render();
   });
   await press('Enter');                            // descend into vault
@@ -243,11 +243,11 @@ function serve() {
     if (g.overlay && g.overlay.type === 'loot') g.overlay = null;
     const p = g.player;
     window.TLU.Player.gainXp(p, 300000, () => {});
-    window.TLU.Player.equip(p, window.TLU.Items.UNIQUES.oathbringer());
-    window.TLU.Player.equip(p, window.TLU.Items.UNIQUES.plate_radiant());
-    p.maxHp = 6000; p.hp = 6000; p.attack = 800; p.stormlight = p.maxStormlight;
+    window.TLU.Player.equip(p, window.TLU.Items.UNIQUES.gravewind());
+    window.TLU.Player.equip(p, window.TLU.Items.UNIQUES.riftplate());
+    p.maxHp = 6000; p.hp = 6000; p.attack = 800; p.charge = p.maxCharge;
     const boss = window.TLU.Bestiary.scale(window.TLU.Bestiary.FINAL_BOSS, 18);
-    g.startCombat([boss], { biome: 'aharietiam', level: 18, isBoss: true, canFlee: false });
+    g.startCombat([boss], { biome: 'deepvault', level: 18, isBoss: true, canFlee: false });
   });
   await page.waitForTimeout(80);
   const bossEnded = await resolveCombat(page, press, state, 300);
@@ -264,7 +264,7 @@ function serve() {
   const grandEnded = await resolveCombat(page, press, state, 400);
   ok('Churnheart finale resolves', grandEnded);
   const grand = await page.evaluate(() => ({ s: window.GAME.state, grand: window.GAME.overlay && window.GAME.overlay.grand, slain: !!window.GAME.player.flags.churnheartSlain }));
-  ok('TRUE ending reached (Churn unmade)', grand.s === 'win' && grand.grand === true && grand.slain === true);
+  ok('TRUE ending reached (Churn undone)', grand.s === 'win' && grand.grand === true && grand.slain === true);
 
   ok('no console/page errors', errors.length === 0);
   if (errors.length) errors.slice(0, 12).forEach((e) => console.error('    ! ' + e));

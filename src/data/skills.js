@@ -15,20 +15,20 @@
     // armor
     heavy:    { name: 'Heavy Armor', group: 'armor', desc: 'Plate and mail.' },
     light:    { name: 'Light Armor', group: 'armor', desc: 'Leather and cloth.' },
-    // channeling schools (one per surge)
-    gravitation: { name: 'Pull', group: 'surge', desc: 'Bend the pull of the world.' },
-    adhesion:    { name: 'Bind',    group: 'surge', desc: 'Bind things together.' },
-    cohesion:    { name: 'Form',    group: 'surge', desc: 'Shape and harden stone & self.' },
-    tension:     { name: 'Strain',     group: 'surge', desc: 'Stress matter to breaking.' },
-    abrasion:    { name: 'Glide',    group: 'surge', desc: 'Remove friction; slide and evade.' },
-    progression: { name: 'Mend', group: 'surge', desc: 'Accelerate growth and healing.' },
-    illumination:{ name: 'Light',group: 'surge', desc: 'Weave light and illusion.' },
-    division:    { name: 'Cinder',    group: 'surge', desc: 'Unmake matter with fire.' },
+    // Attunements — the old arts of waking leftover machines (one per device-class)
+    pull:   { name: 'Pull',   group: 'attune', desc: 'Bend the weight of things with old lift-engines.' },
+    bind:   { name: 'Bind',   group: 'attune', desc: 'Fuse matter with adhesive fields.' },
+    form:   { name: 'Form',   group: 'attune', desc: 'Shape and harden stone, alloy, and self.' },
+    strain: { name: 'Strain', group: 'attune', desc: 'Stress matter to its breaking point.' },
+    glide:  { name: 'Glide',  group: 'attune', desc: 'Shed friction; slide and evade.' },
+    mend:   { name: 'Mend',   group: 'attune', desc: 'Coax flesh and metal to knit and grow.' },
+    veil:   { name: 'Veil',   group: 'attune', desc: 'Weave hard-light into illusion and sight.' },
+    cinder: { name: 'Cinder', group: 'attune', desc: 'Disassemble matter with cutting flame.' },
     // utility
     lockpick: { name: 'Lockpicking', group: 'utility', desc: 'Open what is closed.' },
     barter:   { name: 'Barter',      group: 'utility', desc: 'Better prices when trading.' },
-    survival: { name: 'Survival',    group: 'utility', desc: 'Endure storms and travel.' },
-    alchemy:  { name: 'Alchemy',     group: 'utility', desc: 'Brew draughts and infuse gems.' },
+    survival: { name: 'Survival',    group: 'utility', desc: 'Endure the marches and travel.' },
+    alchemy:  { name: 'Alchemy',     group: 'utility', desc: 'Brew draughts and charge cells.' },
   };
 
   // XP needed to advance a skill from level L to L+1.
@@ -42,6 +42,6 @@
     levelXpFor: levelXpFor,
     ids: Object.keys(SKILLS),
     combatSkills: Object.keys(SKILLS).filter(function (k) { return SKILLS[k].group === 'combat'; }),
-    surgeSkills: Object.keys(SKILLS).filter(function (k) { return SKILLS[k].group === 'surge'; }),
+    attuneSkills: Object.keys(SKILLS).filter(function (k) { return SKILLS[k].group === 'attune'; }),
   };
 })(window.TLU = window.TLU || {});

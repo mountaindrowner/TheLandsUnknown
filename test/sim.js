@@ -40,13 +40,13 @@ const world = TLU.World.generate('test-seed-001', {});
 ok('world has tiles', world.tiles.length === world.h && world.tiles[0].length === world.w);
 ok('world has >=4 towns', world.towns.length >= 4);
 ok('world has vaults', world.vaults.length >= 6);
-ok('world has aharietiam', !!world.aharietiam);
+ok('world has deepvault', !!world.deepvault);
 ok('start is passable', world.passable(world.start.x, world.start.y));
 ok('4 vaults carry fragments', world.vaults.filter(v => v.hasFragment).length === 4);
 
 // deterministic?
 const world2 = TLU.World.generate('test-seed-001', {});
-ok('worldgen deterministic', world2.towns[0].x === world.towns[0].x && world2.aharietiam.x === world.aharietiam.x);
+ok('worldgen deterministic', world2.towns[0].x === world.towns[0].x && world2.deepvault.x === world.deepvault.x);
 
 // ---- dungeon ----
 const dseed = 'd1';
@@ -56,7 +56,7 @@ ok('dungeon entrance passable', floor.passable(floor.entrance.x, floor.entrance.
 ok('dungeon down passable', floor.passable(floor.down.x, floor.down.y));
 ok('fragment placed on deepest', floor.features.some(f => f.type === 'fragment'));
 
-const bossFloor = TLU.Dungeon.genFloor('bf', { level: 16, depth: 4, maxDepth: 4, biome: 'aharietiam', boss: 'final' });
+const bossFloor = TLU.Dungeon.genFloor('bf', { level: 16, depth: 4, maxDepth: 4, biome: 'deepvault', boss: 'final' });
 ok('boss floor has boss entity', bossFloor.entities.some(e => e.boss));
 
 // ---- items ----
@@ -70,13 +70,13 @@ for (let i = 0; i < 400; i++) {
   totalVal += it.value;
 }
 ok('some legendary drops in 400 rolls', legendary);
-const uniq = TLU.Items.UNIQUES.oathbringer();
-ok('unique oathbringer', uniq.shard && uniq.rarity === 'artifact');
+const uniq = TLU.Items.UNIQUES.gravewind();
+ok('unique gravewind', uniq.relic && uniq.rarity === 'artifact');
 
 // ---- player + leveling + skills ----
-const p = TLU.Player.newPlayer({ name: 'Tester', order: 'windrunner', weaponSkill: 'blades', seed: 'x' });
+const p = TLU.Player.newPlayer({ name: 'Tester', order: 'skyrender', weaponSkill: 'blades', seed: 'x' });
 ok('player has hp', p.maxHp > 0 && p.hp === p.maxHp);
-ok('player has stormlight', p.maxStormlight > 0);
+ok('player has charge', p.maxCharge > 0);
 ok('player has weapon equipped', !!p.equip.weapon);
 ok('player knows abilities', p.knownAbilities.length > 0);
 const lvl0 = p.level;
@@ -97,7 +97,7 @@ p.perkPoints = 5;
 ok('addPerk vital works', TLU.Player.addPerk(p, 'vital') && p.maxHp > hp0);
 ok('addPerk sets combat flags', TLU.Player.addPerk(p, 'lifedrinker') && p.perkFlags.lifesteal > 0);
 ok('cannot take same perk twice', !TLU.Player.addPerk(p, 'vital'));
-ok('addPerk channeler raises max anima', (function () { const a = p.maxStormlight; return TLU.Player.addPerk(p, 'channeler') && p.maxStormlight > a; })());
+ok('addPerk channeler raises max Charge', (function () { const a = p.maxCharge; return TLU.Player.addPerk(p, 'channeler') && p.maxCharge > a; })());
 
 // ---- combat: simulate many normal fights ----
 function stubGame(seed) {
@@ -117,7 +117,7 @@ function runBattle(player, enemies, opts) {
   const aoe = player.knownAbilities.filter((id) => TLU.Abilities[id].target === 'all-enemies');
   const single = player.knownAbilities.filter((id) => TLU.Abilities[id].target === 'enemy');
   const heal = player.knownAbilities.filter((id) => id === 'regrowth');
-  function affordable(id) { return (TLU.Abilities[id].cost || 0) <= player.stormlight; }
+  function affordable(id) { return (TLU.Abilities[id].cost || 0) <= player.charge; }
   while (!c.over && guard++ < 2000) {
     if (!c.awaitingPlayer) break;
     const alive = c.aliveEnemies();
@@ -129,7 +129,7 @@ function runBattle(player, enemies, opts) {
       c.playerAct({ type: 'item', item: potion });
     } else if (alive.length >= 2 && aoe.length && affordable(aoe[0])) {
       c.playerAct({ type: 'ability', id: aoe[0] });
-    } else if (single.length && affordable(single[0]) && player.stormlight > player.maxStormlight * 0.4) {
+    } else if (single.length && affordable(single[0]) && player.charge > player.maxCharge * 0.4) {
       c.playerAct({ type: 'ability', id: single[0], target });
     } else {
       c.playerAct({ type: 'attack', target });
@@ -139,11 +139,11 @@ function runBattle(player, enemies, opts) {
 }
 
 // fresh strong-ish player for combat tests
-const hero = TLU.Player.newPlayer({ name: 'Hero', order: 'dustbringer', weaponSkill: 'blades', seed: 'h' });
+const hero = TLU.Player.newPlayer({ name: 'Hero', order: 'cinderwright', weaponSkill: 'blades', seed: 'h' });
 TLU.Player.gainXp(hero, 50000, noop); // a few levels
 let wins = 0, battles = 0;
 for (let i = 0; i < 40; i++) {
-  hero.hp = hero.maxHp; hero.stormlight = hero.maxStormlight; hero.statuses = {};
+  hero.hp = hero.maxHp; hero.charge = hero.maxCharge; hero.statuses = {};
   // refill a couple of potions so a real player's healing option is modeled
   if (!hero.inventory.some((it) => it.heal)) hero.inventory.push(TLU.Items.consumable('potion', 3));
   const enemies = TLU.Bestiary.spawnGroup(new TLU.RNG('grp' + i), 'plains', Math.min(8, hero.level));
@@ -159,8 +159,8 @@ ok('hero wins most level-appropriate fights (' + wins + '/' + battles + ')', win
 const ally0 = TLU.Companions.generate(new TLU.RNG('ally'), 5, 'warrior');
 ok('companion generated', ally0.kind === 'ally' && ally0.maxHp > 0 && ally0.atk > 0);
 (function () {
-  const cap = TLU.Player.newPlayer({ name: 'Cap', order: 'stoneward', weaponSkill: 'blunt', seed: 'cap' });
-  TLU.Player.gainXp(cap, 20000, noop); cap.hp = cap.maxHp; cap.stormlight = cap.maxStormlight;
+  const cap = TLU.Player.newPlayer({ name: 'Cap', order: 'stonewarden', weaponSkill: 'blunt', seed: 'cap' });
+  TLU.Player.gainXp(cap, 20000, noop); cap.hp = cap.maxHp; cap.charge = cap.maxCharge;
   const a = TLU.Companions.generate(new TLU.RNG('a2'), cap.level, 'channeler');
   const enemies = TLU.Bestiary.spawnGroup(new TLU.RNG('eg'), 'plains', cap.level);
   let ended = null;
@@ -173,12 +173,12 @@ ok('companion generated', ally0.kind === 'ally' && ally0.maxHp > 0 && ally0.atk 
 })();
 
 // ---- final boss fight with a geared, high-level hero ----
-const champ = TLU.Player.newPlayer({ name: 'Champion', order: 'windrunner', weaponSkill: 'blades', seed: 'c' });
+const champ = TLU.Player.newPlayer({ name: 'Champion', order: 'skyrender', weaponSkill: 'blades', seed: 'c' });
 TLU.Player.gainXp(champ, 400000, noop); // push to high level
-TLU.Player.equip(champ, TLU.Items.UNIQUES.oathbringer());
-TLU.Player.equip(champ, TLU.Items.UNIQUES.plate_radiant());
+TLU.Player.equip(champ, TLU.Items.UNIQUES.gravewind());
+TLU.Player.equip(champ, TLU.Items.UNIQUES.riftplate());
 for (const a of ['might','finesse','focus','endurance']) { for (let i=0;i<12;i++) TLU.Player.spendAttr(champ, a); }
-champ.hp = champ.maxHp; champ.stormlight = champ.maxStormlight;
+champ.hp = champ.maxHp; champ.charge = champ.maxCharge;
 const boss = TLU.Bestiary.scale(TLU.Bestiary.FINAL_BOSS, TLU.Bestiary.FINAL_BOSS.lvl);
 const br = runBattle(champ, [boss], { s: 999, isBoss: true, level: 18 });
 ok('final boss fight terminates', br.guard < 1999);

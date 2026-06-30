@@ -101,7 +101,7 @@
       assignAll(S.LIST, pack.skills, 'skills', false);
       S.ids = Object.keys(S.LIST);
       S.combatSkills = S.ids.filter(function (k) { return S.LIST[k].group === 'combat'; });
-      S.surgeSkills = S.ids.filter(function (k) { return S.LIST[k].group === 'surge'; });
+      S.attuneSkills = S.ids.filter(function (k) { return S.LIST[k].group === 'attune'; });
     }
 
     // ---- optional hook: arbitrary setup with full TLU access ----

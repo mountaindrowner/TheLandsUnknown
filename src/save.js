@@ -5,7 +5,7 @@
 (function (TLU) {
   'use strict';
 
-  const KEY = 'tlu_save_v1';
+  const KEY = 'tlu_save_v2';
 
   function snapshot(game) {
     const w = game.world;

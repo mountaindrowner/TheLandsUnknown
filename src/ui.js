@@ -33,7 +33,7 @@
   }
 
   // ---- generative hero portrait (cached by seed+level; folio frontispiece) ----
-  const ORDER_ROLE = { windrunner: 'skirmisher', stoneward: 'warden', edgedancer: 'skirmisher', truthwatcher: 'channeler', dustbringer: 'channeler' };
+  const ORDER_ROLE = { skyrender: 'skirmisher', stonewarden: 'warden', slipstrider: 'skirmisher', veilseer: 'channeler', cinderwright: 'channeler' };
   const _portCache = {};
   function heroPortrait(p) {
     if (!TLU.Art || !TLU.Art.portrait) return '';
@@ -53,7 +53,7 @@
     html += '<div class="pname">' + esc(p.name) + '</div>';
     html += '<div class="psub" style="color:' + p.order.color + '">' + p.order.glyph + ' ' + esc(p.order.name) + ' · Lv ' + p.level + '</div>';
     html += '<div class="statrow">HP</div>' + bar(p.hp, p.maxHp, '#c0392b');
-    html += '<div class="statrow">Anima</div>' + bar(p.stormlight, p.maxStormlight, '#7e6bff');
+    html += '<div class="statrow">Charge</div>' + bar(p.charge, p.maxCharge, '#7e6bff');
     html += '<div class="statrow">XP</div>' + bar(p.xp, p.xpNext, '#3a8a4a');
     html += '<div class="gridstats">';
     html += '<span>⚔ ATK <b>' + p.attack + '</b></span>';

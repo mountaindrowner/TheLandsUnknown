@@ -9,7 +9,7 @@
   const BIOMES = {
     ocean:   { id: 'ocean',   glyph: '~', color: '#1d4e73', bg: '#0c2436', name: 'The Eastern Sea', passable: false },
     coast:   { id: 'coast',   glyph: '.', color: '#caa86a', bg: '#1a1d12', name: 'Shore', biome: 'plains' },
-    plains:  { id: 'plains',  glyph: '"', color: '#6f8a3f', bg: '#12160c', name: 'Rockbud Plains', biome: 'plains' },
+    plains:  { id: 'plains',  glyph: '"', color: '#6f8a3f', bg: '#12160c', name: 'Ironbud Plains', biome: 'plains' },
     hills:   { id: 'hills',   glyph: 'n', color: '#7d7048', bg: '#16140c', name: 'Windward Hills', biome: 'hills' },
     forest:  { id: 'forest',  glyph: '♣', color: '#3f7a3f', bg: '#0d160d', name: 'Stonewood', biome: 'forest' },
     mountain:{ id: 'mountain',glyph: '▲', color: '#8a8a8a', bg: '#161616', name: 'The Unclimbed', biome: 'plateau', passable: false },
@@ -143,7 +143,7 @@
     // --- Mini-boss lair ---
     const lair = placeSite({ type: 'lair', glyph: '☠', color: '#ff6a3d', name: 'Varen\'s Warcamp', level: 8, boss: 'highlord_reaver', cleared: false }, 8);
 
-    // --- Final ruin: Dawnhollow (placed deep in the unmade lands, east) ---
+    // --- Final ruin: Dawnhollow (placed deep in the undone lands, east) ---
     let aha = null;
     for (let tries = 0; tries < 500 && !aha; tries++) {
       const x = rng.int(W - 18, W - 4), y = rng.int(6, H - 6);
@@ -170,7 +170,7 @@
 
     return {
       seed: seedStr, w: W, h: H, tiles: tiles, sites: sites,
-      towns: towns, vaults: vaults, camps: camps, landmarks: landmarks, lair: lair, aharietiam: aha,
+      towns: towns, vaults: vaults, camps: camps, landmarks: landmarks, lair: lair, deepvault: aha,
       start: { x: start.x, y: start.y },
       biomeAt: function (x, y) { return (tiles[y] && tiles[y][x]) ? tiles[y][x].biome : 'plains'; },
       siteAt: function (x, y) { return (tiles[y] && tiles[y][x]) ? tiles[y][x].site : null; },

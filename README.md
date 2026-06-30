@@ -4,9 +4,12 @@
 A large, open-world **ASCII RPG** that blends the freeform exploration and skill-by-use
 progression of **The Elder Scrolls**, the deep procedural systems of **Dwarf Fortress**,
 and the emergent, story-soaked pull of **RimWorld** and **Minecraft** — set in an
-original death-and-memory world of the Churn, of Anima, and the unforgotten dead.
+original far-future world: Aurenmark, the worn skin of a planet built and ruined
+across uncounted ages, where the leftover machines of prior peoples are woken like
+sorcery, the dead persist as recorded echoes, and a tide of ancient machine-dust —
+**the Churn** — walks the world taking it apart.
 
-Wander a seed-generated continent, channel the Arts, hoard randomized Riftgear, gather
+Wander a seed-generated continent, turn the Attunements, hoard randomized Riftgear, gather
 rumors from a town full of talkative NPCs, fill in a discovery Codex as you explore —
 and, when you are ready, descend into ruined Dawnhollow to face the final boss:
 **Vethra, the Gloammother**.
@@ -49,7 +52,7 @@ tap-an-enemy-to-attack in combat. The layout reflows for small screens automatic
 
 The **Churn** is a roaming apocalypse that marches **east→west** across the map on a
 **forecastable schedule you can read and exploit** (the HUD shows how many tiles away it is
-and when it returns). Standing in the front makes the **Arts surge** — huge Anima regen —
+and when it returns). Standing in the front makes the **Attunements quicken** — huge Charge regen —
 but its wilds are far more frequent and several levels deadlier. As it passes it **lays the
 land bare and uncovers hidden sites**, so chasing the Churn is how an explorer charts the
 world. A force you plan routes around, not weather you watch.
@@ -103,25 +106,24 @@ TLU.Content.register({
 
 [`DESIGN_QUESTIONS.md`](DESIGN_QUESTIONS.md) is a working questionnaire to refine the
 gameplay loop, progression depth, endgame, replay variance, and a set of **original
-"unique spin"** mechanics (the storm as a duelable clock; wisp-bonds with opinions; a
-soul-economy where every kill arms the apocalypse; asynchronous dynasties). Answer it and
+"unique spin"** mechanics (the Churn as a duelable clock; echo-bonds with opinions; a
+charge-economy where every kill feeds the Churn; asynchronous dynasties). Answer it and
 the next build follows from your choices.
 
 ---
 
 ## The world
 
-> *The Churn walks the world from east to west, and where it passes the stones wake
-> and the souls of the dead drift like embers on the wind. You are one of the Unkindled —
-> born without the gift the temples promised, cast out of the spire-cities to wander the
-> sundered marches. But the echoes have begun to gather at your shoulder...*
+> *The Churn walks the world from east to west — a haze of old machine-dust that takes
+> the land apart, motes still finishing a task their makers forgot. You are one of the
+> Unkindled — born without the echo the spires promised, cast out of the vault-cities to
+> wander the undone marches. But an echo has begun to gather at your shoulder...*
 
-- **Aurenmark** — a sundered continent crossed by the living **Churn**.
-- **Anima** — the soul-light shaken loose from the dead by the Churn, breathed from charged gems to fuel the Arts.
-- **Echoes** — fragments of the dead that gather at the shoulders of the would-be **Kindled**.
-- **The five Orders** — Skyrender, Stonewarden, Slipstrider, Veilseer, Cinderwright — each
-  binding two of the eight Arts. The Kindled carry an echo of the dead.
-- **The Rift** — a soul-severing weapon shattered into four fragments, scattered in drowned vaults.
+- **Aurenmark** — the worn skin of a world built and ruined across uncounted ages, crossed by the living **Churn**.
+- **Charge** — the ambient power that still leaks from the buried machines, drawn from cells to wake old devices and work the Attunements.
+- **Echoes** — recordings of the dead, imprinted by deep vaults long ago and stirred loose by the Churn, that gather to the would-be **Kindled**.
+- **The five Orders** — Skyrender, Stonewarden, Slipstrider, Veilseer, Cinderwright — adept-traditions, each turning two of the eight **Attunements**.
+- **The Rift** — a relic weapon shattered into four fragments, scattered in drowned vaults.
 - **The Hollow Ones** — old, patient, hungry forces. **Vethra, the Gloammother**, is the eldest that wakes.
 
 ### Controls
@@ -159,7 +161,7 @@ no bitmaps, no network, no build step, just geometry composed from a number:
   seed always draws the same face, so a hero keeps one face across saves and worlds, and a
   dead hero's **echo** returns wearing the same hollow cowl.
 - **Specimen plates** (`beast.js`) — the Bestiary plates each creature as an inked profile on
-  a hatched groundline, its form assembled from the creature's tags (void / stone / beast /
+  a hatched groundline, its form assembled from the creature's tags (rift / stone / beast /
   reaver / swarm) and seeded by its id, so a Rockmite is always *that* Rockmite.
 - **A generated voice** (`lexicon.js`) — each face comes with an **epithet** ("the Ashbound",
   "Warden of the Last Gate") and a two-line biographer's note whose physical details are
@@ -184,7 +186,7 @@ or fill the **Codex** bestiary to see it. A standalone gallery lives at `design/
   **Bestiary** that records each creature you slay, **Places** you've charted, and every
   **rumor** you've heard. Discovery is the pull.
 - **Ambient life & travel events.** Evocative barks while you roam, plus non-combat
-  micro-events — an echo’s gift of Anima, a traveler's cairn, a roadside shrine, a wandering
+  micro-events — an echo’s gift of Charge, a traveler's cairn, a roadside shrine, a wandering
   healer, tainted water — that keep the road surprising.
 - **Skill-by-use progression (Elder-Scrolls style).** 21 skills across combat, armor,
   channeling and utility that level *through use*; skill-ups feed your character level

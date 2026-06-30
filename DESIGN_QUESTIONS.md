@@ -64,7 +64,7 @@ return to town to spend → repeat → push east.* It works but it's thin. Quest
 
 13. **How different should two playthroughs be?** Today the world reseeds but the beats are
     fixed. Add: (a) randomized **faction alignment** (who's the villain shifts), (b)
-    **world modifiers / seeds with traits** ("the Long Storm", "the Anima Famine"), ⭐ (c)
+    **world modifiers / seeds with traits** ("the Long Storm", "the Charge Famine"), ⭐ (c)
     procedural **main-quest variants** (the Rift's pieces, bosses, and ending vary).
 14. **Difficulty & accessibility:** a settings screen (combat speed, permadeath toggle,
     encounter rate, text size) ⭐ — important for mobile and for the broad audience you
@@ -85,7 +85,7 @@ storm, the echoes, the soul-severing Rift. Each could be **the** thing this game
    exploit. It supercharges your surges and reveals hidden vaults in its path, but
    transforms the wilds into deadly stormforms and *rewrites terrain* behind it. Master
    players **chase or flee the storm** as a core strategic layer — plan routes around it,
-   bank Anima before it passes, raid vaults only the storm can open. Nobody has made the
+   bank Charge before it passes, raid vaults only the storm can open. Nobody has made the
    weather a *thing you duel with*. *(Lowest-risk, highest-fit — the lore already supports it.)*
 
 2. **Echo-bonding as the whole progression system.** Instead of an XP bar, your power comes

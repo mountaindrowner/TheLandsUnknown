@@ -27,7 +27,7 @@ function serve() { return new Promise((r) => { const s = http.createServer((req,
     g.overlay = null;
     g.state = 'play';                          // ensure render() actually redraws
     window.TLU.Player.gainXp(g.player, 4000, () => {});
-    g.player.hp = g.player.maxHp; g.player.stormlight = g.player.maxStormlight;
+    g.player.hp = g.player.maxHp; g.player.charge = g.player.maxCharge;
     g.storm = { active: true, x: g.player.wx + 5, dir: -1, speed: 1.6, timer: 30 };
     g.render();
   });

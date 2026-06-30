@@ -11,14 +11,14 @@
   'use strict';
   var A = TLU.Art;
 
-  var HOLDS = ['Vesmark', 'Caldspire', 'Thornholt', 'Greywall', 'Saltmere', 'Emberhold', 'Dunmoor', 'Highreach', 'the Ashlands', 'the drowned east', 'a hold the Churn has since unmade', 'the windward marches'];
+  var HOLDS = ['Vesmark', 'Caldspire', 'Thornholt', 'Greywall', 'Saltmere', 'Emberhold', 'Dunmoor', 'Highreach', 'the Ashlands', 'the drowned east', 'a hold the Churn has since undone', 'the windward marches'];
   var ORIGIN_ADJ = ['windward', 'salt-bitten', 'ash-grey', 'far-northern', 'low-born', 'cloister-raised', 'reaver-orphaned', 'rift-touched', 'twice-displaced'];
 
   var EP_ADJ = ['Ashbound', 'Stormwise', 'Unmournful', 'the Late', 'Grey', 'Hollow-touched', 'Twice-Killed', 'Riftborn', 'the Quiet', 'Unkindled', 'Cinder-marked', 'the Patient', 'Saltworn', 'the Unbroken', 'Lastlight', 'the Tallykeeper', 'Stonefast', 'Emberwake', 'the Unsleeping', 'Churn-spurned'];
   var EP_OF = [
     ['Warden', ['the Last Gate', 'a fallen hold', 'the Quiet Field', 'no banner', 'the salt road']],
     ['Keeper', ['Tallies', 'the Dead', 'a broken oath', 'the eastern lamps', 'lost names']],
-    ['Walker', ['the Churnreach', 'the unmade roads', 'the grey marches', 'the long east']],
+    ['Walker', ['the Churnreach', 'the undone roads', 'the grey marches', 'the long east']],
     ['Last', ['of an order', 'of a bloodline', 'of a drowned hold', 'to leave the wall']],
   ];
   var NICK = ['Grey-eye', 'Coalhand', 'Saltwidow', 'Ninefingers', 'Hollowcheek', 'Brightblade', 'Lowvoice', 'Stormear', 'Ashlung', 'Onelamp', 'Dryeye', 'Cairnhand'];
@@ -39,7 +39,7 @@
     warrior: ['swordhand', 'line-breaker', 'oathblade', 'shieldbreaker'],
     warden: ['warden', 'wallkeeper', 'shieldbearer', 'bulwark'],
     skirmisher: ['skirmisher', 'outrider', 'knife', 'pathfinder'],
-    channeler: ['channeler', 'anima-singer', 'gemwright', 'surge-touched'],
+    channeler: ['channeler', 'charge-singer', 'gemwright', 'spark-touched'],
     explorer: ['wanderer', 'charter', 'marchwalker', 'far-strider'],
     folk: ['traveller', 'survivor', 'hold-soul', 'wayfarer'],
   };
@@ -56,7 +56,7 @@
       if (t.age === 'weathered') tells.push('a face the wind has had its way with');
       if (t.fhair === 'beard') tells.push('a grey-shot beard kept against the cold');
       if (t.eyes === 'narrow') tells.push('eyes narrowed as if always reading the horizon');
-      if (t.earring) tells.push('a single anima-bead at one ear');
+      if (t.earring) tells.push('a single charge-bead at one ear');
       if (t.throat) tells.push('a chipped polestone worn at the throat');
     }
     if (!tells.length) tells = ['lean and quiet', 'unremarkable until the killing starts', 'plain-cloaked and watchful'];
@@ -106,12 +106,12 @@
   }
 
   // a naturalist's specimen note for a creature
-  var BEAST_HABITAT = ['the windward flats', 'old unmakings', 'drowned riftvaults', 'the Churnreach', 'stonewood deeps', 'crater-glass barrens', 'the ash dunes'];
+  var BEAST_HABITAT = ['the windward flats', 'old undoings', 'drowned riftvaults', 'the Churnreach', 'stonewood deeps', 'crater-glass barrens', 'the ash dunes'];
   var BEAST_NOTE = [
     'Drawn from a carcass; the living specimen would not hold still for the plate.',
-    'Hunts at the Churn\'s edge, where the unmaking keeps it fed.',
+    'Hunts at the Churn\'s edge, where the undoing keeps it fed.',
     'Sketched at forty paces and a dead run. Errors are the artist\'s.',
-    'Said to be drawn to anima the way moths take a lamp.',
+    'Said to be drawn to charge the way moths take a lamp.',
     'The eyes keep their light a full day after death. The locals bury them deep.',
     'Marrow sells well to gemwrights; the meat to no one.',
     'Moves in the storm-shadow and is gone before the thunder.',

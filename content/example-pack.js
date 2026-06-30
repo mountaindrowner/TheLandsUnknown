@@ -66,7 +66,7 @@
         xp: 16, gold: [0, 4], biomes: ['coast', 'plains', 'hills'], abilities: ['stormblast'], drops: 'gem',
         lore: 'Hoarfrost Echoes are echoes soured by the cold sea — beautiful, drifting, and lethally sharp when they cluster.' },
       { id: 'ice_revenant', name: 'Ice-Drowned Revenant', glyph: 'Z', color: '#7fb3d9', lvl: 7, hp: 95, atk: 26, def: 11, spd: 8,
-        xp: 55, gold: [6, 20], biomes: ['vault', 'coast'], tags: ['void'], abilities: ['drain', 'rend'], drops: 'rare',
+        xp: 55, gold: [6, 20], biomes: ['vault', 'coast'], tags: ['rift'], abilities: ['drain', 'rend'], drops: 'rare',
         lore: 'Ice-Drowned Revenants are the dead of sunken vaults, preserved and animated by the cold and the dark beneath it.' },
     ],
 
@@ -83,7 +83,7 @@
           uid: TLU.Items.uid(), type: 'weapon', base: 'sidesword', glyph: '†', mat: 'shardsteel', color: '#aee3ff',
           name: 'Hoarfrost, the Soulchill', skill: 'blades', slot: 'weapon', hands: 1, dmg: 48, speed: 11, crit: 0.18,
           armorPierce: 0.4, shard: true, rarity: 'artifact', level: 14, affixes: [{ name: 'Soulchill', tier: 5 }],
-          bonus: { dmg: 16, element: 'frost', maxStormlight: 30 }, value: 9999,
+          bonus: { dmg: 16, element: 'frost', maxCharge: 30 }, value: 9999,
           desc: 'A Riftblade sheathed in everfrost. What it cuts, the cold remembers.',
         };
       },

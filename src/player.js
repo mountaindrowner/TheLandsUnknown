@@ -9,14 +9,14 @@
 
   function newPlayer(opts) {
     opts = opts || {};
-    const order = TLU.LORE.orders[opts.order] || TLU.LORE.orders.windrunner;
+    const order = TLU.LORE.orders[opts.order] || TLU.LORE.orders.skyrender;
     const p = {
       kind: 'player',
       name: opts.name || 'Wanderer',
-      orderId: opts.order || 'windrunner',
+      orderId: opts.order || 'skyrender',
       order: order,
       // stable seed for the generative ink portrait — outlives saves
-      artSeed: (opts.name || 'Wanderer') + '|' + (opts.order || 'windrunner') + '|' + (opts.seed || ''),
+      artSeed: (opts.name || 'Wanderer') + '|' + (opts.order || 'skyrender') + '|' + (opts.seed || ''),
       fem: new TLU.RNG('fem:' + (opts.name || 'Wanderer') + (opts.seed || '')).chance(0.5),
       level: 1, xp: 0, xpNext: TLU.Skills.levelXpFor(1),
       // core attributes (raised on level-up)
@@ -24,7 +24,7 @@
       attrPoints: 0,
       perks: {}, perkPoints: 0,
       hp: 0, maxHp: 0,
-      stormlight: 0, maxStormlight: 0,
+      charge: 0, maxCharge: 0,
       food: 100,
       gold: 25,
       skills: {},     // id -> { level, xp }
@@ -48,8 +48,8 @@
     // init skills
     TLU.Skills.ids.forEach(function (id) { p.skills[id] = { level: 1, xp: 0 }; });
 
-    // starting bias by order: bump its surge skills & a weapon skill
-    order.surge.forEach(function (s) { const id = s.toLowerCase(); if (p.skills[id]) p.skills[id].level = 5; });
+    // starting bias by order: bump its Attunement skills & a weapon skill
+    order.attune.forEach(function (s) { const id = s.toLowerCase(); if (p.skills[id]) p.skills[id].level = 5; });
     const startWeaponSkill = opts.weaponSkill || 'blades';
     p.skills[startWeaponSkill].level = 5;
     p.skills.light.level = 3; p.skills.survival.level = 3;
@@ -66,7 +66,7 @@
     equip(p, w); equip(p, body);
 
     recompute(p);
-    p.hp = p.maxHp; p.stormlight = p.maxStormlight;
+    p.hp = p.maxHp; p.charge = p.maxCharge;
     refreshAbilities(p);
     return p;
   }
@@ -74,7 +74,7 @@
   // --- derived stats from attributes + skills + equipment ---
   function recompute(p) {
     const a = p.attr;
-    let bonus = { dmg: 0, def: 0, speed: 0, maxHp: 0, maxStormlight: 0, crit: 0, stormRegen: 0, regen: 0, voidbane: 0, armorPierce: 0 };
+    let bonus = { dmg: 0, def: 0, speed: 0, maxHp: 0, maxCharge: 0, crit: 0, chargeRegen: 0, regen: 0, riftbane: 0, armorPierce: 0 };
     let element = null;
     SLOTS.forEach(function (slot) {
       const it = p.equip[slot];
@@ -100,9 +100,9 @@
     const wSkillId = (wpn && wpn.skill && p.skills[wpn.skill]) ? wpn.skill : 'blades';
     const weaponSkillLv = p.skills[wSkillId] ? p.skills[wSkillId].level : 1;
 
-    // HP & Anima
+    // HP & Charge
     p.maxHp = Math.round(40 + a.endurance * 7 + p.level * 6 + bonus.maxHp);
-    p.maxStormlight = Math.round(30 + a.focus * 6 + bonus.maxStormlight);
+    p.maxCharge = Math.round(30 + a.focus * 6 + bonus.maxCharge);
 
     // Attack (gear upgrades add +10% per reinforce level)
     const wd = wpn ? Math.round(wpn.dmg * (1 + 0.10 * (wpn.upgrade || 0))) : 3;
@@ -127,12 +127,12 @@
     p.speed = Math.round(wSpeed + a.finesse * 1.1 + bonus.speed);
     p.crit = Math.min(0.6, (wpn ? wpn.crit || 0.05 : 0.05) + a.finesse * 0.004 + bonus.crit + p.skills[wSkillId].level * 0.002);
     p.element = element;
-    p.voidbane = bonus.voidbane || 0;
-    p.stormRegen = bonus.stormRegen || 0;
+    p.riftbane = bonus.riftbane || 0;
+    p.chargeRegen = bonus.chargeRegen || 0;
     p.hpRegen = bonus.regen || 0;
 
     if (p.hp > p.maxHp) p.hp = p.maxHp;
-    if (p.stormlight > p.maxStormlight) p.stormlight = p.maxStormlight;
+    if (p.charge > p.maxCharge) p.charge = p.maxCharge;
   }
 
   function equip(p, item) {
@@ -162,7 +162,7 @@
     recompute(p);
   }
 
-  // Which abilities are known given order + surge skill levels + weapon skill.
+  // Which abilities are known given order + Attunement skill levels + weapon skill.
   function refreshAbilities(p) {
     const known = [];
     for (const id in TLU.Abilities) {
@@ -203,7 +203,7 @@
       p.perkPoints = (p.perkPoints || 0) + 1;
       p.xpNext = TLU.Skills.levelXpFor(p.level);
       recompute(p);
-      p.hp = p.maxHp; p.stormlight = p.maxStormlight;
+      p.hp = p.maxHp; p.charge = p.maxCharge;
       if (log) log('%c— Level ' + p.level + '! +2 attributes, +1 perk. Press [C]/[P]. —', 'level');
     }
   }
@@ -244,7 +244,7 @@
   }
   function addGold(p, n) { p.gold = Math.max(0, p.gold + n); }
 
-  function fullHeal(p) { p.hp = p.maxHp; p.stormlight = p.maxStormlight; for (const k in p.statuses) delete p.statuses[k]; }
+  function fullHeal(p) { p.hp = p.maxHp; p.charge = p.maxCharge; for (const k in p.statuses) delete p.statuses[k]; }
 
   TLU.Player = {
     newPlayer: newPlayer, recompute: recompute, equip: equip, unequip: unequip,

@@ -77,10 +77,10 @@
   const h=document.createElement('h2'); h.textContent='Bestiary — specimen plates'; root.appendChild(h);
   const pg=document.createElement('div'); pg.className='plates'; root.appendChild(pg);
   const beasts = [
-    ['cremling',{lvl:1}],['wild_axehound',{}],['chull',{tags:['stone']}],
-    ['reaver_raider',{faction:'reavers'}],['midnight_essence',{tags:['void']}],
-    ['thunderclast',{tags:['stone','void'],big:true}],['voidechoes_knight',{tags:['void'],big:true}],
-    ['churnheart',{tags:['void'],big:true}],
+    ['scrapmite',{lvl:1}],['ridgehound',{}],['craghorn',{tags:['stone']}],
+    ['reaver_raider',{faction:'reavers'}],['gloamspawn',{tags:['rift']}],
+    ['cragwrought',{tags:['stone','rift'],big:true}],['hollow_knight',{tags:['rift'],big:true}],
+    ['churnheart',{tags:['rift'],big:true}],
   ];
   beasts.forEach(function(b){
     const svg = A.beastPlate(b[0], Object.assign({accent:'#9a3b2a', caption:b[0]}, b[1]));

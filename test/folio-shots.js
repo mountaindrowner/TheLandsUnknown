@@ -42,7 +42,7 @@ const OUT = path.join(ROOT, 'assets', 'design');
     g.state = 'play';
     g.storm = { active: true, x: g.player.wx + 5, dir: -1, speed: 1.6, timer: 30 };
     // give some bestiary knowledge
-    ['cremling', 'wild_axehound', 'reaver_raider', 'midnight_essence', 'thunderclast'].forEach(id => { g.player.codex.bestiary[id] = true; });
+    ['scrapmite', 'ridgehound', 'reaver_raider', 'gloamspawn', 'cragwrought'].forEach(id => { g.player.codex.bestiary[id] = true; });
     g.render();
   });
   await page.waitForTimeout(120);
@@ -93,7 +93,7 @@ const OUT = path.join(ROOT, 'assets', 'design');
   // an echo
   await page.evaluate(() => {
     const g = window.GAME;
-    g.overlay = { type: 'echo', annal: { name: 'Shalra Vethin', orderName: 'Veilseer', level: 14, day: 22, cause: 'fell holding the Last Gate', won: false, epitaph: 'I carried what I could.' }, boon: 'a fragment of stored Anima' };
+    g.overlay = { type: 'echo', annal: { name: 'Shalra Vethin', orderName: 'Veilseer', level: 14, day: 22, cause: 'fell holding the Last Gate', won: false, epitaph: 'I carried what I could.' }, boon: 'a fragment of stored Charge' };
     g.render();
   });
   await page.waitForTimeout(150);

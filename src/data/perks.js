@@ -21,10 +21,10 @@
     bulwark:    { name: 'Bulwark', desc: '+15% block chance.', req: { skill: 'block', level: 3 }, bonus: { block: 0.15 } },
     ironhide:   { name: 'Ironhide', desc: '+8 defense, +20 HP.', req: { skill: 'heavy', level: 3 }, bonus: { def: 8, maxHp: 20 } },
     acrobat:    { name: 'Acrobat', desc: '+4 speed; harder to hit.', req: { skill: 'light', level: 3 }, bonus: { speed: 4 }, flags: { evasive: 0.12 } },
-    // --- the Arts (channeling) ---
-    channeler:  { name: 'Channeler', desc: '+30 max Anima and faster regen.', bonus: { maxStormlight: 30, stormRegen: 1 } },
-    overchannel:{ name: 'Overchannel', desc: 'Your Arts cost 25% less Anima.', flags: { artDiscount: 0.25 } },
-    soulfire:   { name: 'Soulfire', desc: '+30% damage from the Arts.', req: { skill: 'cinder', level: 4 }, flags: { artPower: 0.3 } },
+    // --- the Attunements (channeling) ---
+    channeler:  { name: 'Channeler', desc: '+30 max Charge and faster regen.', bonus: { maxCharge: 30, chargeRegen: 1 } },
+    overchannel:{ name: 'Overchannel', desc: 'Your Attunements cost 25% less Charge.', flags: { artDiscount: 0.25 } },
+    soulfire:   { name: 'Soulfire', desc: '+30% damage from the Attunements.', req: { skill: 'cinder', level: 4 }, flags: { artPower: 0.3 } },
     // --- vitality / aggression ---
     vital:      { name: 'Vital', desc: '+35 maximum HP.', bonus: { maxHp: 35 } },
     lifedrinker:{ name: 'Lifedrinker', desc: 'Heal for 15% of melee damage dealt.', flags: { lifesteal: 0.15 } },
@@ -35,7 +35,7 @@
     treasure_hunter: { name: 'Treasure Hunter', desc: 'Find better loot (+magic find).', flags: { magicFind: 1 } },
     forager:    { name: 'Forager', desc: 'Rations stretch further; resist starvation.', req: { skill: 'survival', level: 2 }, flags: { forager: 1 } },
     silver_tongue: { name: 'Silver Tongue', desc: 'Better prices and more rumors.', req: { skill: 'barter', level: 3 }, flags: { barter: 1 } },
-    stormrider: { name: 'Churn-Rider', desc: 'Draw far more Anima from the Churn.', flags: { churnrider: 1 } },
+    stormrider: { name: 'Churn-Rider', desc: 'Draw far more Charge from the Churn.', flags: { churnrider: 1 } },
   };
 
   const IDS = Object.keys(PERKS);

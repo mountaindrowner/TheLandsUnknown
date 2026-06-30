@@ -35,7 +35,7 @@
     --water:#39c6cf; --tree:#4bbf86; --accent:#ff7d6b; --accent2:#36d6c4;
     --ink:#1b1f3a; --ink2:#5a6398; --paper:#fbf6ec; --panel:#fbf6ec; --panelEdge:#e7dcc6;
     --fig:#222547; --figEdge:#3a3f73; --rim:#ff9d6b; --disc:#ffd98a;
-    --hp:#ff6b6b; --anima:#5aa9ff; --xp:#5fe0a0; --shadow:rgba(20,16,40,.28);
+    --hp:#ff6b6b; --charge:#5aa9ff; --xp:#5fe0a0; --shadow:rgba(20,16,40,.28);
   }
   .style-lumen text { font-family:'Poppins',sans-serif; }
   .style-lumen .ink { fill:var(--ink); } .style-lumen .ink2 { fill:var(--ink2); }
@@ -46,7 +46,7 @@
     --water:#1d2e33; --tree:#120d09; --accent:#ff7a1a; --accent2:#48c6a2;
     --ink:#ece0cb; --ink2:#9c8b70; --paper:#1b1410; --panel:#15100c; --panelEdge:#7a5a2e;
     --fig:#070509; --figEdge:#241710; --rim:#ff8a32; --disc:#e07a2a;
-    --hp:#c0392b; --anima:#c89a3a; --xp:#7a8a4a; --shadow:rgba(0,0,0,.6);
+    --hp:#c0392b; --charge:#c89a3a; --xp:#7a8a4a; --shadow:rgba(0,0,0,.6);
   }
   .style-ember text { font-family:'Cinzel',serif; letter-spacing:.5px; }
   .style-ember .h { text-transform:uppercase; letter-spacing:2px; }
@@ -58,7 +58,7 @@
     --water:#aebb9f; --tree:#7c7a52; --accent:#9a3b2a; --accent2:#3f6173;
     --ink:#2a2620; --ink2:#6f6650; --paper:#f3ecd9; --panel:#efe7d2; --panelEdge:#b9ad90;
     --fig:#f3ecd9; --figEdge:#2a2620; --rim:#9a3b2a; --disc:#cdbf99;
-    --hp:#9a3b2a; --anima:#3f6173; --xp:#6b7a4a; --shadow:rgba(42,38,32,.18);
+    --hp:#9a3b2a; --charge:#3f6173; --xp:#6b7a4a; --shadow:rgba(42,38,32,.18);
   }
   .style-folio { background:linear-gradient(180deg,var(--sky1),var(--sky2)); }
   .style-folio text { font-family:'EB Garamond',Georgia,serif; }
@@ -209,7 +209,7 @@ SCENES.overworld = (st)=>`
   <text x="128" y="52" font-size="17" font-weight="600" style="fill:var(--accent)">Selin</text>
   <text x="128" y="70" font-size="11" class="ink2">Skyrender · Level 7</text>
   ${bar(128,84,176,0.62,'--hp','HP','117/189')}
-  ${bar(128,104,176,1.0,'--anima','Anima','60/60')}
+  ${bar(128,104,176,1.0,'--charge','Charge','60/60')}
   ${bar(128,124,176,0.4,'--xp','XP','')}
   <!-- minimap -->
   ${card(660,20,220,150,12)}
@@ -254,11 +254,11 @@ SCENES.combat = (st)=>`
   <line x1="330" y1="446" x2="330" y2="524" stroke="var(--panelEdge)"/>
   <text x="350" y="458" font-size="11" class="ink2">@ Selin · Lv7</text>
   ${bar(350,468,190,0.62,'--hp','','HP 117/189')}
-  ${bar(350,492,190,1.0,'--anima','','Anima 60/60')}
+  ${bar(350,492,190,1.0,'--charge','','Charge 60/60')}
   <text x="350" y="528" font-size="10" class="ink2">Adoni the Channeler · ready</text>
   ${card(580,430,280,110,14)}
   <text x="600" y="458" font-size="12" class="ink2 h" style="fill:var(--ink2)">TURN ORDER</text>
-  <g>${[['Selin','--accent'],['Crag','--hp'],['Adoni','--anima'],['Whelp','--hp']].map((t,i)=>`<circle cx="${612+i*60}" cy="495" r="18" style="fill:var(${t[1]})"/><circle cx="${612+i*60}" cy="495" r="18" fill="none" stroke="#fff" stroke-width="1" opacity="0.4"/><text x="${612+i*60}" y="528" text-anchor="middle" font-size="9" class="ink2">${t[0]}</text>`).join('')}</g>`;
+  <g>${[['Selin','--accent'],['Crag','--hp'],['Adoni','--charge'],['Whelp','--hp']].map((t,i)=>`<circle cx="${612+i*60}" cy="495" r="18" style="fill:var(${t[1]})"/><circle cx="${612+i*60}" cy="495" r="18" fill="none" stroke="#fff" stroke-width="1" opacity="0.4"/><text x="${612+i*60}" y="528" text-anchor="middle" font-size="9" class="ink2">${t[0]}</text>`).join('')}</g>`;
 
 SCENES.town = (st)=>`
   <path d="M0 380 L900 360 L900 560 L0 560 Z" style="fill:var(--near)"/>
@@ -304,14 +304,14 @@ SCENES.inventory = (st)=>`
   <!-- right: stats + grid + talents -->
   ${card(410,30,460,250,16)}
   <text x="432" y="62" font-size="14" class="ink2 h" style="fill:var(--ink2)">ATTRIBUTES &amp; DERIVED</text>
-  ${[['HP','189'],['Anima','60'],['Attack','26'],['Defense','17'],['Speed','21'],['Crit','12%']].map((s,i)=>`
+  ${[['HP','189'],['Charge','60'],['Attack','26'],['Defense','17'],['Speed','21'],['Crit','12%']].map((s,i)=>`
     <text x="${440+(i%3)*150}" y="${100+Math.floor(i/3)*40}" font-size="13" class="ink2">${s[0]}</text>
     <text x="${440+(i%3)*150}" y="${122+Math.floor(i/3)*40}" font-size="20" font-weight="700" style="fill:var(--accent)">${s[1]}</text>`).join('')}
   ${bar(432,200,416,0.62,'--hp','HP','117/189')}
-  ${bar(432,228,416,1.0,'--anima','Anima','60/60')}
+  ${bar(432,228,416,1.0,'--charge','Charge','60/60')}
   ${card(410,300,460,230,16)}
   <text x="432" y="332" font-size="14" class="ink2 h" style="fill:var(--ink2)">SATCHEL</text>
-  ${Array.from({length:18}).map((_,i)=>{const x=432+(i%6)*72, y=348+Math.floor(i/6)*54; const filled=i<8; const col=['--accent','--anima','--xp','--accent2'][i%4];
+  ${Array.from({length:18}).map((_,i)=>{const x=432+(i%6)*72, y=348+Math.floor(i/6)*54; const filled=i<8; const col=['--accent','--charge','--xp','--accent2'][i%4];
     return `<rect x="${x}" y="${y}" width="58" height="46" rx="8" style="fill:var(--near);stroke:var(--panelEdge);stroke-width:1" opacity="0.7"/>${filled?`<circle cx="${x+29}" cy="${y+23}" r="12" style="fill:var(${col})"/>`:''}`;}).join('')}
   <text x="432" y="522" font-size="11" class="ink2">Talents:</text>
   ${['Duelist','Channeler','Lifedrinker'].map((t,i)=>`<rect x="${500+i*120}" y="510" width="110" height="20" rx="10" style="fill:var(--accent)" opacity="0.85"/><text x="${555+i*120}" y="524" text-anchor="middle" font-size="11" fill="#fff">${t}</text>`).join('')}`;

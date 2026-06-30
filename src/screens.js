@@ -124,12 +124,12 @@
       lines.push('Crafting material · used at the smith / alchemist');
     } else if (it.type === 'consumable') {
       if (it.heal) lines.push('Restores ' + it.heal + ' HP');
-      if (it.stormlight) lines.push('Restores ' + it.stormlight + ' Anima');
+      if (it.charge) lines.push('Restores ' + it.charge + ' Charge');
       if (it.food) lines.push('Restores ' + it.food + ' Sustenance');
       if (it.scroll) lines.push('Scroll: ' + it.scroll);
       if (it.cure) lines.push('Cures ' + it.cure);
-    } else if (it.type === 'gem') { lines.push('Infused gem · +' + it.stormlight + ' Anima when used'); }
-    if (it.bonus) { const b = []; for (const key in it.bonus) { if (key === 'element' || key === 'voidbane') b.push(key + ' ' + it.bonus[key]); else b.push((it.bonus[key] > 0 ? '+' : '') + it.bonus[key] + ' ' + key); } if (b.length) lines.push('<span style="color:#7ec8ff">' + b.join(', ') + '</span>'); }
+    } else if (it.type === 'gem') { lines.push('Infused gem · +' + it.charge + ' Charge when used'); }
+    if (it.bonus) { const b = []; for (const key in it.bonus) { if (key === 'element' || key === 'riftbane') b.push(key + ' ' + it.bonus[key]); else b.push((it.bonus[key] > 0 ? '+' : '') + it.bonus[key] + ' ' + key); } if (b.length) lines.push('<span style="color:#7ec8ff">' + b.join(', ') + '</span>'); }
     if (it.desc) lines.push('<i style="color:#9a8">' + esc(it.desc) + '</i>');
     lines.push('Value ' + (it.value || 0) + 'g');
     return s + lines.map(function (l) { return '<div class="iline">' + l + '</div>'; }).join('');
@@ -142,7 +142,7 @@
   }
 
   // ---- generative ink-portrait helpers (Folio) -------------------------
-  const ORDER_ROLE = { windrunner: 'skirmisher', stoneward: 'warden', edgedancer: 'skirmisher', truthwatcher: 'channeler', dustbringer: 'channeler' };
+  const ORDER_ROLE = { skyrender: 'skirmisher', stonewarden: 'warden', slipstrider: 'skirmisher', veilseer: 'channeler', cinderwright: 'channeler' };
   const ARCH_ROLE = { guard: 'warden', warden_scholar: 'channeler', drillmaster: 'warrior', priest: 'channeler', smith: 'warrior', merchant: 'folk', innkeeper: 'folk', wanderer: 'explorer', urchin: 'folk' };
 
   function art() { return TLU.Art; }
@@ -212,10 +212,10 @@
       const o = g.overlay;
       let body = '';
       if (o.step === 0) {
-        body += '<div class="cg-q">Choose your Order (class & Arts):</div>';
+        body += '<div class="cg-q">Choose your Order (class & Attunements):</div>';
         const items = o.orderKeys.map(function (key) {
           const ord = TLU.LORE.orders[key];
-          return { label: ord.glyph + ' ' + ord.name, hint: ord.surge.join(' / '), color: ord.color };
+          return { label: ord.glyph + ' ' + ord.name, hint: ord.attune.join(' / '), color: ord.color };
         });
         body += UI.renderMenu({ items: items, cursor: o.orderIdx });
         const ord = TLU.LORE.orders[o.orderKeys[o.orderIdx]];
@@ -285,7 +285,7 @@
         ['Goal', 'Find the Wardens, gather 4 Rift fragments from'],
         ['', 'drowned vaults (▼), end Warlord Varen (☠), then descend'],
         ['', 'Dawnhollow (Ω) and destroy the Gloammother.'],
-        ['Tips', 'Skills level by USE. Churns (⛈) refill Anima fast'],
+        ['Tips', 'Skills level by USE. Churns (⛈) refill Charge fast'],
         ['', 'but make the wilds deadlier. The east is far more dangerous.'],
       ];
       let html = '<div class="title-screen"><div class="menu-title">How to Play</div><div class="help-grid">';
@@ -342,14 +342,14 @@
       if (it.type === 'consumable') {
         if (it.heal) { const h = Math.min(p.maxHp - p.hp, it.heal); p.hp += h; g.msg('%cYou drink ' + it.name + ' (+' + h + ' HP).', 'good'); }
         if (it.food) { p.food = Math.min(100, p.food + it.food); g.msg('You eat. (+' + it.food + ' sustenance)'); }
-        if (it.stormlight) { p.stormlight = Math.min(p.maxStormlight, p.stormlight + it.stormlight); g.msg('%c+' + it.stormlight + ' Anima.', 'good'); }
+        if (it.charge) { p.charge = Math.min(p.maxCharge, p.charge + it.charge); g.msg('%c+' + it.charge + ' Charge.', 'good'); }
         if (it.scroll === 'recall') { SCREENS.inventory.recall(g); }
         else if (it.scroll === 'blast') { g.msg('That scroll only works in battle.'); return; }
         if (it.cure) { g.msg('Nothing to cure right now.'); return; }
         P.removeItem(p, it, 1);
       } else if (it.type === 'gem') {
-        const s = Math.min(p.maxStormlight - p.stormlight, it.stormlight);
-        p.stormlight += s; g.msg('%cYou breathe in the gem\'s light. +' + s + ' Anima.', 'good');
+        const s = Math.min(p.maxCharge - p.charge, it.charge);
+        p.charge += s; g.msg('%cYou breathe in the gem\'s light. +' + s + ' Charge.', 'good');
         P.removeItem(p, it, 1);
       }
     },
@@ -377,7 +377,7 @@
       html += '<div class="folio-figrow"><div class="pf pf-md">' + playerPortrait(p, { caption: 'Lv ' + p.level }) + '</div><div class="col">';
       html += '<div class="fig-sub">' + p.order.glyph + ' ' + esc(p.order.name) + ' · Level ' + p.level + '</div>';
       html += '<div class="fig-bio">' + esc(p.order.blurb || '') + '</div>';
-      html += '<div class="ch-d" style="margin-top:6px">HP ' + p.maxHp + ' · Anima ' + p.maxStormlight + ' · Atk ' + p.attack + ' · Def ' + p.defense + '</div>';
+      html += '<div class="ch-d" style="margin-top:6px">HP ' + p.maxHp + ' · Charge ' + p.maxCharge + ' · Atk ' + p.attack + ' · Def ' + p.defense + '</div>';
       html += '</div></div>';
       html += '<div class="char-grid"><div>';
       html += '<div class="ch-h">Attributes' + (p.attrPoints > 0 ? ' <span class="alert">(' + p.attrPoints + ' to spend — Enter)</span>' : '') + '</div>';
@@ -386,20 +386,20 @@
           a.charAt(0).toUpperCase() + a.slice(1) + ': <b>' + p.attr[a] + '</b></div>';
       });
       html += '<div class="ch-h">Derived</div>';
-      html += '<div class="ch-d">HP ' + p.maxHp + ' · Anima ' + p.maxStormlight + '</div>';
+      html += '<div class="ch-d">HP ' + p.maxHp + ' · Charge ' + p.maxCharge + '</div>';
       html += '<div class="ch-d">Attack ' + p.attack + ' · Defense ' + p.defense + '</div>';
       html += '<div class="ch-d">Speed ' + p.speed + ' · Crit ' + Math.round(p.crit * 100) + '%</div>';
       html += '<div class="ch-d">Block ' + Math.round(p.blockChance * 100) + '% · Frags ' + p.fragments + '/4</div>';
       html += '</div><div>';
       html += '<div class="ch-h">Skills</div><div class="skill-list">';
-      ['combat', 'armor', 'surge', 'utility'].forEach(function (grp) {
+      ['combat', 'armor', 'attune', 'utility'].forEach(function (grp) {
         TLU.Skills.ids.filter(function (id) { return TLU.Skills.LIST[id].group === grp; }).forEach(function (id) {
           const sk = p.skills[id];
           html += '<div class="sk"><span>' + TLU.Skills.LIST[id].name + '</span><span class="skl">' + sk.level + '</span></div>';
         });
       });
       html += '</div></div></div>';
-      html += '<div class="ch-h">Arts Known</div><div class="ab-list">';
+      html += '<div class="ch-h">Attunements Known</div><div class="ab-list">';
       p.knownAbilities.forEach(function (id) { const ab = TLU.Abilities[id]; html += '<span class="ab">' + ab.name + ' <i>(' + (ab.cost || 0) + ')</i></span>'; });
       html += '</div>';
       if (p.party && p.party.length) {
@@ -548,7 +548,7 @@
       const p = g.player;
       if (p.gold < 10) { g.msg('You cannot afford a bed (10g).'); g.render(); return; }
       p.gold -= 10; P.fullHeal(p); p.food = 100; g.day++;
-      g.msg('%cYou rest. HP & Anima restored. (Day ' + g.day + ')', 'good');
+      g.msg('%cYou rest. HP & Charge restored. (Day ' + g.day + ')', 'good');
       g.save(); g.render();
     },
     speak: function (g) {
@@ -669,7 +669,7 @@
     reinforceCost: function (it) {
       const u = (it.upgrade || 0) + 1;
       const cost = { gold: 30 * u + (it.level || 1) * 6, mats: { scrap: u } };
-      if (u >= 3) cost.mats.shard = u - 2;
+      if (u >= 3) cost.mats.alloy = u - 2;
       return cost;
     },
     costStr: function (c) {
@@ -686,7 +686,7 @@
       });
       if (!items.length) items.push({ label: '(no gear to reinforce)', disabled: true });
       const cur = list[o.cursor];
-      const mats = ['scrap', 'sinew', 'dust', 'shard'].map(function (k) { return SCREENS.town.matCount(p, k) + ' ' + TLU.Items.CRAFT_MATERIALS[k].name; }).join(' · ');
+      const mats = ['scrap', 'sinew', 'dust', 'alloy'].map(function (k) { return SCREENS.town.matCount(p, k) + ' ' + TLU.Items.CRAFT_MATERIALS[k].name; }).join(' · ');
       let body = '<div class="inv-wrap"><div class="inv-left">' + UI.renderMenu({ items: items, cursor: o.cursor }) +
         '</div><div class="inv-right">' + describeItem(cur) + '</div></div>';
       return '<div class="panel"><div class="menu-title">⚒ Smith · ' + p.gold + 'g</div>' +
@@ -719,14 +719,14 @@
     recipes: [
       { out: 'potion', name: 'Healing Draught', gold: 18, mats: { herb: 1 } },
       { out: 'potion_major', name: 'Greater Healing Draught', gold: 55, mats: { herb: 3 } },
-      { out: 'elixir_storm', name: 'Anima Elixir', gold: 35, mats: { dust: 1 } },
+      { out: 'elixir_storm', name: 'Charge Elixir', gold: 35, mats: { dust: 1 } },
       { out: 'antidote', name: 'Antidote', gold: 14, mats: { herb: 1 } },
-      { out: 'scroll_blast', name: 'Scroll of Churnblast', gold: 60, mats: { dust: 1, shard: 1 } },
+      { out: 'scroll_blast', name: 'Scroll of Arc Blast', gold: 60, mats: { dust: 1, alloy: 1 } },
     ],
     renderAlchemy: function (g) {
       const o = g.overlay, p = g.player;
       const items = SCREENS.town.recipes.map(function (r) { return { label: r.name, hint: SCREENS.town.costStr({ gold: r.gold, mats: r.mats }) }; });
-      const mats = ['herb', 'dust', 'shard'].map(function (k) { return SCREENS.town.matCount(p, k) + ' ' + TLU.Items.CRAFT_MATERIALS[k].name; }).join(' · ');
+      const mats = ['herb', 'dust', 'alloy'].map(function (k) { return SCREENS.town.matCount(p, k) + ' ' + TLU.Items.CRAFT_MATERIALS[k].name; }).join(' · ');
       return '<div class="panel"><div class="menu-title">⚗ Alchemist · ' + p.gold + 'g</div>' +
         '<div class="town-desc">' + esc(mats) + '</div>' +
         UI.renderMenu({ items: items, cursor: o.cursor }) +
@@ -854,7 +854,7 @@
       }
       // player panel
       html += '<div class="cb-player"><div class="cb-pname">@ ' + esc(p.name) + ' · Lv' + p.level + ' ' + statusTags(p) + '</div>' +
-        '<div class="cb-bars">HP ' + UI.bar(p.hp, p.maxHp, '#c0392b') + 'Anima ' + UI.bar(p.stormlight, p.maxStormlight, '#7e6bff') + '</div></div>';
+        '<div class="cb-bars">HP ' + UI.bar(p.hp, p.maxHp, '#c0392b') + 'Charge ' + UI.bar(p.charge, p.maxCharge, '#7e6bff') + '</div></div>';
       // menu
       html += '<div class="cb-menu">' + SCREENS.combat.renderMenu(g) + '</div>';
       html += '</div>';
@@ -867,13 +867,13 @@
       if (o.menu === 'root') {
         return UI.renderMenu({ items: [{ label: '⚔ Attack' }, { label: '✦ Channel' }, { label: '⚗ Item' }, { label: '⛨ Defend' }, { label: '⚐ Flee', disabled: c.isBoss }], cursor: o.cursor, footer: 'Enter select · Esc back' });
       }
-      if (o.menu === 'surge') {
-        const ab = p.knownAbilities.map(function (id) { const a = TLU.Abilities[id]; return { label: a.name, hint: a.cost + ' light', color: a.cost > p.stormlight ? '#777' : null }; });
-        if (!ab.length) ab.push({ label: '(no surges known)', disabled: true });
-        return UI.renderMenu({ title: 'The Arts', items: ab, cursor: o.cursor, footer: 'Esc back' });
+      if (o.menu === 'attune') {
+        const ab = p.knownAbilities.map(function (id) { const a = TLU.Abilities[id]; return { label: a.name, hint: a.cost + ' Charge', color: a.cost > p.charge ? '#777' : null }; });
+        if (!ab.length) ab.push({ label: '(no Attunements known)', disabled: true });
+        return UI.renderMenu({ title: 'Attunements', items: ab, cursor: o.cursor, footer: 'Esc back' });
       }
       if (o.menu === 'item') {
-        const items = SCREENS.combat.usableItems(p).map(function (it) { return { label: itemLabel(it), hint: it.heal ? '+' + it.heal + ' HP' : it.stormlight ? '+' + it.stormlight + ' Anima' : it.scroll || '' }; });
+        const items = SCREENS.combat.usableItems(p).map(function (it) { return { label: itemLabel(it), hint: it.heal ? '+' + it.heal + ' HP' : it.charge ? '+' + it.charge + ' Charge' : it.scroll || '' }; });
         if (!items.length) items.push({ label: '(no usable items)', disabled: true });
         return UI.renderMenu({ title: 'Items', items: items, cursor: o.cursor, footer: 'Esc back' });
       }
@@ -885,7 +885,7 @@
     },
     usableItems: function (p) {
       return p.inventory.filter(function (it) {
-        return (it.type === 'consumable' && (it.heal || it.stormlight || it.scroll === 'blast' || it.cure)) || it.type === 'gem';
+        return (it.type === 'consumable' && (it.heal || it.charge || it.scroll === 'blast' || it.cure)) || it.type === 'gem';
       });
     },
     key: function (g, k) {
@@ -894,18 +894,18 @@
       if (o.menu === 'root') {
         menuNav(o, k, 5, function (i) {
           if (i === 0) { o.pending = { kind: 'attack' }; o.menu = 'target'; o.cursor = 0; }
-          else if (i === 1) { o.menu = 'surge'; o.cursor = 0; }
+          else if (i === 1) { o.menu = 'attune'; o.cursor = 0; }
           else if (i === 2) { o.menu = 'item'; o.cursor = 0; }
           else if (i === 3) { c.playerAct({ type: 'defend' }); SCREENS.combat.after(g); }
           else if (i === 4) { if (!c.isBoss) { c.playerAct({ type: 'flee' }); SCREENS.combat.after(g); } }
         });
-      } else if (o.menu === 'surge') {
+      } else if (o.menu === 'attune') {
         const ids = p.knownAbilities;
         if (k === 'Escape') { o.menu = 'root'; o.cursor = 0; g.render(); return; }
         menuNav(o, k, Math.max(1, ids.length), function (i) {
           const id = ids[i]; if (!id) return;
           const ab = TLU.Abilities[id];
-          if ((ab.cost || 0) > p.stormlight) { g.msg('Not enough Anima.'); return; }
+          if ((ab.cost || 0) > p.charge) { g.msg('Not enough Charge.'); return; }
           if (ab.target === 'enemy') { o.pending = { kind: 'ability', id: id }; o.menu = 'target'; o.cursor = 0; }
           else { c.playerAct({ type: 'ability', id: id }); SCREENS.combat.after(g); }
         });
@@ -1146,10 +1146,10 @@
     },
     render: function (g) {
       const grand = g.overlay.grand;
-      const title = grand ? '★✶★ THE CHURN UNMADE ★✶★' : '★ The Last Churn Stilled ★';
+      const title = grand ? '★✶★ THE CHURN UNDONE ★✶★' : '★ The Last Churn Stilled ★';
       const tale = grand
-        ? 'Karth-Vael, the Heart of the Churn, comes apart in your hands — and with it, the unmaking itself. The storm that walked the world since the first dawn simply... stops. Aurenmark exhales. The dead, at last, rest. Your name will outlast every hold: you did not merely survive the Churn. You ended it. <b>This is the true ending.</b>'
-        : 'Vethra, the Gloammother, unravels into fading light, and the Churn gentles. You have ended the eldest of the waking Hollow Ones. But far below where she fell, something older still turns in its sleep — the Heart of the Churn itself. The unmaking is wounded, not ended. Will you descend?';
+        ? 'Karth-Vael, the Heart of the Churn, comes apart in your hands — and with it, the undoing itself. The storm that walked the world since the first dawn simply... stops. Aurenmark exhales. The dead, at last, rest. Your name will outlast every hold: you did not merely survive the Churn. You ended it. <b>This is the true ending.</b>'
+        : 'Vethra, the Gloammother, unravels into fading light, and the Churn gentles. You have ended the eldest of the waking Hollow Ones. But far below where she fell, something older still turns in its sleep — the Heart of the Churn itself. The undoing is wounded, not ended. Will you descend?';
       return '<div class="title-screen endscreen victory"><div class="end-title win">' + title + '</div>' +
         '<div class="end-quote">' + tale + '</div>' +
         statsBlock(g) + annalsNote(g) +

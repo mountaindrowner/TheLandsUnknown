@@ -4,7 +4,7 @@
  * The codex is a field journal, so every creature is drawn the way a
  * travelling naturalist would plate a thing that tried to kill them:
  * an inked profile on a hatched groundline, assembled from a seed +
- * the creature's tags (void / stone / beast / reaver / swarm). Seeded
+ * the creature's tags (rift / stone / beast / reaver / swarm). Seeded
  * by the bestiary id, so a Rockmite is always the same Rockmite.
  * ============================================================ */
 (function (TLU) {
@@ -16,7 +16,7 @@
     if (opt.form) return opt.form;
     var tags = opt.tags || [];
     var big = opt.big;
-    if (tags.indexOf('void') >= 0) return big ? 'hollow' : 'void';
+    if (tags.indexOf('rift') >= 0) return big ? 'hollow' : 'rift';
     if (tags.indexOf('stone') >= 0) return big ? 'colossus' : 'stone';
     if (opt.faction === 'reavers') return 'reaver';
     if (opt.swarm || (opt.lvl != null && opt.lvl <= 1)) return 'swarm';
@@ -86,7 +86,7 @@
       return finish(W, H, defs, body, accent, opt);
     }
 
-    // ----- towering hollow (big void boss) -----
+    // ----- towering hollow (big rift boss) -----
     if (form === 'hollow') {
       var topH = 26;
       body += A.stroke(rng, [[cx - 26, gy], [cx - 30, gy - 70], [cx - 14, gy - 100], [cx - 18, topH + 10], [cx, topH], [cx + 18, topH + 10], [cx + 14, gy - 100], [cx + 30, gy - 70], [cx + 26, gy]], { close: true, fill: PAL.ink, w: 2.2, amt: 1.3, op: 0.94 });
@@ -122,22 +122,22 @@
       return finish(W, H, defs, body, accent, opt);
     }
 
-    // quadruped/brute/void/stone torso
+    // quadruped/brute/rift/stone torso
     var torso = [
       [bx - len * 0.5, by + tall * 0.3], [bx - len * 0.5, by - tall * 0.2],
       [bx - len * 0.3, by - tall * 0.55], [bx + len * 0.2, by - tall * 0.6],
       [bx + len * 0.5, by - tall * 0.3], [bx + len * 0.55, by + tall * 0.2],
       [bx + len * 0.35, by + tall * 0.45], [bx - len * 0.35, by + tall * 0.45],
     ];
-    var fill = form === 'void' ? PAL.ink : PAL.paper2;
-    body += A.stroke(rng, torso, { close: true, fill: fill, w: form === 'stone' ? 2.4 : 2, amt: form === 'stone' ? 0.4 : 0.9, op: form === 'void' ? 0.92 : 1 });
+    var fill = form === 'rift' ? PAL.ink : PAL.paper2;
+    body += A.stroke(rng, torso, { close: true, fill: fill, w: form === 'stone' ? 2.4 : 2, amt: form === 'stone' ? 0.4 : 0.9, op: form === 'rift' ? 0.92 : 1 });
 
     // head + neck (front-right) — neck overlaps the head so they read as one
     var nx = bx + len * 0.5, ny = by - tall * 0.3;
     var headType = rng.pick(['maw', 'horned', 'beaked', 'blunt']);
     body += A.stroke(rng, [[nx - 8, ny + tall * 0.1], [nx + 6, ny - tall * 0.3], [nx + 18, ny - tall * 0.18]], { w: tall * 0.38, amt: 0.5, stroke: fill, cap: 'round' });
     var hx2 = nx + 19, hy2 = ny - tall * 0.16;
-    if (form === 'void') {
+    if (form === 'rift') {
       // hollow head with embered eyes
       body += A.circle(hx2, hy2, 11, { fill: PAL.ink, stroke: 'none' });
       body += A.circle(hx2 + 2, hy2 - 2, 2.4, { fill: accent, stroke: 'none' });
@@ -171,11 +171,11 @@
     else if (spine === 'spines') { for (var sp = 0; sp < 5; sp++) { var spx = bx - len * 0.3 + sp * (len * 0.16); body += A.stroke(rng, [[spx, by - tall * 0.55], [spx + 1, by - tall * 0.55 - 8 - rng.next() * 6]], { w: 2.2, amt: 0.3 }); } }
     else { for (var pl = 0; pl < 4; pl++) { var plx = bx - len * 0.25 + pl * (len * 0.18); body += A.path('M ' + plx + ' ' + (by - tall * 0.5) + ' l 6 -10 l 6 10 Z', { fill: PAL.paper, w: 1.6, stroke: ink }); } }
 
-    // stone carapace cracks, or void dissolve
+    // stone carapace cracks, or rift dissolve
     if (form === 'stone') {
       body += A.stroke(rng, [[bx - len * 0.2, by - tall * 0.4], [bx, by], [bx + len * 0.2, by - tall * 0.2]], { w: 1, amt: 0.3, stroke: PAL.ink2 });
       body += A.stroke(rng, [[bx + len * 0.1, by + tall * 0.1], [bx + len * 0.3, by + tall * 0.3]], { w: 1, amt: 0.3, stroke: PAL.ink2 });
-    } else if (form === 'void') {
+    } else if (form === 'rift') {
       var vid = 'bv_' + A.uid();
       var vh = A.hatch(vid, { gap: 5, angle: -45, op: 0.3, w: 0.8, color: accent });
       defs += vh.def;

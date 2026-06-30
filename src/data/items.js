@@ -12,8 +12,8 @@
     { id: 'steel',    name: 'Steel',     mult: 1.25, value: 1.8, tier: 2, color: '#dfe6ee' },
     { id: 'bronze',   name: 'Tarnsteel', mult: 1.45, value: 2.6, tier: 3, color: '#caa04b' },
     { id: 'azure',    name: 'Azurine',     mult: 1.7, value: 4.0, tier: 4, color: '#7ec8ff' },
-    { id: 'shardsteel', name: 'Riftsteel', mult: 2.1, value: 7.5, tier: 5, color: '#b99cff' },
-    { id: 'soulcast', name: 'Soulforged',  mult: 2.6, value: 12, tier: 6, color: '#67e08a' },
+    { id: 'riftsteel', name: 'Riftsteel', mult: 2.1, value: 7.5, tier: 5, color: '#b99cff' },
+    { id: 'aeonsteel', name: 'Aeonforged',  mult: 2.6, value: 12, tier: 6, color: '#67e08a' },
   ];
 
   // Weapon base types. dmg is base at iron tier; speed affects turn order.
@@ -28,7 +28,7 @@
     { id: 'glaive',   name: 'Glaive',     glyph: '|', dmg: 18, speed: 7, hands: 2, skill: 'polearm' },
     { id: 'greatbow', name: 'Longbow',    glyph: '}', dmg: 14, speed: 9, hands: 2, skill: 'archery', ranged: true },
     { id: 'shortbow', name: 'Shortbow',   glyph: '}', dmg: 9, speed: 12, hands: 2, skill: 'archery', ranged: true },
-    { id: 'halfshard', name: 'Riftshard Blade', glyph: '†', dmg: 20, speed: 10, hands: 1, skill: 'blades', crit: 0.1, special: 'shard' },
+    { id: 'riftspur', name: 'Riftspur Blade', glyph: '†', dmg: 20, speed: 10, hands: 1, skill: 'blades', crit: 0.1, special: 'relic' },
   ];
 
   // Armor slots and bases. def = base armor at iron tier.
@@ -53,7 +53,7 @@
     { id: 'swift',   name: 'Swift',    tier: 1, bonus: { speed: 2 } },
     { id: 'heavy',   name: 'Brutal',   tier: 2, bonus: { dmg: 4 } },
     { id: 'guarded', name: 'Warded',   tier: 2, bonus: { def: 4 } },
-    { id: 'stormlit', name: 'Animabright', tier: 3, bonus: { dmg: 5, maxStormlight: 15 } },
+    { id: 'chargelit', name: 'Chargebright', tier: 3, bonus: { dmg: 5, maxCharge: 15 } },
     { id: 'vicious', name: 'Vicious',  tier: 3, bonus: { dmg: 6, crit: 0.08 } },
     { id: 'adamant', name: 'Adamant',  tier: 3, bonus: { def: 7, maxHp: 12 } },
     { id: 'godslaying', name: 'God-Slaying', tier: 4, bonus: { dmg: 10, crit: 0.12 } },
@@ -64,10 +64,10 @@
     { id: 'of_warding',   name: 'of Warding',    tier: 2, bonus: { def: 3, maxHp: 8 } },
     { id: 'of_flame',     name: 'of Flame',      tier: 2, bonus: { dmg: 4, element: 'fire' } },
     { id: 'of_frost',     name: 'of Frost',      tier: 2, bonus: { dmg: 4, element: 'frost' } },
-    { id: 'of_the_storm', name: 'of the Gale',  tier: 3, bonus: { maxStormlight: 30, stormRegen: 1 } },
+    { id: 'of_the_gale', name: 'of the Gale',  tier: 3, bonus: { maxCharge: 30, chargeRegen: 1 } },
     { id: 'of_vigor',     name: 'of Vigor',      tier: 3, bonus: { maxHp: 25, regen: 1 } },
-    { id: 'of_radiance',  name: 'of Dawnlight',   tier: 4, bonus: { dmg: 6, def: 6, maxStormlight: 25 } },
-    { id: 'of_voidbane',  name: 'of Voidbane',   tier: 5, bonus: { dmg: 12, voidbane: 0.4 } },
+    { id: 'of_radiance',  name: 'of Dawnlight',   tier: 4, bonus: { dmg: 6, def: 6, maxCharge: 25 } },
+    { id: 'of_riftbane',  name: 'of Riftbane',   tier: 5, bonus: { dmg: 12, riftbane: 0.4 } },
   ];
 
   // Consumables & quest items.
@@ -75,16 +75,16 @@
     potion_minor:  { id: 'potion_minor', name: 'Minor Healing Draught', glyph: '!', type: 'consumable', heal: 25, value: 15, stack: true },
     potion:        { id: 'potion', name: 'Healing Draught', glyph: '!', type: 'consumable', heal: 60, value: 40, stack: true },
     potion_major:  { id: 'potion_major', name: 'Greater Healing Draught', glyph: '!', type: 'consumable', heal: 140, value: 110, stack: true },
-    elixir_storm:  { id: 'elixir_storm', name: 'Anima Elixir', glyph: '*', type: 'consumable', stormlight: 60, value: 60, stack: true },
+    elixir_storm:  { id: 'elixir_storm', name: 'Charge Elixir', glyph: '*', type: 'consumable', charge: 60, value: 60, stack: true },
     antidote:      { id: 'antidote', name: 'Antidote', glyph: '!', type: 'consumable', cure: 'poison', value: 25, stack: true },
     ration:        { id: 'ration', name: 'Travel Ration', glyph: '%', type: 'consumable', food: 30, value: 5, stack: true },
-    scroll_blast:  { id: 'scroll_blast', name: 'Scroll of Churnblast', glyph: '?', type: 'consumable', scroll: 'blast', value: 50, stack: true },
+    scroll_blast:  { id: 'scroll_blast', name: 'Scroll of Arc Blast', glyph: '?', type: 'consumable', scroll: 'blast', value: 50, stack: true },
     scroll_warp:   { id: 'scroll_warp', name: 'Scroll of Recall', glyph: '?', type: 'consumable', scroll: 'recall', value: 80, stack: true },
   };
 
-  // Infused gems — used to recharge Anima & craft.
+  // Infused gems — used to recharge Charge & craft.
   function makeGem(name) {
-    return { id: 'gem_' + name.toLowerCase(), name: 'Infused ' + name, glyph: '*', type: 'gem', stormlight: 40, value: 35, stack: true };
+    return { id: 'gem_' + name.toLowerCase(), name: 'Infused ' + name, glyph: '*', type: 'gem', charge: 40, value: 35, stack: true };
   }
 
   // Crafting materials — dropped by foes & dungeons, spent at the smith/alchemist.
@@ -92,8 +92,8 @@
     scrap: { id: 'mat_scrap', name: 'Scrap Metal', glyph: '¤', type: 'material', tier: 1, value: 6, stack: true },
     sinew: { id: 'mat_sinew', name: 'Beast Sinew', glyph: '¤', type: 'material', tier: 1, value: 5, stack: true },
     herb:  { id: 'mat_herb',  name: 'Bitterleaf',  glyph: '♠', type: 'material', tier: 1, value: 4, stack: true },
-    dust:  { id: 'mat_dust',  name: 'Anima Dust',  glyph: '¤', type: 'material', tier: 2, value: 14, stack: true },
-    shard: { id: 'mat_shard', name: 'Riftsteel Shard', glyph: '¤', type: 'material', tier: 3, value: 28, stack: true },
+    dust:  { id: 'mat_dust',  name: 'Charge Dust',  glyph: '¤', type: 'material', tier: 2, value: 14, stack: true },
+    alloy: { id: 'mat_alloy', name: 'Riftsteel Alloy', glyph: '¤', type: 'material', tier: 3, value: 28, stack: true },
   };
 
   let UID = 1;
@@ -142,7 +142,7 @@
       item.speed = base.speed;
       item.crit = base.crit || 0.05;
       item.armorPierce = base.armorPierce || 0;
-      if (base.special === 'shard') item.shard = true;
+      if (base.special === 'relic') item.relic = true;
     } else {
       item.def = Math.round(base.def * mat.mult);
       item.block = base.block || 0;
@@ -168,7 +168,7 @@
       : item.affixes.length === 1 ? 'magic'
       : (item.affixes.some(function (a) { return a.tier >= 4; }) ? 'legendary' : 'rare');
     item.rarity = rarity;
-    if (item.shard) item.rarity = 'legendary';
+    if (item.relic) item.rarity = 'legendary';
 
     // Value
     const baseVal = isWeapon ? base.dmg * 3 : base.def * 4;
@@ -179,33 +179,33 @@
   function mergeBonus(dst, src) {
     if (!src) return dst;
     for (const k in src) {
-      if (k === 'element' || k === 'voidbane') { dst[k] = src[k]; continue; }
+      if (k === 'element' || k === 'riftbane') { dst[k] = src[k]; continue; }
       dst[k] = (dst[k] || 0) + src[k];
     }
     return dst;
   }
 
-  // A handful of unique, hand-authored artifacts (Shardblades etc.)
+  // A handful of unique, hand-authored artifacts (relic weapons of the prior ages).
   const UNIQUES = {
-    oathbringer: function () {
-      return { uid: uid(), type: 'weapon', base: 'longsword', glyph: '†', mat: 'shardsteel', color: '#b99cff',
+    gravewind: function () {
+      return { uid: uid(), type: 'weapon', base: 'longsword', glyph: '†', mat: 'riftsteel', color: '#b99cff',
         name: 'Gravewind, the First Rift', skill: 'blades', slot: 'weapon', hands: 1, dmg: 55, speed: 11, crit: 0.2,
-        armorPierce: 0.6, shard: true, rarity: 'artifact', level: 20, affixes: [{name:'Soulsevering',tier:5}],
-        bonus: { dmg: 20, voidbane: 0.6, maxStormlight: 50 }, value: 9999,
-        desc: 'A living Riftblade that severs the soul. The dead cannot rise from its cut.' };
+        armorPierce: 0.6, relic: true, rarity: 'artifact', level: 20, affixes: [{name:'Riftsevering',tier:5}],
+        bonus: { dmg: 20, riftbane: 0.6, maxCharge: 50 }, value: 9999,
+        desc: 'A living Riftblade that severs clean through. The dead cannot rise from its cut.' };
     },
-    sunmaker: function () {
-      return { uid: uid(), type: 'weapon', base: 'warhammer', glyph: '†', mat: 'soulcast', color: '#ff7a4b',
+    cinderfall: function () {
+      return { uid: uid(), type: 'weapon', base: 'warhammer', glyph: '†', mat: 'aeonsteel', color: '#ff7a4b',
         name: 'Cinderfall, the Ruin', skill: 'blunt', slot: 'weapon', hands: 2, dmg: 70, speed: 6, crit: 0.12,
-        armorPierce: 0.8, shard: true, rarity: 'artifact', level: 24, affixes: [{name:'Cataclysm',tier:5}],
+        armorPierce: 0.8, relic: true, rarity: 'artifact', level: 24, affixes: [{name:'Cataclysm',tier:5}],
         bonus: { dmg: 25, element: 'fire' }, value: 9999,
         desc: 'A Rifthammer that burned a hundred holds to ash. It hungers still.' };
     },
-    plate_radiant: function () {
-      return { uid: uid(), type: 'armor', base: 'halfplate', glyph: '◊', mat: 'shardsteel', color: '#b99cff',
+    riftplate: function () {
+      return { uid: uid(), type: 'armor', base: 'halfplate', glyph: '◊', mat: 'riftsteel', color: '#b99cff',
         name: 'Kindled Riftplate', skill: 'heavy', slot: 'body', def: 50, block: 0.2, rarity: 'artifact', level: 20,
-        affixes: [{name:'Galeforged',tier:5}], bonus: { maxHp: 80, maxStormlight: 60, stormRegen: 2, def: 20 }, value: 9999,
-        desc: 'Glowing plate that drinks Anima to mend itself and its bearer.' };
+        affixes: [{name:'Galeforged',tier:5}], bonus: { maxHp: 80, maxCharge: 60, chargeRegen: 2, def: 20 }, value: 9999,
+        desc: 'Glowing plate that drinks Charge to mend itself and its bearer.' };
     },
   };
 
@@ -227,10 +227,10 @@
       const lvl = (enemy && enemy.level) || 1;
       const tags = (enemy && enemy.tags) || [];
       let kind;
-      if (tags.indexOf('void') >= 0) kind = rng.pick(['dust', 'dust', 'shard']);
+      if (tags.indexOf('rift') >= 0) kind = rng.pick(['dust', 'dust', 'alloy']);
       else if (enemy && (enemy.faction === 'reavers')) kind = rng.pick(['scrap', 'scrap', 'herb']);
       else kind = rng.pick(['sinew', 'scrap', 'herb']);
-      if (lvl >= 8 && rng.chance(0.3)) kind = 'shard';
+      if (lvl >= 8 && rng.chance(0.3)) kind = 'alloy';
       return TLU.Items.material(kind, 1);
     },
     consumable: function (id, qty) {
