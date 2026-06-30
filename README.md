@@ -188,6 +188,11 @@ or fill the **Codex** bestiary to see it. A standalone gallery lives at `design/
   premade looks to pick from, with **reroll** for fresh sets and **presentation** / **age**
   toggles. Your choice drives the generative ink portrait everywhere it appears (the HUD,
   the character sheet, dialogue), and persists with your save and your dynasty.
+- **An illustrated overworld.** The world map is drawn as an inked chart, not ASCII — each
+  biome a hand-symbol (water waves, ironbud tufts, hill bumps, stonewood trees, mountains,
+  crater rings, chasm hatch), holds/vaults/camps/ruins as framed map-pins, roads as trails,
+  the hero a hooded figure with a selection ring, and the Churn a hatched front sweeping the
+  page. Uncharted ground stays blank parchment; it fills in as you explore. (`src/render.js`)
 - **Procedural open world.** A value-noise continent with nine biomes, holds (towns),
   drowned Riftvaults, reaver camps, roads, the roaming Churn, and a far-eastern danger gradient —
   every world is reproducible from its seed.

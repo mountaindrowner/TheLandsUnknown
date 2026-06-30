@@ -49,36 +49,178 @@
   function TB(hex) { return TLU.Theme ? TLU.Theme.bg(hex) : hex; }
   function themed() { return TLU.Theme && TLU.Theme.activeId !== 'storm'; }
 
-  // ---- overworld viewport ----
+  // ---- overworld viewport — an illustrated, inked cartographic map ----
   function drawWorld(disp, game) {
-    const w = game.world, p = game.player;
-    disp.clear(TB('#05060a'));
+    const w = game.world, p = game.player, ctx = disp.ctx, cell = disp.cell;
+    const base = (TLU.Theme && TLU.Theme.active().mapBg) || '#0e0b16';
+    const ink = TC('#2a2620'), ink2 = TC('#6f6650');
+    disp.clear(base);
     const halfC = Math.floor(disp.cols / 2), halfR = Math.floor(disp.rows / 2);
     const ox = p.wx - halfC, oy = p.wy - halfR;
-    const th = themed();
+
+    ctx.save();
     for (let sy = 0; sy < disp.rows; sy++) {
       for (let sx = 0; sx < disp.cols; sx++) {
         const mx = ox + sx, my = oy + sy;
-        if (mx < 0 || my < 0 || mx >= w.w || my >= w.h) { disp.put(sx, sy, ' ', null, TB('#05060a')); continue; }
+        if (mx < 0 || my < 0 || mx >= w.w || my >= w.h) continue;
         const t = w.tiles[my][mx];
-        const seen = p.visited[mx + ',' + my];
-        let glyph = t.glyph, color = t.color, bg = t.bg, role = null;
-        if (t.road && !t.site) { glyph = '+'; color = '#8a7a55'; }
-        if (t.site) { glyph = t.site.glyph; color = t.site.color; bg = '#0a0a12'; role = 'site'; }
-        // theme the colour, then apply the (default-only) churn shading & fog
-        color = TC(color, role);
-        bg = TB(bg);
-        if (!th && game.storm && game.storm.active) {
-          const dxF = mx - game.storm.x;
-          if (Math.abs(dxF) <= 3) { bg = '#3a1455'; if (Math.abs(dxF) <= 1) bg = '#5a1f7a'; }
-          else if (dxF < 0) bg = '#160c22';
-        }
-        if (!seen) { color = dim(color, 0.42); bg = dim(bg || '#05060a', 0.5); }
-        disp.put(sx, sy, glyph, color, bg);
+        if (!p.visited[mx + ',' + my]) continue;   // uncharted stays blank parchment
+        const px = sx * cell, py = sy * cell;
+        // terrain wash — the biome's hue, muted into the map's paper
+        ctx.fillStyle = mix(base, t.color, t.glyph === '~' ? 0.4 : 0.22);
+        ctx.fillRect(px, py, cell, cell);
+        if (t.road && !t.site) drawRoad(ctx, px, py, cell, mix(ink, '#b89360', 0.55));
+        else if (!t.site) drawMotif(ctx, px, py, cell, t.glyph, mix(ink, t.color, 0.28), ink2);
+        if (t.site) drawPin(ctx, px, py, cell, t.site, base, ink);
       }
     }
-    disp.put(halfC, halfR, '@', TC('#fff36b', 'player'), TB('#1a1a2a'));
+    ctx.restore();
+
+    // the Churn front — a hatched band of machine-dust sweeping the map
+    if (game.storm && game.storm.active) drawChurn(ctx, disp, game, ox, oy);
+
+    // the hero, dwarfed at the centre
+    drawHero(ctx, halfC * cell + cell / 2, halfR * cell + cell / 2, cell, ink, TC('#9a3b2a', 'accent'));
     drawMinimap(game);
+  }
+
+  // ---- map drawing primitives -----------------------------------------
+  function parseHex(h) {
+    if (!h || h[0] !== '#') return [128, 128, 128];
+    const n = h.length === 4
+      ? parseInt(h[1] + h[1] + h[2] + h[2] + h[3] + h[3], 16) : parseInt(h.slice(1), 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+  function mix(a, b, t) {
+    const A = parseHex(a), B = parseHex(b);
+    return 'rgb(' + Math.round(A[0] + (B[0] - A[0]) * t) + ',' + Math.round(A[1] + (B[1] - A[1]) * t) + ',' + Math.round(A[2] + (B[2] - A[2]) * t) + ')';
+  }
+
+  // a small terrain symbol drawn for a tile glyph
+  function drawMotif(ctx, px, py, cell, glyph, col, col2) {
+    const cx = px + cell / 2, cy = py + cell / 2, u = cell;
+    ctx.lineWidth = Math.max(1, u * 0.055);
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = col; ctx.fillStyle = col;
+    switch (glyph) {
+      case '~': // open water
+        ctx.strokeStyle = mix(col2, '#3f6173', 0.55);
+        wave(ctx, cx, cy - u * 0.12, u * 0.32);
+        wave(ctx, cx, cy + u * 0.16, u * 0.32);
+        break;
+      case '.': // shore
+        ctx.strokeStyle = mix(col2, '#3f6173', 0.4);
+        wave(ctx, cx, cy + u * 0.06, u * 0.3);
+        break;
+      case '"': // ironbud plains — little tufts
+        ctx.strokeStyle = col;
+        for (let i = -1; i <= 1; i++) { ctx.beginPath(); ctx.moveTo(cx + i * u * 0.22, cy + u * 0.12); ctx.lineTo(cx + i * u * 0.22, cy - u * 0.06); ctx.stroke(); }
+        break;
+      case 'n': // hills — a bump or two
+        ctx.beginPath(); ctx.arc(cx - u * 0.13, cy + u * 0.06, u * 0.16, Math.PI, 0); ctx.stroke();
+        ctx.beginPath(); ctx.arc(cx + u * 0.15, cy + u * 0.1, u * 0.13, Math.PI, 0); ctx.stroke();
+        break;
+      case '♣': { // stonewood — a tree
+        ctx.beginPath(); ctx.moveTo(cx, cy + u * 0.2); ctx.lineTo(cx, cy - u * 0.04); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx, cy - u * 0.26); ctx.lineTo(cx - u * 0.16, cy + u * 0.02); ctx.lineTo(cx + u * 0.16, cy + u * 0.02); ctx.closePath(); ctx.fill();
+        break;
+      }
+      case '▲': // mountain
+        ctx.beginPath(); ctx.moveTo(cx, cy - u * 0.24); ctx.lineTo(cx - u * 0.26, cy + u * 0.2); ctx.lineTo(cx + u * 0.26, cy + u * 0.2); ctx.closePath();
+        ctx.fillStyle = mix(col, '#ffffff', 0.12); ctx.fill(); ctx.stroke();
+        ctx.strokeStyle = mix(col, '#ffffff', 0.5); ctx.beginPath(); ctx.moveTo(cx, cy - u * 0.24); ctx.lineTo(cx - u * 0.08, cy - u * 0.02); ctx.stroke();
+        break;
+      case '=': // sundered plateau — chasm hatch
+        ctx.strokeStyle = col2;
+        for (let i = -1; i <= 1; i++) { ctx.beginPath(); ctx.moveTo(cx - u * 0.22 + i * u * 0.04, cy - u * 0.12 + i * u * 0.16); ctx.lineTo(cx + u * 0.22 + i * u * 0.04, cy - u * 0.12 + i * u * 0.16); ctx.stroke(); }
+        break;
+      case 'o': // crater
+        ctx.beginPath(); ctx.arc(cx, cy, u * 0.18, 0, Math.PI * 2); ctx.stroke();
+        break;
+      case '§': // the Churnreach — drifting motes
+        ctx.fillStyle = mix(col, '#c0703a', 0.6);
+        for (let i = 0; i < 4; i++) dot(ctx, cx + (i % 2 ? 1 : -1) * u * 0.16, cy + (i < 2 ? -1 : 1) * u * 0.13, u * 0.05);
+        break;
+      case ':': // ashlands
+        ctx.fillStyle = col2;
+        dot(ctx, cx - u * 0.12, cy + u * 0.04, u * 0.045); dot(ctx, cx + u * 0.1, cy - u * 0.06, u * 0.045); dot(ctx, cx + u * 0.04, cy + u * 0.14, u * 0.04);
+        break;
+      default:
+        dot(ctx, cx, cy, u * 0.05);
+    }
+  }
+  function wave(ctx, cx, cy, half) {
+    ctx.beginPath(); ctx.moveTo(cx - half, cy);
+    ctx.quadraticCurveTo(cx - half * 0.5, cy - half * 0.5, cx, cy);
+    ctx.quadraticCurveTo(cx + half * 0.5, cy + half * 0.5, cx + half, cy); ctx.stroke();
+  }
+  function dot(ctx, x, y, r) { ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); }
+
+  function drawRoad(ctx, px, py, cell, col) {
+    const cx = px + cell / 2, cy = py + cell / 2;
+    ctx.fillStyle = col;
+    ctx.beginPath();
+    if (ctx.roundRect) { ctx.roundRect(cx - cell * 0.34, cy - cell * 0.1, cell * 0.68, cell * 0.2, cell * 0.1); ctx.fill(); }
+    else ctx.fillRect(cx - cell * 0.34, cy - cell * 0.1, cell * 0.68, cell * 0.2);
+  }
+
+  // a framed map-pin: a light disc with an ink ring and the site's symbol
+  function drawPin(ctx, px, py, cell, site, base, ink) {
+    const cx = px + cell / 2, cy = py + cell / 2, r = cell * 0.4;
+    ctx.save();
+    ctx.fillStyle = 'rgba(40,30,18,0.28)';
+    ctx.beginPath(); ctx.ellipse(cx, cy + r * 0.7, r * 0.8, r * 0.32, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = mix(base, site.color, 0.5);
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+    ctx.lineWidth = Math.max(1, cell * 0.07); ctx.strokeStyle = ink; ctx.stroke();
+    ctx.fillStyle = mix(ink, site.color, 0.65);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = Math.floor(cell * 0.56) + 'px ' + 'Georgia, serif';
+    ctx.fillText(site.glyph, cx, cy + 1);
+    ctx.restore();
+  }
+
+  function drawHero(ctx, cx, cy, cell, ink, accent) {
+    const h = cell * 0.86, w = h * 0.46;
+    ctx.save();
+    // selection ring
+    ctx.strokeStyle = accent; ctx.lineWidth = Math.max(1.5, cell * 0.07);
+    ctx.beginPath(); ctx.arc(cx, cy, cell * 0.5, 0, Math.PI * 2); ctx.stroke();
+    // shadow
+    ctx.fillStyle = 'rgba(30,22,12,0.3)';
+    ctx.beginPath(); ctx.ellipse(cx, cy + h * 0.36, w * 0.5, h * 0.07, 0, 0, Math.PI * 2); ctx.fill();
+    // cloaked body
+    ctx.fillStyle = ink;
+    ctx.beginPath();
+    ctx.moveTo(cx - w / 2, cy + h * 0.36);
+    ctx.quadraticCurveTo(cx - w * 0.56, cy - h * 0.22, cx - h * 0.13, cy - h * 0.36);
+    ctx.quadraticCurveTo(cx, cy - h * 0.52, cx + h * 0.13, cy - h * 0.36);
+    ctx.quadraticCurveTo(cx + w * 0.56, cy - h * 0.22, cx + w / 2, cy + h * 0.36);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx, cy - h * 0.4, h * 0.12, 0, Math.PI * 2); ctx.fill();
+    // anima gem
+    ctx.fillStyle = accent; dot(ctx, cx, cy - h * 0.04, cell * 0.06);
+    ctx.restore();
+  }
+
+  function drawChurn(ctx, disp, game, ox, oy) {
+    const cell = disp.cell, sxF = (game.storm.x - ox);
+    const xpx = sxF * cell;
+    if (xpx < -cell * 2 || xpx > disp.cols * cell + cell * 2) return;
+    const H = disp.rows * cell;
+    ctx.save();
+    // faint wash on the wake (west) side already passed
+    ctx.fillStyle = 'rgba(150,70,40,0.08)';
+    ctx.fillRect(xpx - cell, 0, cell * 2, H);
+    // diagonal hatch front
+    ctx.strokeStyle = 'rgba(120,60,35,0.5)'; ctx.lineWidth = Math.max(1, cell * 0.05);
+    for (let y = -cell; y < H; y += cell * 0.5) {
+      ctx.beginPath(); ctx.moveTo(xpx - cell * 0.5, y); ctx.lineTo(xpx + cell * 0.5, y + cell * 0.8); ctx.stroke();
+    }
+    // a stronger leading line
+    ctx.strokeStyle = TC('#9a3b2a', 'accent'); ctx.lineWidth = Math.max(1.5, cell * 0.08);
+    ctx.beginPath(); ctx.moveTo(xpx + cell * 0.1, 0); ctx.lineTo(xpx + cell * 0.1, H); ctx.stroke();
+    ctx.restore();
   }
 
   // ---- dungeon viewport ----
