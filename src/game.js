@@ -77,8 +77,8 @@
     this.discoverBiome(p.wx, p.wy);
     this.logLines = [];
     this.msg('%c' + TLU.LORE.title + ' — ' + TLU.LORE.subtitle, 'head');
-    this.msg('You wake on the Rockbud Plains, wisps circling like curious sparks.');
-    this.msg('Seek the Galewardens in a hold (⌂). Press [?] for help, [Enter] to interact.');
+    this.msg('You wake on the Rockbud Plains, echoes circling like curious sparks.');
+    this.msg('Seek the Wardens in a hold (⌂). Press [?] for help, [Enter] to interact.');
     this.save();
     this.render();
   };
@@ -147,8 +147,8 @@
     this.storm.timer--;
     if (this.storm.timer <= 0) {
       this.storm.active = !this.storm.active;
-      if (this.storm.active) { this.storm.timer = 14; this.storm.front = 0; this.msg('%c⛈ A galestorm sweeps in from the east! The surges flow freely, but the wilds grow deadly.', 'storm'); }
-      else { this.storm.timer = 90 + (this.turnCount % 40); this.storm.front = 999; this.day++; this.msg('%c☀ The storm passes. Dawn breaks on day ' + this.day + '.', 'note'); }
+      if (this.storm.active) { this.storm.timer = 14; this.storm.front = 0; this.msg('%c⛈ The Churn sweeps in from the east! The Arts flow freely, but the wilds grow deadly.', 'storm'); }
+      else { this.storm.timer = 90 + (this.turnCount % 40); this.storm.front = 999; this.day++; this.msg('%c☀ The Churn recedes. Dawn breaks on day ' + this.day + '.', 'note'); }
     }
     if (this.storm.active) this.storm.front = Math.max(0, this.storm.front - 4);
   };

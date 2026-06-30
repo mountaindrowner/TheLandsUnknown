@@ -1,12 +1,12 @@
 # The Lands Unknown
-### *A Chronicle of Gale and Gleam*
+### *A Chronicle of the Churn*
 
 A large, open-world **ASCII RPG** that blends the freeform exploration and skill-by-use
 progression of **The Elder Scrolls**, the deep procedural systems of **Dwarf Fortress**,
 and the emergent, story-soaked pull of **RimWorld** and **Minecraft** — set in an
-original storm-haunted world of gale, gleam, and living wisps.
+original death-and-memory world of the Churn, of Anima, and the unforgotten dead.
 
-Wander a seed-generated continent, bind the surges, hoard randomized Riftgear, gather
+Wander a seed-generated continent, channel the Arts, hoard randomized Riftgear, gather
 rumors from a town full of talkative NPCs, fill in a discovery Codex as you explore —
 and, when you are ready, descend into ruined Dawnhollow to face the final boss:
 **Vethra, the Gloammother**.
@@ -61,7 +61,7 @@ the live tables at load.
 ```js
 TLU.Content.register({
   id: 'my-pack',
-  bestiary: [ { id:'frost_wisp', name:'Hoarfrost Wisp', glyph:'i', lvl:3, hp:26, atk:11,
+  bestiary: [ { id:'frost_wisp', name:'Hoarfrost Echo', glyph:'i', lvl:3, hp:26, atk:11,
                 def:2, spd:15, biomes:['coast'], lore:'Codex entry shown on first kill.' } ],
   npcs:    { bard: { role:'Bard', glyph:'♪', greet:[...], talk:[...], bye:[...] } },
   quests:  [ { id:'...', name:'...', stages:[...], onComplete:{...} } ],
@@ -81,16 +81,16 @@ the next build follows from your choices.
 
 ## The world
 
-> *The Galestorm walks the world from east to west, and where it passes the stones wake
-> and the souls of the dead drift like embers on the wind. You are one of the Gleamless —
+> *The Churn walks the world from east to west, and where it passes the stones wake
+> and the souls of the dead drift like embers on the wind. You are one of the Unkindled —
 > born without the gift the temples promised, cast out of the spire-cities to wander the
-> sundered marches. But the wisps have begun to gather at your shoulder...*
+> sundered marches. But the echoes have begun to gather at your shoulder...*
 
-- **Aurenmark** — a sundered continent crossed by the living **Galestorm**.
-- **Gleam** — stored storm-light, breathed from charged gems to fuel surgebinding.
-- **Wisps** — fragments of living spirit that gather at the shoulders of the would-be **Sworn**.
-- **The five Orders** — Galewalker, Stonewarden, Slipstrider, Veilseer, Cinderwright — each
-  binding two of the eight Surges.
+- **Aurenmark** — a sundered continent crossed by the living **Churn**.
+- **Anima** — the soul-light shaken loose from the dead by the Churn, breathed from charged gems to fuel the Arts.
+- **Echoes** — fragments of the dead that gather at the shoulders of the would-be **Kindled**.
+- **The five Orders** — Skyrender, Stonewarden, Slipstrider, Veilseer, Cinderwright — each
+  binding two of the eight Arts. The Kindled carry an echo of the dead.
 - **The Rift** — a soul-severing weapon shattered into four fragments, scattered in drowned vaults.
 - **The Hollow Ones** — old, patient, hungry forces. **Vethra, the Gloammother**, is the eldest that wakes.
 
@@ -114,24 +114,24 @@ The game **auto-saves** as you travel and on major events.
 ## What's in it
 
 - **Procedural open world.** A value-noise continent with nine biomes, holds (towns),
-  drowned Riftvaults, reaver camps, roads, galestorms, and a far-eastern danger gradient —
+  drowned Riftvaults, reaver camps, roads, the roaming Churn, and a far-eastern danger gradient —
   every world is reproducible from its seed.
 - **A world that talks.** Towns are populated with named, archetyped **NPCs** — innkeepers,
-  gem-merchants, drillmasters, guards, scholars, wanderers, street children, stormpriests,
+  gem-merchants, drillmasters, guards, scholars, wanderers, street children, ashpriests,
   riftsmiths — each with deep pools of greetings, banter, and lore. Ask for **rumors** to
   hear flavor or to get nearby vaults, camps, and the warlord's lair **marked on your map**.
 - **A discovery Codex.** A journal that fills in as you play: World lore, Factions, a
   **Bestiary** that records each creature you slay, **Places** you've charted, and every
   **rumor** you've heard. Discovery is the pull.
 - **Ambient life & travel events.** Evocative barks while you roam, plus non-combat
-  micro-events — a wisp's gift of Gleam, a traveler's cairn, a roadside shrine, a wandering
+  micro-events — an echo’s gift of Anima, a traveler's cairn, a roadside shrine, a wandering
   healer, tainted water — that keep the road surprising.
 - **Skill-by-use progression (Elder-Scrolls style).** 21 skills across combat, armor,
-  surgebinding and utility that level *through use*; skill-ups feed your character level
+  channeling and utility that level *through use*; skill-ups feed your character level
   and grant attribute points you allocate freely.
 - **Mountains of randomized loot.** Seven material tiers × weapon/armor bases ×
   prefix/suffix affixes, plus hand-authored artifacts (the living Riftblade *Gravewind*,
-  *Gleamsworn Riftplate*, *Cinderfall*). Rarities from common to artifact.
+  *Kindled Riftplate*, *Cinderfall*). Rarities from common to artifact.
 - **Final-Fantasy-style turn-based combat.** Initiative order, crits, elements,
   armor-piercing, blocking, status effects (burn/bleed/stun/bound/fear/guard/evade…),
   fleeing, and a multi-phase final boss that spawns murderous shadows and escalates.
@@ -140,7 +140,7 @@ The game **auto-saves** as you travel and on major events.
 - **Quests in many directions.** A main arc (gather the Rift, end Warlord Varen, descend
   Dawnhollow) plus faction side-quests and bounties — pursue them in any order.
 - **Towns & economy.** Rest at inns, buy/sell from refreshing merchant stock, pay
-  trainers, and counsel with the Galewardens. Bartering improves with use.
+  trainers, and counsel with the Wardens. Bartering improves with use.
 
 ---
 
@@ -155,7 +155,7 @@ src/
     lore.js           # world flavor, orders, gems, name generator, biome flavor
     skills.js         # skill definitions + XP curves
     items.js          # materials, bases, affixes, loot tables, uniques
-    abilities.js      # surgebinding powers + enemy moves
+    abilities.js      # channeling powers + enemy moves
     bestiary.js       # enemies, mini-boss, final boss, scaling
     quests.js         # main arc + side quests
     dialogue.js       # NPC archetypes, rumors, codex, barks, travel events
@@ -206,4 +206,4 @@ services, an NPC conversation, the codex, a dungeon entry, normal combat, and a
 Built to a single brief: *make it completely playable; reskin the world from an obvious
 inspiration into something original but kindred; pack it with NPC dialogue and lore; make
 it enthralling like the games that pull people in for hundreds of hours; and give me a link
-to play.* Strength before weakness. Journey before destination.
+to play.* Remember the dead. Outlast the Churn.

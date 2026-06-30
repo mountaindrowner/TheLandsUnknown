@@ -39,7 +39,7 @@
     html += '<div class="pname">' + esc(p.name) + '</div>';
     html += '<div class="psub" style="color:' + p.order.color + '">' + p.order.glyph + ' ' + esc(p.order.name) + ' · Lv ' + p.level + '</div>';
     html += '<div class="statrow">HP</div>' + bar(p.hp, p.maxHp, '#c0392b');
-    html += '<div class="statrow">Gleam</div>' + bar(p.stormlight, p.maxStormlight, '#7e6bff');
+    html += '<div class="statrow">Anima</div>' + bar(p.stormlight, p.maxStormlight, '#7e6bff');
     html += '<div class="statrow">XP</div>' + bar(p.xp, p.xpNext, '#3a8a4a');
     html += '<div class="gridstats">';
     html += '<span>⚔ ATK <b>' + p.attack + '</b></span>';
@@ -58,7 +58,7 @@
       ? (game.world.tiles[p.wy] && game.world.tiles[p.wy][p.wx] ? game.world.tiles[p.wy][p.wx].name : '')
       : (game.dungeon.site ? game.dungeon.site.name + ' — Floor ' + game.dungeon.depth : 'Ruin');
     html += '<div class="loc">◉ ' + esc(loc) + '</div>';
-    html += '<div class="time">' + (game.storm && game.storm.active ? '⛈ GALESTORM' : '☀ Day ' + game.day) + '</div>';
+    html += '<div class="time">' + (game.storm && game.storm.active ? '⛈ THE CHURN' : '☀ Day ' + game.day) + '</div>';
     el.innerHTML = html;
   }
 

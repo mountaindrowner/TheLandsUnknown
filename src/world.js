@@ -15,7 +15,7 @@
     mountain:{ id: 'mountain',glyph: '▲', color: '#8a8a8a', bg: '#161616', name: 'The Unclimbed', biome: 'plateau', passable: false },
     plateau: { id: 'plateau', glyph: '=', color: '#9a7a4a', bg: '#161208', name: 'Sundered Plains', biome: 'plateau' },
     crater:  { id: 'crater',  glyph: 'o', color: '#6a5a3a', bg: '#13100a', name: 'Crater Flats', biome: 'crater' },
-    storm:   { id: 'storm',   glyph: '§', color: '#7e6bff', bg: '#0e0b1a', name: 'The Galeseat', biome: 'storm' },
+    storm:   { id: 'storm',   glyph: '§', color: '#7e6bff', bg: '#0e0b1a', name: 'The Churnreach', biome: 'storm' },
     desert:  { id: 'desert',  glyph: ':', color: '#caa84a', bg: '#161206', name: 'The Ashlands', biome: 'plains' },
   };
 
@@ -58,7 +58,7 @@
         else if (e < 0.345) b = BIOMES.coast;
         else if (e > 0.82) b = BIOMES.mountain;
         else if (e > 0.70) b = BIOMES.plateau;
-        else if (x > W * 0.62 && m > 0.55 && e > 0.45) b = BIOMES.storm; // east = storm-wracked
+        else if (x > W * 0.62 && m > 0.55 && e > 0.45) b = BIOMES.storm; // east = churn-wracked
         else if (m < 0.30 && x > W * 0.5) b = BIOMES.desert;
         else if (m > 0.62 && e < 0.6) b = BIOMES.forest;
         else if (e > 0.55) b = BIOMES.hills;
@@ -131,7 +131,7 @@
     // --- Mini-boss lair ---
     const lair = placeSite({ type: 'lair', glyph: '☠', color: '#ff6a3d', name: 'Varen\'s Warcamp', level: 8, boss: 'highlord_reaver', cleared: false }, 8);
 
-    // --- Final ruin: Dawnhollow (placed deep in the storm-lands, east) ---
+    // --- Final ruin: Dawnhollow (placed deep in the unmade lands, east) ---
     let aha = null;
     for (let tries = 0; tries < 500 && !aha; tries++) {
       const x = rng.int(W - 18, W - 4), y = rng.int(6, H - 6);

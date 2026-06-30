@@ -13,7 +13,7 @@
     { id: 'bronze',   name: 'Tarnsteel', mult: 1.45, value: 2.6, tier: 3, color: '#caa04b' },
     { id: 'azure',    name: 'Azurine',     mult: 1.7, value: 4.0, tier: 4, color: '#7ec8ff' },
     { id: 'shardsteel', name: 'Riftsteel', mult: 2.1, value: 7.5, tier: 5, color: '#b99cff' },
-    { id: 'soulcast', name: 'Gleamforged',  mult: 2.6, value: 12, tier: 6, color: '#67e08a' },
+    { id: 'soulcast', name: 'Soulforged',  mult: 2.6, value: 12, tier: 6, color: '#67e08a' },
   ];
 
   // Weapon base types. dmg is base at iron tier; speed affects turn order.
@@ -53,7 +53,7 @@
     { id: 'swift',   name: 'Swift',    tier: 1, bonus: { speed: 2 } },
     { id: 'heavy',   name: 'Brutal',   tier: 2, bonus: { dmg: 4 } },
     { id: 'guarded', name: 'Warded',   tier: 2, bonus: { def: 4 } },
-    { id: 'stormlit', name: 'Gleamlit', tier: 3, bonus: { dmg: 5, maxStormlight: 15 } },
+    { id: 'stormlit', name: 'Animabright', tier: 3, bonus: { dmg: 5, maxStormlight: 15 } },
     { id: 'vicious', name: 'Vicious',  tier: 3, bonus: { dmg: 6, crit: 0.08 } },
     { id: 'adamant', name: 'Adamant',  tier: 3, bonus: { def: 7, maxHp: 12 } },
     { id: 'godslaying', name: 'God-Slaying', tier: 4, bonus: { dmg: 10, crit: 0.12 } },
@@ -75,14 +75,14 @@
     potion_minor:  { id: 'potion_minor', name: 'Minor Healing Draught', glyph: '!', type: 'consumable', heal: 25, value: 15, stack: true },
     potion:        { id: 'potion', name: 'Healing Draught', glyph: '!', type: 'consumable', heal: 60, value: 40, stack: true },
     potion_major:  { id: 'potion_major', name: 'Greater Healing Draught', glyph: '!', type: 'consumable', heal: 140, value: 110, stack: true },
-    elixir_storm:  { id: 'elixir_storm', name: 'Gleam Elixir', glyph: '*', type: 'consumable', stormlight: 60, value: 60, stack: true },
+    elixir_storm:  { id: 'elixir_storm', name: 'Anima Elixir', glyph: '*', type: 'consumable', stormlight: 60, value: 60, stack: true },
     antidote:      { id: 'antidote', name: 'Antidote', glyph: '!', type: 'consumable', cure: 'poison', value: 25, stack: true },
     ration:        { id: 'ration', name: 'Travel Ration', glyph: '%', type: 'consumable', food: 30, value: 5, stack: true },
-    scroll_blast:  { id: 'scroll_blast', name: 'Scroll of Galeblast', glyph: '?', type: 'consumable', scroll: 'blast', value: 50, stack: true },
+    scroll_blast:  { id: 'scroll_blast', name: 'Scroll of Churnblast', glyph: '?', type: 'consumable', scroll: 'blast', value: 50, stack: true },
     scroll_warp:   { id: 'scroll_warp', name: 'Scroll of Recall', glyph: '?', type: 'consumable', scroll: 'recall', value: 80, stack: true },
   };
 
-  // Infused gems — used to recharge Stormlight & craft.
+  // Infused gems — used to recharge Anima & craft.
   function makeGem(name) {
     return { id: 'gem_' + name.toLowerCase(), name: 'Infused ' + name, glyph: '*', type: 'gem', stormlight: 40, value: 35, stack: true };
   }
@@ -194,9 +194,9 @@
     },
     plate_radiant: function () {
       return { uid: uid(), type: 'armor', base: 'halfplate', glyph: '◊', mat: 'shardsteel', color: '#b99cff',
-        name: 'Gleamsworn Riftplate', skill: 'heavy', slot: 'body', def: 50, block: 0.2, rarity: 'artifact', level: 20,
+        name: 'Kindled Riftplate', skill: 'heavy', slot: 'body', def: 50, block: 0.2, rarity: 'artifact', level: 20,
         affixes: [{name:'Galeforged',tier:5}], bonus: { maxHp: 80, maxStormlight: 60, stormRegen: 2, def: 20 }, value: 9999,
-        desc: 'Glowing plate that drinks Gleam to mend itself and its bearer.' };
+        desc: 'Glowing plate that drinks Anima to mend itself and its bearer.' };
     },
   };
 

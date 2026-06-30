@@ -117,11 +117,11 @@
       lines.push('Defense ' + it.def);
     } else if (it.type === 'consumable') {
       if (it.heal) lines.push('Restores ' + it.heal + ' HP');
-      if (it.stormlight) lines.push('Restores ' + it.stormlight + ' Gleam');
+      if (it.stormlight) lines.push('Restores ' + it.stormlight + ' Anima');
       if (it.food) lines.push('Restores ' + it.food + ' Sustenance');
       if (it.scroll) lines.push('Scroll: ' + it.scroll);
       if (it.cure) lines.push('Cures ' + it.cure);
-    } else if (it.type === 'gem') { lines.push('Infused gem · +' + it.stormlight + ' Gleam when used'); }
+    } else if (it.type === 'gem') { lines.push('Infused gem · +' + it.stormlight + ' Anima when used'); }
     if (it.bonus) { const b = []; for (const key in it.bonus) { if (key === 'element' || key === 'voidbane') b.push(key + ' ' + it.bonus[key]); else b.push((it.bonus[key] > 0 ? '+' : '') + it.bonus[key] + ' ' + key); } if (b.length) lines.push('<span style="color:#7ec8ff">' + b.join(', ') + '</span>'); }
     if (it.desc) lines.push('<i style="color:#9a8">' + esc(it.desc) + '</i>');
     lines.push('Value ' + (it.value || 0) + 'g');
@@ -154,7 +154,7 @@
       html += '<pre class="logo">' + esc(art) + '</pre>';
       html += '<div class="tagline">' + esc(TLU.LORE.subtitle) + '</div>';
       html += UI.renderMenu({ items: g.overlay.items.map(function (it) { return { label: it.label, color: it.color }; }), cursor: g.overlay.cursor });
-      html += '<div class="menu-foot">↑/↓ move · Enter select · A storm-wracked open world of rift & wisp</div>';
+      html += '<div class="menu-foot">↑/↓ move · Enter select · A churn-wracked open world of rift & wisp</div>';
       html += '</div>';
       return html;
     },
@@ -177,7 +177,7 @@
       const o = g.overlay;
       let body = '';
       if (o.step === 0) {
-        body += '<div class="cg-q">Choose your Order (class & surges):</div>';
+        body += '<div class="cg-q">Choose your Order (class & Arts):</div>';
         const items = o.orderKeys.map(function (key) {
           const ord = TLU.LORE.orders[key];
           return { label: ord.glyph + ' ' + ord.name, hint: ord.surge.join(' / '), color: ord.color };
@@ -189,13 +189,13 @@
         body += '<div class="cg-q">Choose your weapon focus:</div>';
         body += UI.renderMenu({ items: o.weapons.map(function (w) { return { label: w[1] }; }), cursor: o.weaponIdx });
       } else {
-        body += '<div class="cg-q">Your name, Sworn?</div>';
+        body += '<div class="cg-q">Your name, Kindled?</div>';
         body += '<div class="cg-name">' + esc(o.name) + ' <span class="dimk">(Tab to reroll)</span></div>';
         const ord = TLU.LORE.orders[o.orderKeys[o.orderIdx]];
         body += '<div class="cg-summary">' + ord.glyph + ' ' + ord.name + ' · ' + o.weapons[o.weaponIdx][1] + '</div>';
         body += '<div class="menu-foot">Enter to begin your journey.</div>';
       }
-      return '<div class="title-screen"><div class="menu-title">Create Your Gleamsworn</div>' + body +
+      return '<div class="title-screen"><div class="menu-title">Create Your Kindled</div>' + body +
         '<div class="menu-foot">↑/↓ choose · Enter next · Esc back</div></div>';
     },
     key: function (g, k) {
@@ -245,10 +245,10 @@
         ['Pause / Save / Quit', 'Esc'], ['This help', '?'],
         ['Codex / Journal', 'L'],
         ['—', '—'],
-        ['Goal', 'Find the Galewardens, gather 4 Rift fragments from'],
+        ['Goal', 'Find the Wardens, gather 4 Rift fragments from'],
         ['', 'drowned vaults (▼), end Warlord Varen (☠), then descend'],
         ['', 'Dawnhollow (Ω) and destroy the Gloammother.'],
-        ['Tips', 'Skills level by USE. Galestorms (⛈) refill Gleam fast'],
+        ['Tips', 'Skills level by USE. Churns (⛈) refill Anima fast'],
         ['', 'but make the wilds deadlier. The east is far more dangerous.'],
       ];
       let html = '<div class="title-screen"><div class="menu-title">How to Play</div><div class="help-grid">';
@@ -305,14 +305,14 @@
       if (it.type === 'consumable') {
         if (it.heal) { const h = Math.min(p.maxHp - p.hp, it.heal); p.hp += h; g.msg('%cYou drink ' + it.name + ' (+' + h + ' HP).', 'good'); }
         if (it.food) { p.food = Math.min(100, p.food + it.food); g.msg('You eat. (+' + it.food + ' sustenance)'); }
-        if (it.stormlight) { p.stormlight = Math.min(p.maxStormlight, p.stormlight + it.stormlight); g.msg('%c+' + it.stormlight + ' Gleam.', 'good'); }
+        if (it.stormlight) { p.stormlight = Math.min(p.maxStormlight, p.stormlight + it.stormlight); g.msg('%c+' + it.stormlight + ' Anima.', 'good'); }
         if (it.scroll === 'recall') { SCREENS.inventory.recall(g); }
         else if (it.scroll === 'blast') { g.msg('That scroll only works in battle.'); return; }
         if (it.cure) { g.msg('Nothing to cure right now.'); return; }
         P.removeItem(p, it, 1);
       } else if (it.type === 'gem') {
         const s = Math.min(p.maxStormlight - p.stormlight, it.stormlight);
-        p.stormlight += s; g.msg('%cYou breathe in the gem\'s light. +' + s + ' Gleam.', 'good');
+        p.stormlight += s; g.msg('%cYou breathe in the gem\'s light. +' + s + ' Anima.', 'good');
         P.removeItem(p, it, 1);
       }
     },
@@ -343,7 +343,7 @@
           a.charAt(0).toUpperCase() + a.slice(1) + ': <b>' + p.attr[a] + '</b></div>';
       });
       html += '<div class="ch-h">Derived</div>';
-      html += '<div class="ch-d">HP ' + p.maxHp + ' · Gleam ' + p.maxStormlight + '</div>';
+      html += '<div class="ch-d">HP ' + p.maxHp + ' · Anima ' + p.maxStormlight + '</div>';
       html += '<div class="ch-d">Attack ' + p.attack + ' · Defense ' + p.defense + '</div>';
       html += '<div class="ch-d">Speed ' + p.speed + ' · Crit ' + Math.round(p.crit * 100) + '%</div>';
       html += '<div class="ch-d">Block ' + Math.round(p.blockChance * 100) + '% · Frags ' + p.fragments + '/4</div>';
@@ -356,7 +356,7 @@
         });
       });
       html += '</div></div></div>';
-      html += '<div class="ch-h">Surges Known</div><div class="ab-list">';
+      html += '<div class="ch-h">Arts Known</div><div class="ab-list">';
       p.knownAbilities.forEach(function (id) { const ab = TLU.Abilities[id]; html += '<span class="ab">' + ab.name + ' <i>(' + (ab.cost || 0) + ')</i></span>'; });
       html += '</div>';
       html += '<div class="menu-foot">↑/↓ select attribute · Enter spend point · Esc close</div></div>';
@@ -424,13 +424,13 @@
 
   // ---- TOWN ----
   SCREENS.town = {
-    services: [['Rest at the inn (10g)', 'rest'], ['Visit the merchant', 'shop'], ['Train skills', 'train'], ['Speak with the townsfolk', 'folk'], ['Speak with the Galewarden', 'speak'], ['Leave'.toString(), 'leave']],
+    services: [['Rest at the inn (10g)', 'rest'], ['Visit the merchant', 'shop'], ['Train skills', 'train'], ['Speak with the townsfolk', 'folk'], ['Speak with the Warden', 'speak'], ['Leave'.toString(), 'leave']],
     render: function (g) {
       const o = g.overlay, site = o.site;
       if (o.sub === 'shop') return SCREENS.town.renderShop(g);
       if (o.sub === 'train') return SCREENS.town.renderTrain(g);
       let html = '<div class="panel town"><div class="menu-title">⌂ ' + esc(site.name) + '</div>' +
-        '<div class="town-desc">A gale-bunkered hold of the ' + (site.level > 6 ? 'eastern frontier' : 'western plains') + '. Travelers shelter behind its windward wall.</div>';
+        '<div class="town-desc">A churn-bunkered hold of the ' + (site.level > 6 ? 'eastern frontier' : 'western plains') + '. Travelers shelter behind its windward wall.</div>';
       html += UI.renderMenu({ items: SCREENS.town.services.map(function (s) { return { label: s[0] }; }), cursor: o.cursor });
       html += '<div class="menu-foot">' + g.player.gold + 'g · HP ' + Math.round(g.player.hp) + '/' + g.player.maxHp + ' · Enter select · Esc leave</div></div>';
       return html;
@@ -454,29 +454,29 @@
       const p = g.player;
       if (p.gold < 10) { g.msg('You cannot afford a bed (10g).'); g.render(); return; }
       p.gold -= 10; P.fullHeal(p); p.food = 100; g.day++;
-      g.msg('%cYou rest. HP & Gleam restored. (Day ' + g.day + ')', 'good');
+      g.msg('%cYou rest. HP & Anima restored. (Day ' + g.day + ')', 'good');
       g.save(); g.render();
     },
     speak: function (g) {
       const p = g.player;
       g.advanceMain('talk:stormwarden');
       const st = p.questState.main.stage;
-      g.overlay = { type: 'dialog', who: 'The Galewarden', back: 'town', backSite: g.townSite,
+      g.overlay = { type: 'dialog', who: 'The Warden', back: 'town', backSite: g.townSite,
         lines: SCREENS.town.stormwardenLines(g, st), idx: 0 };
       g.render();
     },
     stormwardenLines: function (g, stage) {
       if (stage <= 1) return [
-        'The Galewarden studies the wisps orbiting your shoulders.',
-        '"So. The old bonds stir again. You are no Gleamless — you are the first of a reborn Order."',
-        '"Listen: the Galestorm is no mere tempest. A Hollow One wakes beneath Dawnhollow — Vethra, the Gloammother."',
+        'The Warden studies the echoes orbiting your shoulders.',
+        '"So. The old bonds stir again. You are no Unkindled — you are the first of a reborn Order."',
+        '"Listen: the Churn is no mere tempest. A Hollow One wakes beneath Dawnhollow — Vethra, the Gloammother."',
         '"To stand against her you must reclaim a Rift. Its fragments lie scattered in the drowned Riftvaults (▼). Recover all four."',
-        '"And beware Warlord Varen of the Cinder Reavers (☠). He hunts the Sworn. End him before he ends you."',
+        '"And beware Warlord Varen of the Cinder Reavers (☠). He hunts the Kindled. End him before he ends you."',
       ];
       return [
-        'The Galewarden bows her head.',
+        'The Warden bows her head.',
         '"You carry ' + g.player.fragments + ' of four fragments. When all are joined, descend into Dawnhollow (Ω)."',
-        '"Strength before weakness, Sworn. The last storm is coming."',
+        '"Remember the dead, Kindled. The last Churn is coming."',
       ];
     },
     // ---- shop ----
@@ -607,7 +607,7 @@
       html += '</div>';
       // player panel
       html += '<div class="cb-player"><div class="cb-pname">@ ' + esc(p.name) + ' · Lv' + p.level + ' ' + statusTags(p) + '</div>' +
-        '<div class="cb-bars">HP ' + UI.bar(p.hp, p.maxHp, '#c0392b') + 'Gleam ' + UI.bar(p.stormlight, p.maxStormlight, '#7e6bff') + '</div></div>';
+        '<div class="cb-bars">HP ' + UI.bar(p.hp, p.maxHp, '#c0392b') + 'Anima ' + UI.bar(p.stormlight, p.maxStormlight, '#7e6bff') + '</div></div>';
       // menu
       html += '<div class="cb-menu">' + SCREENS.combat.renderMenu(g) + '</div>';
       html += '</div>';
@@ -618,15 +618,15 @@
       const o = g.overlay, c = g.combat, p = g.player;
       if (!c.awaitingPlayer) return '<div class="cb-wait">…</div>';
       if (o.menu === 'root') {
-        return UI.renderMenu({ items: [{ label: '⚔ Attack' }, { label: '✦ Surge' }, { label: '⚗ Item' }, { label: '⛨ Defend' }, { label: '⚐ Flee', disabled: c.isBoss }], cursor: o.cursor, footer: 'Enter select · Esc back' });
+        return UI.renderMenu({ items: [{ label: '⚔ Attack' }, { label: '✦ Channel' }, { label: '⚗ Item' }, { label: '⛨ Defend' }, { label: '⚐ Flee', disabled: c.isBoss }], cursor: o.cursor, footer: 'Enter select · Esc back' });
       }
       if (o.menu === 'surge') {
         const ab = p.knownAbilities.map(function (id) { const a = TLU.Abilities[id]; return { label: a.name, hint: a.cost + ' light', color: a.cost > p.stormlight ? '#777' : null }; });
         if (!ab.length) ab.push({ label: '(no surges known)', disabled: true });
-        return UI.renderMenu({ title: 'Surgebinding', items: ab, cursor: o.cursor, footer: 'Esc back' });
+        return UI.renderMenu({ title: 'The Arts', items: ab, cursor: o.cursor, footer: 'Esc back' });
       }
       if (o.menu === 'item') {
-        const items = SCREENS.combat.usableItems(p).map(function (it) { return { label: itemLabel(it), hint: it.heal ? '+' + it.heal + ' HP' : it.stormlight ? '+' + it.stormlight + ' light' : it.scroll || '' }; });
+        const items = SCREENS.combat.usableItems(p).map(function (it) { return { label: itemLabel(it), hint: it.heal ? '+' + it.heal + ' HP' : it.stormlight ? '+' + it.stormlight + ' Anima' : it.scroll || '' }; });
         if (!items.length) items.push({ label: '(no usable items)', disabled: true });
         return UI.renderMenu({ title: 'Items', items: items, cursor: o.cursor, footer: 'Esc back' });
       }
@@ -658,7 +658,7 @@
         menuNav(o, k, Math.max(1, ids.length), function (i) {
           const id = ids[i]; if (!id) return;
           const ab = TLU.Abilities[id];
-          if ((ab.cost || 0) > p.stormlight) { g.msg('Not enough Gleam.'); return; }
+          if ((ab.cost || 0) > p.stormlight) { g.msg('Not enough Anima.'); return; }
           if (ab.target === 'enemy') { o.pending = { kind: 'ability', id: id }; o.menu = 'target'; o.cursor = 0; }
           else { c.playerAct({ type: 'ability', id: id }); SCREENS.combat.after(g); }
         });
@@ -824,7 +824,7 @@
       return '<div class="title-screen endscreen death"><div class="end-title">✟ You Have Fallen ✟</div>' +
         '<div class="end-quote">' + esc(g.overlay.quote || '') + '</div>' + statsBlock(g) +
         UI.renderMenu({ items: cont ? [{ label: 'Reload last camp', color: '#7ec8ff' }, { label: 'Return to title' }] : [{ label: 'Return to title' }], cursor: g.overlay.cursor || 0 }) +
-        '<div class="menu-foot">The storm moves on. Will you?</div></div>';
+        '<div class="menu-foot">The Churn moves on. Will you?</div></div>';
     },
     key: function (g, k) {
       const o = g.overlay; o.cursor = o.cursor || 0;
@@ -843,10 +843,10 @@
   SCREENS.win = {
     render: function (g) {
       return '<div class="title-screen endscreen victory"><div class="end-title win">★ The Last Storm Stilled ★</div>' +
-        '<div class="end-quote">Vethra, the Gloammother, unravels into fading light. The Galestorm gentles, and across Aurenmark the wisps wheel skyward in silent salute. You are the first of the Sworn reborn — and you have ended the eldest of the Hollow Ones.</div>' +
+        '<div class="end-quote">Vethra, the Gloammother, unravels into fading light. The Churn gentles, and across Aurenmark the echoes wheel skyward in silent salute. You are the first of the Kindled reborn — and you have ended the eldest of the Hollow Ones.</div>' +
         statsBlock(g) +
         UI.renderMenu({ items: [{ label: 'Begin anew', color: '#ffd86b' }], cursor: 0 }) +
-        '<div class="menu-foot">Strength before weakness. Journey before destination. — Thank you for playing.</div></div>';
+        '<div class="menu-foot">Remember the dead. Outlast the Churn. — Thank you for playing.</div></div>';
     },
     key: function (g, k) {
       if (k === 'Enter' || k === ' ' || k === 'Escape') { g.openTitle(); g.render(); }

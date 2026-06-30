@@ -1,12 +1,12 @@
 /* ============================================================
- * abilities.js — combat actions: surgebinding powers, enemy moves.
- * Each ability: cost (stormlight), targeting, and an effect(ctx).
+ * abilities.js — combat actions: channeling powers, enemy moves.
+ * Each ability: cost (Anima), targeting, and an effect(ctx).
  * ctx = { rng, user, target, enemies, allies, log, combat }
  * ============================================================ */
 (function (TLU) {
   'use strict';
 
-  // Player surgebinding abilities, gated by Order & skill level.
+  // Player channeling abilities, gated by Order & skill level.
   // unlock: minimum skill level in `school` to learn.
   const ABILITIES = {
     // --- universal martial ---
@@ -41,7 +41,7 @@
       desc: 'Become frictionless: large evasion boost for several turns.',
       effect: function (c) { c.combat.applyStatus(c.user, 'evade', 3); c.log(c.user.name + ' slides free of all friction.'); } },
     regrowth: { name: 'Regrowth', cost: 14, school: 'progression', target: 'self', unlock: 2, order: 'edgedancer',
-      desc: 'Channel Progression to heal a third of your wounds.',
+      desc: 'Channel the Mend art to heal a third of your wounds.',
       effect: function (c) { c.combat.heal(c.user, Math.round(c.user.maxHp * 0.33), 'Regrowth'); } },
 
     // --- Truthwatcher: Illumination / Progression ---
@@ -61,8 +61,8 @@
       effect: function (c) { c.enemies.filter(function (e) { return e.alive; }).forEach(function (e) { c.combat.magicHit(c.user, e, 1.3, 'fire', 'Ashstorm'); c.combat.applyStatus(e, 'burn', 2); }); } },
 
     // --- consumable scrolls reuse these ---
-    scroll_blast: { name: 'Galeblast', cost: 0, target: 'all-enemies', hidden: true,
-      effect: function (c) { c.enemies.filter(function (e) { return e.alive; }).forEach(function (e) { c.combat.magicHit(c.user, e, 1.6, 'storm', 'Galeblast'); }); } },
+    scroll_blast: { name: 'Churnblast', cost: 0, target: 'all-enemies', hidden: true,
+      effect: function (c) { c.enemies.filter(function (e) { return e.alive; }).forEach(function (e) { c.combat.magicHit(c.user, e, 1.6, 'storm', 'Churnblast'); }); } },
   };
 
   // Enemy abilities, chosen by the combat AI.
@@ -72,7 +72,7 @@
     shellguard: { name: 'Shell Guard', target: 'self', effect: function (c) { c.combat.applyStatus(c.user, 'guard', 2); c.log(c.user.name + ' pulls into its shell.'); } },
     drain: { name: 'Soul Drain', target: 'enemy', effect: function (c) { const d = c.combat.magicHit(c.user, c.target, 1.0, 'void', 'Soul Drain'); c.combat.heal(c.user, Math.round(d * 0.6), null); } },
     swallow: { name: 'Swallow', target: 'enemy', effect: function (c) { c.combat.attack(c.user, c.target, { mult: 1.5, label: 'Swallow' }); if (c.rng.chance(0.3)) c.combat.applyStatus(c.target, 'stun', 1); } },
-    stormblast: { name: 'Galeblast', target: 'enemy', effect: function (c) { c.combat.magicHit(c.user, c.target, 1.3, 'storm', 'Galeblast'); } },
+    stormblast: { name: 'Churnblast', target: 'enemy', effect: function (c) { c.combat.magicHit(c.user, c.target, 1.3, 'storm', 'Churnblast'); } },
     quake: { name: 'Quake', target: 'all-enemies', effect: function (c) { c.allies0(c).forEach(function (t) { c.combat.magicHit(c.user, t, 0.9, 'storm', 'Quake'); }); } },
     gravlance: { name: 'Gravitation Lance', target: 'enemy', effect: function (c) { c.combat.magicHit(c.user, c.target, 1.5, 'storm', 'Gravitation Lance'); } },
     regenvoid: { name: 'Void Mending', target: 'self', effect: function (c) { c.combat.heal(c.user, Math.round(c.user.maxHp * 0.15), 'Void Mending'); } },

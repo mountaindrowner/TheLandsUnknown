@@ -48,7 +48,7 @@ function serve() {
 
   // ----- chargen -----
   await press('Enter');                          // New Game
-  ok('chargen shows', (await title()).includes('Gleamsworn'));
+  ok('chargen shows', (await title()).includes('Kindled'));
   await press('ArrowDown'); await press('Enter'); // order
   await press('Enter');                           // weapon
   await press('Enter');                           // name -> begin

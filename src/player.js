@@ -84,7 +84,7 @@
     const wSkillId = (wpn && wpn.skill && p.skills[wpn.skill]) ? wpn.skill : 'blades';
     const weaponSkillLv = p.skills[wSkillId] ? p.skills[wSkillId].level : 1;
 
-    // HP & Stormlight
+    // HP & Anima
     p.maxHp = Math.round(40 + a.endurance * 7 + p.level * 6 + bonus.maxHp);
     p.maxStormlight = Math.round(30 + a.focus * 6 + bonus.maxStormlight);
 

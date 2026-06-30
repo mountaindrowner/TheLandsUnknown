@@ -18,10 +18,10 @@
     { id: 'reaver_raider', name: 'Cinder Raider', glyph: 'R', color: '#c0533b', lvl: 4, hp: 48, atk: 16, def: 6, spd: 10, xp: 24, gold: [8, 24], biomes: ['plains', 'road', 'camp'], faction: 'reavers', drops: 'weapon', abilities: ['cleave'] },
     { id: 'midnight_essence', name: 'Gloamspawn', glyph: 'm', color: '#3a2a55', lvl: 5, hp: 40, atk: 18, def: 4, spd: 14, xp: 30, gold: [0, 0], biomes: ['ruin', 'vault', 'night'], tags: ['void'], abilities: ['drain'] },
     { id: 'deepmaw', name: 'Deepmaw', glyph: 'D', color: '#553355', lvl: 6, hp: 90, atk: 22, def: 8, spd: 7, xp: 40, gold: [4, 14], biomes: ['cave', 'vault', 'chasm'], abilities: ['swallow'] },
-    { id: 'stormform', name: 'Stormcaller', glyph: 'S', color: '#7e6bff', lvl: 7, hp: 80, atk: 24, def: 10, spd: 11, xp: 50, gold: [10, 30], biomes: ['storm', 'plateau'], tags: ['void'], abilities: ['stormblast'], drops: 'gem' },
+    { id: 'stormform', name: 'Churncaller', glyph: 'S', color: '#7e6bff', lvl: 7, hp: 80, atk: 24, def: 10, spd: 11, xp: 50, gold: [10, 30], biomes: ['storm', 'plateau'], tags: ['void'], abilities: ['stormblast'], drops: 'gem' },
     // --- elite / late ---
     { id: 'thunderclast', name: 'Cragwrought Colossus', glyph: 'T', color: '#b04030', lvl: 9, hp: 180, atk: 34, def: 16, spd: 6, xp: 90, gold: [10, 40], biomes: ['ruin', 'vault', 'storm'], tags: ['void', 'stone'], abilities: ['quake', 'cleave'], drops: 'rare' },
-    { id: 'voidspren_knight', name: 'Hollow Knight', glyph: 'F', color: '#cc55cc', lvl: 11, hp: 150, atk: 40, def: 18, spd: 15, xp: 120, gold: [20, 60], biomes: ['storm', 'vault', 'sky'], tags: ['void'], abilities: ['gravlance', 'regenvoid'], drops: 'rare' },
+    { id: 'voidechoes_knight', name: 'Hollow Knight', glyph: 'F', color: '#cc55cc', lvl: 11, hp: 150, atk: 40, def: 18, spd: 15, xp: 120, gold: [20, 60], biomes: ['storm', 'vault', 'sky'], tags: ['void'], abilities: ['gravlance', 'regenvoid'], drops: 'rare' },
     { id: 'unmade_shard', name: 'Splinter of the Hollow', glyph: 'U', color: '#ff4488', lvl: 13, hp: 240, atk: 48, def: 20, spd: 12, xp: 200, gold: [40, 100], biomes: ['vault', 'aharietiam'], tags: ['void'], abilities: ['terror', 'drain', 'stormblast'], drops: 'legendary' },
   ];
 

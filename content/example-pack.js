@@ -20,7 +20,7 @@
     gems: ['Opal'],
     biomeFlavor: {
       // overrides/extends existing biome intro text
-      coast: 'The Frostmere shore, where pale ice-wisps drift in off a sea that never quite freezes.',
+      coast: 'The Frostmere shore, where pale ice-echoes drift in off a sea that never quite freezes.',
     },
 
     // --- a new NPC archetype (joins the town rotation automatically) ---
@@ -33,9 +33,9 @@
         ],
         talk: [
           '"I sang in the spire-cities once, before the gale took my patron and his roof."',
-          '"There\'s a ballad of the first Sworn that the temples banned. I know all nine verses. Buy me a drink."',
+          '"There\'s a ballad of the first Kindled that the temples banned. I know all nine verses. Buy me a drink."',
           '"Every hold has a song. Frostmere\'s is a lament. They usually are, this far east."',
-          '"A good rumor travels faster than a galestorm. And lies faster still."',
+          '"A good rumor travels faster than a Churn. And lies faster still."',
         ],
         bye: ['"Travel light, and hum as you go."', '"May your story end in a tavern, not a ditch."'],
       },
@@ -62,9 +62,9 @@
 
     // --- two new creatures (with codex lore baked in) ---
     bestiary: [
-      { id: 'frost_wisp', name: 'Hoarfrost Wisp', glyph: 'i', color: '#aee3ff', lvl: 3, hp: 26, atk: 11, def: 2, spd: 15,
+      { id: 'frost_wisp', name: 'Hoarfrost Echo', glyph: 'i', color: '#aee3ff', lvl: 3, hp: 26, atk: 11, def: 2, spd: 15,
         xp: 16, gold: [0, 4], biomes: ['coast', 'plains', 'hills'], abilities: ['stormblast'], drops: 'gem',
-        lore: 'Hoarfrost Wisps are wisps soured by the cold sea — beautiful, drifting, and lethally sharp when they cluster.' },
+        lore: 'Hoarfrost Echoes are echoes soured by the cold sea — beautiful, drifting, and lethally sharp when they cluster.' },
       { id: 'ice_revenant', name: 'Ice-Drowned Revenant', glyph: 'Z', color: '#7fb3d9', lvl: 7, hp: 95, atk: 26, def: 11, spd: 8,
         xp: 55, gold: [6, 20], biomes: ['vault', 'coast'], tags: ['void'], abilities: ['drain', 'rend'], drops: 'rare',
         lore: 'Ice-Drowned Revenants are the dead of sunken vaults, preserved and animated by the cold and the dark beneath it.' },
@@ -99,7 +99,7 @@
     // --- codex lore ---
     codex: {
       world: [
-        { id: 'frostmere', title: 'The Frostmere Reach', text: 'A cold northern coast where the Eastern Sea laps at black ice. The Galestorm comes rarely here, but when it does, it brings the drowned dead with it.' },
+        { id: 'frostmere', title: 'The Frostmere Reach', text: 'A cold northern coast where the Eastern Sea laps at black ice. The Churn comes rarely here, but when it does, it brings the drowned dead with it.' },
       ],
     },
   });

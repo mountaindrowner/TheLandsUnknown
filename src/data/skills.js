@@ -15,13 +15,13 @@
     // armor
     heavy:    { name: 'Heavy Armor', group: 'armor', desc: 'Plate and mail.' },
     light:    { name: 'Light Armor', group: 'armor', desc: 'Leather and cloth.' },
-    // surgebinding schools (one per surge)
+    // channeling schools (one per surge)
     gravitation: { name: 'Pull', group: 'surge', desc: 'Bend the pull of the world.' },
     adhesion:    { name: 'Bind',    group: 'surge', desc: 'Bind things together.' },
     cohesion:    { name: 'Form',    group: 'surge', desc: 'Shape and harden stone & self.' },
     tension:     { name: 'Strain',     group: 'surge', desc: 'Stress matter to breaking.' },
     abrasion:    { name: 'Glide',    group: 'surge', desc: 'Remove friction; slide and evade.' },
-    progression: { name: 'Growth', group: 'surge', desc: 'Accelerate growth and healing.' },
+    progression: { name: 'Mend', group: 'surge', desc: 'Accelerate growth and healing.' },
     illumination:{ name: 'Light',group: 'surge', desc: 'Weave light and illusion.' },
     division:    { name: 'Cinder',    group: 'surge', desc: 'Unmake matter with fire.' },
     // utility

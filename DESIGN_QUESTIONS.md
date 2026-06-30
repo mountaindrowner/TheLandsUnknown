@@ -49,7 +49,7 @@ return to town to spend → repeat → push east.* It works but it's thin. Quest
 
 10. **What happens after the final boss?** Today: a victory screen. Options:
     - (a) **New Game+** with harder world + carried gear. ⭐
-    - (b) **Open endgame** — the Galestorm intensifies; the world becomes a roguelite
+    - (b) **Open endgame** — the Churn intensifies; the world becomes a roguelite
       gauntlet of escalating Hollow incursions you hold back indefinitely.
     - (c) **Legacy** — retire your hero into the world as an NPC/legend; start an heir who
       inherits a piece of your power (DF-style dynasties).
@@ -64,7 +64,7 @@ return to town to spend → repeat → push east.* It works but it's thin. Quest
 
 13. **How different should two playthroughs be?** Today the world reseeds but the beats are
     fixed. Add: (a) randomized **faction alignment** (who's the villain shifts), (b)
-    **world modifiers / seeds with traits** ("the Long Storm", "the Gleam Famine"), ⭐ (c)
+    **world modifiers / seeds with traits** ("the Long Storm", "the Anima Famine"), ⭐ (c)
     procedural **main-quest variants** (the Rift's pieces, bosses, and ending vary).
 14. **Difficulty & accessibility:** a settings screen (combat speed, permadeath toggle,
     encounter rate, text size) ⭐ — important for mobile and for the broad audience you
@@ -78,20 +78,20 @@ return to town to spend → repeat → push east.* It works but it's thin. Quest
 ## E. The unique spin (pick one to make this *not* just another roguelike RPG)
 
 Here are four original mechanics built around what's *already* in the fiction — the living
-storm, the wisps, the soul-severing Rift. Each could be **the** thing this game is known for.
+storm, the echoes, the soul-severing Rift. Each could be **the** thing this game is known for.
 
-1. **The Storm as a living clock & second player.** ⭐⭐ The Galestorm isn't weather — it's a
+1. **The Storm as a living clock & second player.** ⭐⭐ The Churn isn't weather — it's a
    *roaming systemic force* that physically crosses the map on a schedule you can read and
    exploit. It supercharges your surges and reveals hidden vaults in its path, but
    transforms the wilds into deadly stormforms and *rewrites terrain* behind it. Master
    players **chase or flee the storm** as a core strategic layer — plan routes around it,
-   bank Gleam before it passes, raid vaults only the storm can open. Nobody has made the
+   bank Anima before it passes, raid vaults only the storm can open. Nobody has made the
    weather a *thing you duel with*. *(Lowest-risk, highest-fit — the lore already supports it.)*
 
-2. **Wisp-bonding as the whole progression system.** Instead of an XP bar, your power comes
-   from **bonding wisps** — semi-autonomous spirit companions, each a *living perk with
-   opinions*. They grow by witnessing you live up (or fail) your Oaths; break an Oath and a
-   wisp can **abandon you mid-fight**, stripping a power at the worst moment. Builds become
+2. **Echo-bonding as the whole progression system.** Instead of an XP bar, your power comes
+   from **bonding echoes** — semi-autonomous spirit companions, each a *living perk with
+   opinions*. They grow by witnessing you live up (or fail) your Vows; break an Oath and a
+   echo can **abandon you mid-fight**, stripping a power at the worst moment. Builds become
    *relationships you maintain*, not stats you grind. (RimWorld's emergent drama meets a
    skill tree that can quit on you.)
 
