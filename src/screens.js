@@ -26,6 +26,9 @@
     const navKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'Enter'];
     if (navKeys.indexOf(k) >= 0) e.preventDefault();
 
+    // while battle fx are playing, any key fast-forwards them (and nothing else)
+    if (this._fxPlaying) { if (this._fxSkip) this._fxSkip(); return; }
+
     // global: cycle visual theme anywhere
     if ((k === 't' || k === 'T') && TLU.Theme) { TLU.Theme.cycle(this); return; }
 
@@ -923,35 +926,65 @@
   };
 
   // ---- COMBAT ----
+  // deterministic beast plates, cached by bestiary id (the art never changes)
+  const _plateCache = {};
+  function battlePlate(e) {
+    if (!TLU.Art || !TLU.Art.beastPlate) return '<div class="cb-glyph" style="color:' + e.color + '">' + esc(e.glyph) + '</div>';
+    const key = e.id + '|' + e.color;
+    if (_plateCache[key]) return _plateCache[key];
+    const svg = TLU.Art.beastPlate(e.id, {
+      tags: e.tags || [], faction: e.faction, big: !!e.boss || (e.lvl || e.level || 0) >= 9,
+      lvl: e.lvl || e.level, accent: e.color, bare: true, cls: 'tlu-plate cb-plate-svg',
+    });
+    _plateCache[key] = svg;
+    return svg;
+  }
+  // a dark vista behind the fight, chosen by biome, held stable for the battle
+  const BIOME_VISTA = { storm: 'churn', vault: 'spires', deepvault: 'spires', ruin: 'spires', camp: 'spires', plateau: 'world', crater: 'world', hills: 'world', forest: 'world', plains: 'world' };
+  function battleVista(c) {
+    if (c._vista) return c._vista;
+    if (!TLU.Art || !TLU.Art.vista) { c._vista = ''; return ''; }
+    const anyBoss = c.enemies.some(function (e) { return e.boss; });
+    const kind = anyBoss ? 'throne' : (BIOME_VISTA[c.biome] || 'world');
+    c._vista = TLU.Art.vista(kind, (c.biome || 'x') + ':' + (c.level || 1), { cls: 'tlu-vista cb-vista' });
+    return c._vista;
+  }
+
   SCREENS.combat = {
     render: function (g) {
       const c = g.combat, p = g.player, o = g.overlay;
-      let html = '<div class="combat">';
-      // enemies
+      const anyBoss = c.enemies.some(function (e) { return e.boss; });
+      const nAlive = SCREENS.combat.aliveList(c).length;
+      let html = '<div class="combat' + (anyBoss ? ' cb-boss' : '') + (nAlive <= 1 ? ' cb-solo' : '') + '">';
+      // the stage — a dark backdrop with the foes arrayed upon it
+      html += '<div class="cb-stage">';
+      html += '<div class="cb-backdrop">' + battleVista(c) + '</div>';
       html += '<div class="cb-enemies">';
       const alive = SCREENS.combat.aliveList(c);
       c.enemies.forEach(function (e, i) {
         const targeting = (o.menu === 'target') && alive[o.cursor] === e;
         const aIdx = alive.indexOf(e);
-        html += '<div class="cb-enemy' + (e.alive ? '' : ' dead') + (targeting ? ' target' : '') + '"' + (e.alive ? ' data-eidx="' + aIdx + '"' : '') + '>' +
-          '<div class="cb-glyph" style="color:' + e.color + '">' + esc(e.glyph) + (e.boss ? ' ☠' : '') + '</div>' +
-          '<div class="cb-name">' + esc(e.name) + '</div>' +
-          (e.alive ? UI.bar(e.hp, e.maxHp, e.boss ? '#ff2d78' : '#a33') : '<div class="slain">SLAIN</div>') +
+        html += '<div class="cb-enemy' + (e.alive ? '' : ' dead') + (e.boss ? ' boss' : '') + (targeting ? ' target' : '') + '"' +
+          ' data-fxid="' + e._id + '" data-side="enemy"' + (e.alive ? ' data-eidx="' + aIdx + '"' : '') + '>' +
+          '<div class="cb-plate">' + battlePlate(e) + (e.boss ? '<span class="cb-boss-mark">☠</span>' : '') + '</div>' +
+          '<div class="cb-name" style="color:' + e.color + '">' + esc(e.name) + '</div>' +
+          '<div class="cb-hp">' + (e.alive ? UI.bar(e.hp, e.maxHp, e.boss ? '#ff2d78' : '#a33') : '<div class="slain">SLAIN</div>') + '</div>' +
           '<div class="cb-status">' + statusTags(e) + '</div></div>';
       });
-      html += '</div>';
-      // allies (companions)
+      html += '</div></div>';
+      // the HUD — allies + the player
+      html += '<div class="cb-hud">';
       if (c.allies && c.allies.length) {
         html += '<div class="cb-allies">';
         c.allies.forEach(function (a) {
-          html += '<div class="cb-ally' + (a.alive ? '' : ' dead') + '"><span class="cb-aname" style="color:' + a.color + '">' + esc(a.glyph + ' ' + a.name) + ' <i>' + a.roleName + '</i></span>' +
+          html += '<div class="cb-ally' + (a.alive ? '' : ' dead') + '" data-fxid="' + a._id + '" data-side="ally"><span class="cb-aname" style="color:' + a.color + '">' + esc(a.glyph + ' ' + a.name) + ' <i>' + a.roleName + '</i></span>' +
             (a.alive ? UI.bar(a.hp, a.maxHp, '#3a8a4a') : '<span class="slain">DOWNED</span>') + '</div>';
         });
         html += '</div>';
       }
-      // player panel
-      html += '<div class="cb-player"><div class="cb-pname">@ ' + esc(p.name) + ' · Lv' + p.level + ' ' + statusTags(p) + '</div>' +
+      html += '<div class="cb-player" data-fxid="player" data-side="player"><div class="cb-pname">@ ' + esc(p.name) + ' · Lv' + p.level + ' ' + statusTags(p) + '</div>' +
         '<div class="cb-bars">HP ' + UI.bar(p.hp, p.maxHp, '#c0392b') + 'Charge ' + UI.bar(p.charge, p.maxCharge, '#7e6bff') + '</div></div>';
+      html += '</div>';
       // menu
       html += '<div class="cb-menu">' + SCREENS.combat.renderMenu(g) + '</div>';
       html += '</div>';
@@ -987,6 +1020,7 @@
     },
     key: function (g, k) {
       const o = g.overlay, c = g.combat, p = g.player;
+      if (g._fxPlaying) { if (g._fxSkip) g._fxSkip(); return; }
       if (!c.awaitingPlayer) return;
       if (o.menu === 'root') {
         menuNav(o, k, 5, function (i) {
@@ -1028,9 +1062,8 @@
       g.render();
     },
     after: function (g) {
-      // combat may have ended (onEnd already handled state); else return to root menu
-      if (g.state === 'combat' && g.combat && !g.combat.over) { g.overlay.menu = 'root'; g.overlay.cursor = 0; }
-      g.render();
+      // play the queued fx; the animator settles the menu / combat-end when done
+      g.playBattleFx();
     },
   };
 

@@ -287,13 +287,15 @@ async function resolveCombat(page, press, state, maxActions) {
   for (let i = 0; i < maxActions; i++) {
     const st = await page.evaluate(() => {
       const g = window.GAME;
-      return { s: g.state, await: g.combat ? g.combat.awaitingPlayer : false, menu: g.overlay && g.overlay.menu, ov: g.overlay && g.overlay.type };
+      return { s: g.state, await: g.combat ? g.combat.awaitingPlayer : false, fx: !!g._fxPlaying, menu: g.overlay && g.overlay.menu, ov: g.overlay && g.overlay.type };
     });
     if (st.s !== 'combat') {
       // clear any loot overlay
       if (st.ov === 'loot') { await page.keyboard.press('a').catch(() => {}); await page.waitForTimeout(30); }
       return true;
     }
+    // battle fx are playing — press a key to fast-forward them (as a player would)
+    if (st.fx) { await press('Enter'); continue; }
     if (!st.await) { await page.waitForTimeout(30); continue; }
     if (st.menu === 'root') await press('Enter');        // Attack
     else if (st.menu === 'target') await press('Enter'); // first target

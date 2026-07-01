@@ -300,9 +300,11 @@
   }
 
   function finish(W, H, P, accent, opt) {
-    var frame = A.path('M 8 8 L ' + (W - 8) + ' 8 L ' + (W - 8) + ' ' + (H - 8) + ' L 8 ' + (H - 8) + ' Z', { stroke: PAL.ink2, w: 1, fill: 'none', op: 0.6 });
+    // 'bare' plates drop the paper card + frame so the creature stands directly
+    // on whatever it is placed over (the battle vista); codex plates keep both.
+    var frame = opt.bare ? '' : A.path('M 8 8 L ' + (W - 8) + ' 8 L ' + (W - 8) + ' ' + (H - 8) + ' L 8 ' + (H - 8) + ' Z', { stroke: PAL.ink2, w: 1, fill: 'none', op: 0.6 });
     var cap = opt.caption ? A.caption(W / 2, H - 14, opt.caption, { size: 13, color: accent }) : '';
-    return A.svg(W, H, '<defs>' + P.defs + '</defs>' + P.body + frame + cap, { cls: opt.cls || 'tlu-plate' });
+    return A.svg(W, H, '<defs>' + P.defs + '</defs>' + P.body + frame + cap, { cls: opt.cls || 'tlu-plate', paper: opt.bare ? false : undefined });
   }
 
   TLU.Art.beastPlate = plate;

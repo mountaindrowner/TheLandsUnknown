@@ -25,6 +25,9 @@
     this.isBoss = opts.isBoss || false;
     this.canFlee = opts.canFlee !== false;
     this.log = opts.log || function () {};
+    // fx(ev): a visual-effect sink drained by the battle animator. Emitting is
+    // side-effect-free for the simulation — combat math never reads it back.
+    this.fx = opts.fx || function () {};
     this.onEnd = opts.onEnd || function () {};
     this.round = 0;
     this.order = [];
@@ -38,6 +41,7 @@
     // ensure enemies have statuses + unique tags
     this.enemies.forEach(function (e, i) { e.statuses = e.statuses || {}; e._id = 'e' + i; e.alive = e.hp > 0; });
     this.player.statuses = this.player.statuses || {};
+    this.player._id = 'player';
     // companions fight on the player's side
     this.allies = (opts.allies || []).filter(function (a) { return a && a.hp > 0; });
     this.allies.forEach(function (a, i) { a.statuses = a.statuses || {}; a._id = 'a' + i; a.alive = a.hp > 0; a.kind = 'ally'; });
@@ -101,9 +105,9 @@
     const s = actor.statuses; if (!s) return false;
     let skip = false;
     // damage-over-time
-    if (s.burn) { const d = Math.max(2, Math.round((actor.maxHp || 40) * 0.04)); this._raw(actor, d, 'fire'); this.log('%c' + actor.name + ' burns for ' + d + '.', 'dot'); }
-    if (s.bleed) { const d = Math.max(2, Math.round((actor.maxHp || 40) * 0.03)); this._raw(actor, d, 'phys'); this.log('%c' + actor.name + ' bleeds for ' + d + '.', 'dot'); }
-    if (s.poison) { const d = Math.max(1, Math.round((actor.maxHp || 40) * 0.025)); this._raw(actor, d, 'poison'); this.log('%c' + actor.name + ' suffers poison for ' + d + '.', 'dot'); }
+    if (s.burn) { const d = Math.max(2, Math.round((actor.maxHp || 40) * 0.04)); this._raw(actor, d, 'fire'); this.log('%c' + actor.name + ' burns for ' + d + '.', 'dot'); this._emitHit(actor, d, 'fire', { dot: true }); }
+    if (s.bleed) { const d = Math.max(2, Math.round((actor.maxHp || 40) * 0.03)); this._raw(actor, d, 'phys'); this.log('%c' + actor.name + ' bleeds for ' + d + '.', 'dot'); this._emitHit(actor, d, 'bleed', { dot: true }); }
+    if (s.poison) { const d = Math.max(1, Math.round((actor.maxHp || 40) * 0.025)); this._raw(actor, d, 'poison'); this.log('%c' + actor.name + ' suffers poison for ' + d + '.', 'dot'); this._emitHit(actor, d, 'poison', { dot: true }); }
     if (s.stun || s.bound) skip = true;
     if (s.fear && this.rng.chance(0.5)) skip = true;
     // decrement durations
@@ -133,6 +137,7 @@
         p.charge -= cost;
         ctx.target = action.target && action.target.alive ? action.target : this.aliveEnemies()[0];
         this.log('%c' + p.name + ' invokes ' + ab.name + '!', 'cast');
+        this.fx({ type: 'cast', id: p._id, name: ab.name, school: ab.school || null });
         ab.effect(ctx);
         if (ab.school) TLU.Player.trainSkill(p, ab.school, 10, this.log);
       }
@@ -173,7 +178,8 @@
     if (!enemies.length) return;
     const p = this.player;
     if (a.art) {
-      if (p.hp < p.maxHp * 0.4 && this.rng.chance(0.6)) { this.heal(p, Math.round(p.maxHp * 0.18), a.name + '’s mending'); return; }
+      if (p.hp < p.maxHp * 0.4 && this.rng.chance(0.6)) { this.fx({ type: 'cast', id: a._id, name: 'Mending' }); this.heal(p, Math.round(p.maxHp * 0.18), a.name + '’s mending'); return; }
+      this.fx({ type: 'cast', id: a._id, name: 'Art' });
       this.magicHit(a, this.rng.pick(enemies), 1.2, 'arc', a.name + '’s Art');
       return;
     }
@@ -203,12 +209,14 @@
     let useAbility = abilities.length && this.rng.chance(e.boss ? 0.7 : 0.4);
     // heal if low
     if (e.hp < e.maxHp * 0.3 && abilities.indexOf('regenrift') >= 0 && this.rng.chance(0.7)) {
+      this.fx({ type: 'cast', id: e._id, name: TLU.EnemyAbilities.regenrift.name, enemy: true });
       TLU.EnemyAbilities.regenrift.effect(ctx); return;
     }
     if (useAbility) {
       const id = this.rng.pick(abilities);
       const ab = TLU.EnemyAbilities[id];
       this.log('%c' + e.name + ' uses ' + ab.name + '!', 'ecast');
+      this.fx({ type: 'cast', id: e._id, name: ab.name, enemy: true });
       ab.effect(ctx);
     } else {
       this.attack(e, ctx.target || p, {});
@@ -222,6 +230,7 @@
       this.bossPhase = newPhase;
       e.atk = Math.round(e.atk * 1.12);
       e.spd += 1;
+      this.fx({ type: 'phase', id: e._id, phase: newPhase });
       this.log('%c☇ ' + e.name + ' surges with renewed fury! (Phase ' + newPhase + ')', 'boss');
       if (e.id === 'gloammother' || e.id === 'churnheart') this.spawnAdd(e);
     }
@@ -232,13 +241,14 @@
   Combat.prototype.attack = function (attacker, target, opts) {
     opts = opts || {};
     if (!target || target.hp <= 0) return 0;
+    this._emitAct(attacker, opts._counter ? 'counter' : 'melee', target._id);
     // miss checks (evasion from blur/evade/slick)
     const ts = target.statuses || {};
     let missChance = 0;
     if (ts.evade) missChance += 0.45;
     if (ts.blur) missChance += 0.4;
     if (target.kind === 'player' && target.perkFlags && target.perkFlags.evasive) missChance += target.perkFlags.evasive;
-    if (this.rng.chance(missChance)) { this.log(attacker.name + ' misses ' + target.name + '!'); return 0; }
+    if (this.rng.chance(missChance)) { this.log(attacker.name + ' misses ' + target.name + '!'); this.fx({ type: 'miss', id: target._id }); return 0; }
     // block (shields)
     let mitigateBlock = 1;
     const blockCh = target.kind === 'player' ? target.blockChance : (target.block || 0);
@@ -268,6 +278,7 @@
     dmg = Math.max(1, Math.round(dmg));
     this._raw(target, dmg, 'phys');
     this.log((crit ? '%c' : '') + attacker.name + (opts.label ? ' ' + opts.label + 's' : ' hits') + ' ' + target.name + ' for ' + dmg + (crit ? '! CRIT' : '.'), crit ? 'crit' : null);
+    this._emitHit(target, dmg, 'phys', { crit: crit, blocked: mitigateBlock < 1 });
     // melee perks: lifesteal & stagger (player attacker only)
     if (apf.lifesteal && dmg > 0 && attacker.hp > 0) this.heal(attacker, Math.max(1, Math.round(dmg * apf.lifesteal)), null);
     if (apf.stagger && target.hp > 0 && this.rng.chance(apf.stagger)) { this.applyStatus(target, 'stun', 1); this.log('%c' + target.name + ' is staggered!', 'block'); }
@@ -299,6 +310,7 @@
     if (user.kind === 'player' && user.riftbane && target.tags && target.tags.indexOf('rift') >= 0) dmg = Math.round(dmg * (1 + user.riftbane));
     this._raw(target, dmg, element);
     this.log('%c' + (label || 'Attunement') + ' strikes ' + target.name + ' for ' + dmg + '.', 'cast');
+    this._emitHit(target, dmg, element || 'arc', { magic: true });
     this._onDamaged(user, target);
     return dmg;
   };
@@ -316,6 +328,7 @@
     if (target.kind === 'enemy') {
       if (!target.alive) return;
       target.alive = false;
+      this.fx({ type: 'death', id: target._id, boss: !!target.boss });
       this.log('%c' + target.name + ' is slain!', 'kill');
       this.rewards.xp += target.xp || 0;
       const g = target.gold ? this.rng.int(target.gold[0], target.gold[1]) : 0;
@@ -341,6 +354,7 @@
     } else if (target.kind === 'ally') {
       if (!target.alive) return;
       target.alive = false; target.hp = 0;
+      this.fx({ type: 'death', id: target._id });
       this.log('%c' + target.name + ' is downed!', 'bad');
     } else {
       // player died
@@ -354,19 +368,37 @@
     target.hp = Math.min(max, target.hp + amount);
     const gained = target.hp - before;
     if (label) this.log('%c' + target.name + ' recovers ' + gained + ' HP (' + label + ').', 'good');
+    if (gained > 0 && target._id) this.fx({ type: 'heal', id: target._id, amount: gained, hpAfter: target.hp, maxHp: max });
     return gained;
   };
 
   Combat.prototype.applyStatus = function (target, status, turns) {
     target.statuses = target.statuses || {};
+    const fresh = !target.statuses[status];
     target.statuses[status] = Math.max(target.statuses[status] || 0, turns);
+    if (fresh && target._id) this.fx({ type: 'status', id: target._id, status: status });
+  };
+
+  // ---- fx emitters (drained by the battle animator; no gameplay effect) ----
+  Combat.prototype._emitAct = function (actor, kind, targetId) {
+    if (actor && actor._id) this.fx({ type: 'act', id: actor._id, kind: kind, targetId: targetId || null });
+  };
+  Combat.prototype._emitHit = function (target, amount, element, opt) {
+    opt = opt || {};
+    if (!target || !target._id) return;
+    this.fx({
+      type: 'hit', id: target._id, amount: amount, element: element || 'phys',
+      hpAfter: Math.max(0, target.hp), maxHp: target.maxHp || 40,
+      crit: !!opt.crit, blocked: !!opt.blocked, dot: !!opt.dot, dead: target.hp <= 0,
+    });
   };
 
   Combat.prototype.spawnAdd = function (boss) {
     const add = TLU.Bestiary.scale(TLU.Bestiary.byId('gloamspawn'), this.level);
     add.name = 'Gloam Shadow';
-    add.statuses = {}; add.alive = true; add._id = 'add' + this.rng.int(0, 9999);
+    add.statuses = {}; add.alive = true; add._id = 'e' + this.enemies.length;
     this.enemies.push(add);
+    this.fx({ type: 'spawn', id: add._id });
     this.log('%cA murderous shadow peels from the darkness!', 'boss');
   };
 

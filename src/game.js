@@ -501,17 +501,40 @@
     const self = this;
     if (!this.rng) this.rng = new TLU.RNG(this.seed + ':enc');
     this.state = 'combat';
+    this._fxq = [];
+    this._combatEndPending = null;
     this.combat = new TLU.Combat(this, {
       rng: this.rng.fork('battle' + this.turnCount + ':' + enemies.length),
       player: this.player, enemies: enemies, level: opts.level, biome: opts.biome,
       allies: (this.player.party || []).filter(function (a) { return a.alive && a.hp > 0; }),
       isBoss: opts.isBoss, canFlee: opts.canFlee,
       log: this.mkLog(),
-      onEnd: function (c) { self.onCombatEnd(c); },
+      fx: function (ev) { self._fxq.push(ev); },
+      // defer the state transition until the killing-blow animation has played
+      onEnd: function (c) { self._combatEndPending = c; },
     });
     this.overlay = { type: 'combat', menu: 'root', cursor: 0, pending: null };
     this.combat.start();
+    // opening actions (a faster foe striking first) are already resolved; show the
+    // final board rather than animating from a state the player never saw.
+    this._fxq = [];
     this.render();
+    // if the foe won initiative and somehow ended it, honour the pending transition
+    if (this._combatEndPending) this.playBattleFx();
+  };
+
+  // Play the queued battle fx against the rendered DOM, then settle: apply a
+  // deferred combat-end, or hand the menu back to the player.
+  Game.prototype.playBattleFx = function () {
+    const self = this;
+    const q = this._fxq || []; this._fxq = [];
+    const settle = function () {
+      if (self._combatEndPending) { const c = self._combatEndPending; self._combatEndPending = null; self.onCombatEnd(c); return; }
+      if (self.state === 'combat' && self.combat && !self.combat.over) { self.overlay.menu = 'root'; self.overlay.cursor = 0; }
+      self.render();
+    };
+    if (TLU.BattleFX && q.length) TLU.BattleFX.run(this, q, settle);
+    else settle();
   };
 
   Game.prototype.onCombatEnd = function (c) {

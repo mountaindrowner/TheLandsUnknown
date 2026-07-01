@@ -228,6 +228,12 @@ or fill the **Codex** bestiary to see it. A standalone gallery lives at `design/
 - **Final-Fantasy-style turn-based combat.** Initiative order, crits, elements,
   armor-piercing, blocking, status effects (burn/bleed/stun/bound/fear/guard/evade…),
   fleeing, and a multi-phase final boss that spawns murderous shadows and escalates.
+- **Cinematic battle stage.** Every foe is drawn live as its generative **beast plate**
+  arrayed on a dark, biome-chosen **vista** (a dusk world, the churn-haze, or a colossal
+  throne for boss reveals). The fight animates: attackers lunge, blows land in a flash of
+  floating damage, crits shake the frame, casts flare, healing pulses green, and the slain
+  dissolve. A key or tap fast-forwards. Combat resolution is unchanged — the animator is
+  pure presentation that reads nothing back into the simulation (`src/battlefx.js`).
 - **Roguelike dungeon delving.** Multi-floor vaults with room/corridor generation,
   raycast field-of-view, wandering monsters, chests, infused gems, and Rift fragments.
 - **Quests in many directions.** A main arc (gather the Rift, end Warlord Varen, descend
@@ -264,7 +270,8 @@ src/
   world.js            # overworld generation (biomes, sites, roads)
   dungeon.js          # dungeon floor generation
   player.js           # character: attributes, gear, derived stats, leveling, codex
-  combat.js           # turn-based battle resolver (player + ally side)
+  combat.js           # turn-based battle resolver (player + ally side; emits fx events)
+  battlefx.js         # the battle animator — plays the fx queue over the stage DOM
   save.js             # localStorage persistence
   dynasty.js          # the Annals — asynchronous dynasties / echoes
   render.js           # canvas ASCII viewport + minimap
