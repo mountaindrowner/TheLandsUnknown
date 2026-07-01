@@ -27,11 +27,12 @@
   .iso-unit::after { content: ''; position: absolute; left: 50%; bottom: -3px; transform: translateX(-50%);
     width: 60%; height: 12px; background: radial-gradient(closest-side, rgba(0,0,0,0.6), rgba(0,0,0,0)); z-index: -1; }
   .iso-art-wrap { width: 58px; }
-  .iso-enemy .iso-art-wrap { width: 82px; }
-  .iso-heroU .iso-art-wrap { width: 66px; }
-  .iso-art-wrap svg { width: 100%; height: auto; display: block;
-    filter: drop-shadow(0 3px 4px rgba(0,0,0,0.7)) drop-shadow(0 0 4px rgba(232,220,190,0.4)); }
-  .iso-ally .iso-art-wrap svg { border-radius: 6px; }
+  .iso-figw { width: 52px; }
+  .iso-beastw { width: 80px; }
+  .iso-art-wrap svg { width: 100%; height: auto; display: block; }
+  .iso-figw svg { filter: drop-shadow(0 2px 3px rgba(0,0,0,0.6)); }
+  .iso-beastw svg { filter: drop-shadow(0 3px 4px rgba(0,0,0,0.7)) drop-shadow(0 0 4px rgba(232,220,190,0.4)); }
+  .iso-sel-info { font-size: 13px; color: #cbb06a; min-height: 20px; margin-bottom: 8px; }
   .iso-tag { position: absolute; left: 50%; top: -12px; transform: translateX(-50%);
     min-width: 20px; text-align: center; padding: 0 5px; border-radius: 9px;
     background: rgba(10,10,14,0.9); border: 1.5px solid #a33; font-size: 12px; font-weight: 700; color: #f2ead6; }
@@ -79,6 +80,8 @@
 <script src="../src/art/ink.js"></script>
 <script src="../src/art/portrait.js"></script>
 <script src="../src/art/beast.js"></script>
+<script src="../src/art/figure.js"></script>
+<script src="../src/iso_art.js"></script>
 <script src="../src/iso.js"></script>
 <script>
   window.ISO = TLU.Iso.mount(document.getElementById('root'), { seed: 'bench-1', w: 8, h: 8 });

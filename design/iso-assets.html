@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Lands Unknown — Isometric Asset Sheet</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext y='13' font-size='13'%3E%E2%97%88%3C/text%3E%3C/svg%3E" />
+<style>
+  body { margin: 0; background: #14140f; color: #d8cfbf; font-family: Georgia, serif;
+    background-image: radial-gradient(120% 80% at 50% -10%, #22201a 0%, #100f0b 70%); }
+  .page { max-width: 1200px; margin: 0 auto; padding: 24px 26px 70px; }
+  h1 { font-variant: small-caps; letter-spacing: 1px; color: #e6c15a; margin: 0 0 2px; }
+  .sub { color: #8f8672; font-style: italic; margin: 0 0 22px; }
+  h2 { font-variant: small-caps; color: #cbb06a; border-bottom: 1px solid #3a352a; padding-bottom: 5px; margin: 30px 0 14px; }
+  .grid { display: flex; flex-wrap: wrap; gap: 12px; }
+  .cell { background: #e4d9bd; border-radius: 8px; padding: 6px 6px 2px; text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+  .cell.dark { background: #1c1b16; }
+  .cell canvas { display: block; }
+  .nm { font-size: 12px; color: #4a4230; font-variant: small-caps; letter-spacing: 0.5px; padding: 3px 0 2px; }
+  .cell.dark .nm { color: #b7a986; }
+  .fig .nm { color: #4a4230; }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Isometric Asset Sheet</h1>
+  <p class="sub">Every tile, obstacle, structure, hazard and figure below is drawn from a number, in ink, on vellum — a hand-charted world for a tactics board.</p>
+  <div id="root"></div>
+</div>
+
+<script src="../src/rng.js"></script>
+<script src="../src/data/lore.js"></script>
+<script src="../src/data/bestiary.js"></script>
+<script src="../src/art/ink.js"></script>
+<script src="../src/art/portrait.js"></script>
+<script src="../src/art/beast.js"></script>
+<script src="../src/art/figure.js"></script>
+<script src="../src/iso_art.js"></script>
+<script>
+  var A = TLU.IsoArt, TW = A.TW, TH = A.TH;
+  var root = document.getElementById('root');
+  var dpr = Math.min(2, window.devicePixelRatio || 1);
+
+  function section(title) { var h = document.createElement('h2'); h.textContent = title; root.appendChild(h); var g = document.createElement('div'); g.className = 'grid'; root.appendChild(g); return g; }
+  function makeCanvas(cell, w, h) { var c = document.createElement('canvas'); c.width = w * dpr; c.height = h * dpr; c.style.width = w + 'px'; c.style.height = h + 'px'; var x = c.getContext('2d'); x.scale(dpr, dpr); cell.appendChild(c); return x; }
+  function cell(g, label, dark) { var d = document.createElement('div'); d.className = 'cell' + (dark ? ' dark' : ''); g.appendChild(d); var wrap = { el: d, label: label }; return wrap; }
+
+  // 1) terrain — a 2x2 patch of each, to show tessellation
+  var g = section('Terrain — the ground itself');
+  A.terrainKinds.forEach(function (k) {
+    var c = cell(g, k); var W = TW + 20, H = TH + 34; var ctx = makeCanvas(c.el, W, H);
+    var ox = W / 2, oy = 18;
+    for (var gy = 0; gy < 2; gy++) for (var gx = 0; gx < 2; gx++) {
+      var cx = ox + (gx - gy) * TW / 2, cy = oy + (gx + gy) * TH / 2;
+      A.drawTerrain(ctx, k, cx, cy, k + gx + gy);
+    }
+    var nm = document.createElement('div'); nm.className = 'nm'; nm.textContent = k; c.el.appendChild(nm);
+  });
+
+  // 2) features / obstacles / structures / hazards — each on a grass tile
+  g = section('Obstacles, structures & hazards — things upon the land');
+  A.featureKinds.forEach(function (k) {
+    var c = cell(g, k); var W = TW + 20, H = 84; var ctx = makeCanvas(c.el, W, H);
+    var cx = W / 2, cy = H - 26;
+    A.drawTerrain(ctx, 'grass', cx, cy, 'g' + k);
+    A.drawFeature(ctx, k, cx, cy, k, { accent: '#9a3b2a', pulse: 0.6 });
+    var nm = document.createElement('div'); nm.className = 'nm'; nm.textContent = k; c.el.appendChild(nm);
+  });
+
+  // 3) the cast, as full-body figures (not busts)
+  if (TLU.Art && TLU.Art.figure) {
+    g = section('The Kindled — full-body figures, one per Order');
+    var orders = ['skyrender', 'stonewarden', 'slipstrider', 'veilseer', 'cinderwright'];
+    orders.forEach(function (o) {
+      var c = cell(g, o); c.el.className += ' fig'; var W = 96, H = 132; var ctx = makeCanvas(c.el, W, H);
+      var svg = TLU.Art.figure(o + '-a', { order: o, accent: '#9a3b2a' });
+      // rasterize the svg into the cell via an <img> layered instead of canvas draw
+      c.el.removeChild(c.el.lastChild); // drop the canvas; use svg directly
+      var box = document.createElement('div'); box.style.width = '96px'; box.innerHTML = svg;
+      box.querySelector('svg').style.width = '96px'; box.querySelector('svg').style.height = 'auto';
+      c.el.appendChild(box);
+      var nm = document.createElement('div'); nm.className = 'nm'; nm.textContent = o; c.el.appendChild(nm);
+    });
+    // a spread of one Order, many seeds, to show variation
+    g = section('One Order, many souls — generative variation');
+    for (var i = 0; i < 8; i++) {
+      var c = cell(g, ''); c.el.className += ' fig'; var box = document.createElement('div'); box.style.width = '88px';
+      box.innerHTML = TLU.Art.figure('vary' + i, { order: orders[i % orders.length], accent: '#9a3b2a' });
+      box.querySelector('svg').style.width = '88px'; box.querySelector('svg').style.height = 'auto';
+      c.el.appendChild(box);
+    }
+  }
+</script>
+</body>
+</html>

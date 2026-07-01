@@ -178,13 +178,38 @@ or fill the **Codex** bestiary to see it. A standalone gallery lives at `design/
 
 ### An isometric tactics bench
 
-`design/iso.html` is a self-contained experiment: the cast on an **isometric board**
-in the *Into the Breach* idiom. The Hollow **telegraph** exactly where they will strike
-next resolution (red tiles + arrows); on your turn you move the Kindled and shove foes
-(every attack pushes 1) so a blow whiffs off the board, crunches a mountain, drowns in
-the pond, or lands on the enemy's own kin. Units are the same generative portraits and
-beast plates the rest of the game uses. It's a bench (`src/iso.js`), not a mode — a place
-to feel a different combat grammar with these characters.
+`design/iso.html` is a self-contained experiment: the cast on a hand-inked **isometric
+vellum board** in the *Into the Breach* / *Advance Wars* idiom. The Hollow **telegraph**
+exactly where they will strike next resolution (red tiles + arrows); on your turn you move
+the Kindled and shove foes so a blow betrays them — into **water**, a **chasm**, **fire**,
+a **mountain**, or their own kin — while protecting the **steadings** (buildings) on the
+field. It's a bench (`src/iso.js`), not a mode.
+
+What makes it its own thing:
+
+- **A whole isometric tileset, drawn from numbers** (`src/iso_art.js`) — a canvas
+  re-implementation of the ink doctrine: **11 terrains** (grass, dirt, sand, stone, ash,
+  bog, road, water, deepwater, ice, rift) and **24 features** (mountain, hill, forest,
+  pine, dead tree, boulder, rubble, standing stone, obelisk, campfire, tent, banner, well,
+  bones, crystal, barricade, gate, tower, building, rift-vent, ember-vent, chasm, bridge).
+  Every tile is deterministic and never shimmers between frames.
+- **The Kindled as real people, not busts** (`src/art/figure.js`) — a new generative
+  **full-body standee** renderer in the ink doctrine: five Orders with distinct
+  silhouettes and kit (the Skyrender's cloak and longblade, the Stonewarden's plate, maul
+  and shield, the Slipstrider's hood and daggers, the Veilseer's robe and rift-staff, the
+  Cinderwright's apron and ember-forge), varying in build, height, stance, colouring and
+  gear so a squad reads as kin without repeating.
+- **Terrain that behaves** — water and chasms are lethal to shove into, forests give cover
+  from ranged fire, ember-vents burn and fire spreads through woods, rift-vents spawn the
+  Hollow, ice, bog, and rubble all read differently.
+- **A signature verb per Order** — Skyblade (dash + shove), Shield-bash (shove 2 + stun),
+  Hookblade (*pull* a foe), Riftlance (arced artillery **splash**), Ember-line (ignite a
+  lane) — so each character plays unlike the others.
+- **Five Hollow archetypes, each telegraphing a different shape** — the charger, the
+  brute (shove 2), the artillery-spitter (a **splash** at range), the flyer (ignores
+  terrain), and the armoured shielded (soak the first blow).
+
+A full **asset sheet** of every tile, feature and figure lives at `design/iso-assets.html`.
 
 ---
 
