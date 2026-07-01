@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Lands Unknown — Isometric Tactics Bench</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext y='13' font-size='13'%3E%E2%97%88%3C/text%3E%3C/svg%3E" />
+<style>
+  :root { --paper:#e2d6b9; --ink:#2a2620; --ox:#9a3b2a; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #0c0d12; color: #d8cfbf;
+    font-family: Georgia, 'EB Garamond', serif;
+    background-image: radial-gradient(120% 80% at 50% -10%, #1a1b24 0%, #0a0b10 70%); }
+  .page { max-width: 1180px; margin: 0 auto; padding: 22px 24px 60px; }
+  h1 { font-variant: small-caps; letter-spacing: 1px; color: #e6c15a; margin: 0 0 2px; font-weight: 600; }
+  .sub { color: #8a8296; font-style: italic; margin: 0 0 18px; }
+
+  .iso-wrap { display: flex; gap: 22px; align-items: flex-start; flex-wrap: wrap; }
+  .iso-board { position: relative; border-radius: 10px; overflow: hidden;
+    background: radial-gradient(120% 100% at 50% 0%, #14151d 0%, #08090d 80%);
+    border: 1px solid #2a2b36; box-shadow: 0 18px 40px rgba(0,0,0,0.55) inset, 0 8px 30px rgba(0,0,0,0.5); }
+  .iso-canvas { position: absolute; inset: 0; }
+  .iso-units { position: absolute; inset: 0; pointer-events: none; }
+
+  .iso-unit { position: absolute; transform: translate(-50%, -100%); pointer-events: auto; cursor: pointer;
+    transition: left 0.18s ease, top 0.18s ease; will-change: left, top; }
+  .iso-unit::after { content: ''; position: absolute; left: 50%; bottom: -3px; transform: translateX(-50%);
+    width: 60%; height: 12px; background: radial-gradient(closest-side, rgba(0,0,0,0.6), rgba(0,0,0,0)); z-index: -1; }
+  .iso-art-wrap { width: 58px; }
+  .iso-enemy .iso-art-wrap { width: 82px; }
+  .iso-heroU .iso-art-wrap { width: 66px; }
+  .iso-art-wrap svg { width: 100%; height: auto; display: block;
+    filter: drop-shadow(0 3px 4px rgba(0,0,0,0.7)) drop-shadow(0 0 4px rgba(232,220,190,0.4)); }
+  .iso-ally .iso-art-wrap svg { border-radius: 6px; }
+  .iso-tag { position: absolute; left: 50%; top: -12px; transform: translateX(-50%);
+    min-width: 20px; text-align: center; padding: 0 5px; border-radius: 9px;
+    background: rgba(10,10,14,0.9); border: 1.5px solid #a33; font-size: 12px; font-weight: 700; color: #f2ead6; }
+  .iso-unit.iso-acted { filter: grayscale(0.7) brightness(0.7); }
+  .iso-unit.iso-sel .iso-art-wrap svg { filter: drop-shadow(0 0 8px #e6c15a) drop-shadow(0 3px 4px rgba(0,0,0,0.7)); }
+  .iso-unit.iso-hurt { animation: isoHurt 0.3s ease; }
+  @keyframes isoHurt { 0%,100% { transform: translate(-50%,-100%); } 30% { transform: translate(-50%,-100%) scale(1.06) rotate(-3deg); filter: brightness(2.2) sepia(1) hue-rotate(-30deg); } }
+  .iso-unit.iso-dead { opacity: 0; transform: translate(-50%,-90%) scale(0.8); transition: opacity 0.35s, transform 0.35s; }
+
+  .iso-banner { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-variant: small-caps; letter-spacing: 4px; font-size: 46px; font-weight: 700;
+    background: rgba(6,7,11,0.55); text-shadow: 0 3px 14px #000; }
+  .iso-banner.win { color: #e6c15a; } .iso-banner.lose { color: #ff5a64; }
+
+  .iso-side { width: 300px; flex: 1; min-width: 260px; }
+  .iso-title { font-variant: small-caps; color: #e6c15a; font-size: 20px; margin-bottom: 6px; }
+  .iso-title span { color: #7c7488; font-size: 14px; font-style: italic; }
+  .iso-status { background: #14151d; border: 1px solid #2a2b36; border-radius: 8px; padding: 10px 12px; font-size: 14px; margin-bottom: 12px; }
+  .iso-status b { color: #e6c15a; } .iso-status span { color: #a49bb0; }
+  .iso-win { color: #8fe0a2 !important; } .iso-lose { color: #ff7a84 !important; }
+  .iso-roster { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+  .iso-r { display: flex; align-items: center; gap: 8px; font-size: 14px; padding: 5px 9px; border-radius: 6px; background: #101119; border: 1px solid #23242e; }
+  .iso-r.enemy { border-color: #3a1f22; } .iso-r.done { opacity: 0.5; }
+  .iso-r .dot { width: 11px; height: 11px; border-radius: 50%; box-shadow: 0 0 6px currentColor; }
+  .iso-r i { margin-left: auto; color: #9a92a6; font-style: normal; }
+  .iso-actions { display: flex; gap: 10px; margin-bottom: 14px; }
+  .iso-btn { flex: 1; padding: 11px 10px; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 15px;
+    background: #1c1d28; color: #e6c15a; border: 1px solid #3a3b4a; transition: background 0.15s; }
+  .iso-btn:hover { background: #262838; }
+  .iso-end { background: #2a2334; color: #f0d98a; border-color: #4a3d5a; }
+  .iso-reset { flex: 0 0 90px; color: #a49bb0; }
+  .iso-help { font-size: 13px; line-height: 1.55; color: #8a8296; border-top: 1px solid #23242e; padding-top: 12px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Isometric Tactics — a bench</h1>
+  <p class="sub">The Kindled and the Hollow on an <i>Into the Breach</i>-style board: the foe telegraphs its blow; you reposition, or shove it so the blow betrays it. Every unit is drawn from a number.</p>
+  <div id="root"></div>
+</div>
+
+<script src="../src/rng.js"></script>
+<script src="../src/data/lore.js"></script>
+<script src="../src/data/bestiary.js"></script>
+<script src="../src/art/ink.js"></script>
+<script src="../src/art/portrait.js"></script>
+<script src="../src/art/beast.js"></script>
+<script src="../src/iso.js"></script>
+<script>
+  window.ISO = TLU.Iso.mount(document.getElementById('root'), { seed: 'bench-1', w: 8, h: 8 });
+</script>
+</body>
+</html>

@@ -176,6 +176,16 @@ no bitmaps, no network, no build step, just geometry composed from a number:
 Open the **Character** sheet, **Recruit** at a hold, talk to **townsfolk**, meet an **echo**,
 or fill the **Codex** bestiary to see it. A standalone gallery lives at `design/faces.html`.
 
+### An isometric tactics bench
+
+`design/iso.html` is a self-contained experiment: the cast on an **isometric board**
+in the *Into the Breach* idiom. The Hollow **telegraph** exactly where they will strike
+next resolution (red tiles + arrows); on your turn you move the Kindled and shove foes
+(every attack pushes 1) so a blow whiffs off the board, crunches a mountain, drowns in
+the pond, or lands on the enemy's own kin. Units are the same generative portraits and
+beast plates the rest of the game uses. It's a bench (`src/iso.js`), not a mode — a place
+to feel a different combat grammar with these characters.
+
 ---
 
 ## What's in it
