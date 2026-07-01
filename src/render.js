@@ -52,9 +52,12 @@
   // ---- overworld viewport — a hand-drawn world map, in three styles ----
   const MAP_STYLES = ['realm', 'chart', 'vellum', 'survey'];
   const MAP_STYLE_NAMES = { realm: 'Hand-Drawn Realm', chart: 'Field Chart', vellum: 'Old Vellum', survey: 'Survey Map' };
-  let MAP_STYLE = (function () { try { return localStorage.getItem('tlu_mapstyle') || 'realm'; } catch (e) { return 'realm'; } })();
+  // key is versioned: the Hand-Drawn Realm is the new definitive overworld, so any style
+  // pinned under the old key is ignored and every player lands on 'realm' by default.
+  const MAP_STYLE_KEY = 'tlu_mapstyle_v2';
+  let MAP_STYLE = (function () { try { return localStorage.getItem(MAP_STYLE_KEY) || 'realm'; } catch (e) { return 'realm'; } })();
   if (MAP_STYLES.indexOf(MAP_STYLE) < 0) MAP_STYLE = 'realm';
-  function setMapStyle(s) { if (MAP_STYLES.indexOf(s) < 0) s = 'realm'; MAP_STYLE = s; try { localStorage.setItem('tlu_mapstyle', s); } catch (e) {} }
+  function setMapStyle(s) { if (MAP_STYLES.indexOf(s) < 0) s = 'realm'; MAP_STYLE = s; try { localStorage.setItem(MAP_STYLE_KEY, s); } catch (e) {} }
   function cycleMapStyle() { setMapStyle(MAP_STYLES[(MAP_STYLES.indexOf(MAP_STYLE) + 1) % MAP_STYLES.length]); return MAP_STYLE; }
 
   // a charted, in-bounds tile or null
