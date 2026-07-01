@@ -457,72 +457,187 @@
     ctx.quadraticCurveTo(mx + (-dy / len) * bow, my + (dx / len) * bow, B[0], B[1]); ctx.stroke();
   }
 
+  // coarse mesh: bigger, looser polygons (each cell = a 2×2 block of tiles)
+  const MSTEP = 2;
+  function ccorner(env, I, J) {
+    const w = env.w; if (!w._cc) w._cc = Object.create(null);
+    const key = (I + 2048) * 100000 + (J + 2048); let c = w._cc[key]; if (c) return c;
+    const h = (TLU.hashSeed ? TLU.hashSeed(I + '_' + J + '_cc_' + (env.game && env.game.seed)) : (((I * 73856093) ^ (J * 19349663)) >>> 0));
+    const ang = (h & 4095) / 4095 * Math.PI * 2, mag = (0.3 + ((h >>> 12) & 255) / 255 * 0.55) * MSTEP; // up to ~0.85 cell
+    c = { x: I * MSTEP + Math.cos(ang) * mag, y: J * MSTEP + Math.sin(ang) * mag }; w._cc[key] = c; return c;
+  }
+  // a coarse cell's representative (biome) tile + whether any of it is charted
+  function coarseCell(env, I, J) {
+    const w = env.w, bx = I * MSTEP, by = J * MSTEP; let seen = false, raw = null, rep = null;
+    for (let dy = 0; dy < MSTEP; dy++) for (let dx = 0; dx < MSTEP; dx++) {
+      const x = bx + dx, y = by + dy; if (x < 0 || y < 0 || x >= w.w || y >= w.h) continue;
+      const t = w.tiles[y][x]; if (!raw) raw = t;
+      if (env.p.visited[x + ',' + y]) { seen = true; if (!rep) rep = t; }
+    }
+    return { rep: rep || raw, seen: seen, bx: bx, by: by };
+  }
+  function hash01(a, b, s) { return (TLU.hashSeed ? (TLU.hashSeed(a + '_' + b + '_' + s) & 0xffff) / 0xffff : 0.5); }
+
+  // trace rivers once per world: from the highlands, descend the distance-to-sea
+  // field to the coast (coarse elevation alone has no gradient across flats).
+  function ensureRivers(env) {
+    const w = env.w; if (w._rivers) return w._rivers;
+    const seed = (env.game && env.game.seed) || 'x', W = w.w, H = w.h;
+    // multi-source BFS: distance (in tiles) from the nearest sea
+    const dsea = new Array(W * H).fill(-1), q = [];
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (isWater(w.tiles[y][x])) { dsea[y * W + x] = 0; q.push(x, y); }
+    const N4 = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+    for (let h = 0; h < q.length; h += 2) { const x = q[h], y = q[h + 1], dv = dsea[y * W + x];
+      for (let k = 0; k < 4; k++) { const nx = x + N4[k][0], ny = y + N4[k][1]; if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue; const ni = ny * W + nx; if (dsea[ni] < 0) { dsea[ni] = dv + 1; q.push(nx, ny); } } }
+    const N8 = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, 1], [1, -1], [-1, -1]];
+    const rivers = []; let count = 0;
+    for (let y = 0; y < H && count < 8; y++) for (let x = 0; x < W && count < 8; x++) {
+      if (elev(w.tiles[y][x]) < 4) continue;                 // sources: plateau/mountain
+      if ((dsea[y * W + x]) < 6) continue;                   // far enough inland to matter
+      if (hash01(x, y, seed + 'src') > 0.16) continue;       // and sparse
+      const path = [[x, y]]; let cx = x, cy = y, reached = false;
+      for (let step = 0; step < 400; step++) {
+        const cur = dsea[cy * W + cx]; if (cur <= 1) { reached = true; break; }
+        let bX = cx, bY = cy, bD = 1e9, bS = 1e9;
+        for (let k = 0; k < 8; k++) { const nx = cx + N8[k][0], ny = cy + N8[k][1]; if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
+          const nd = dsea[ny * W + nx]; if (nd < 0) continue;
+          const s = elev(w.tiles[ny][nx]) + hash01(nx, ny, seed + 'e') * 0.9;   // tie-break: prefer lower & noisy
+          if (nd < bD || (nd === bD && s < bS)) { bD = nd; bS = s; bX = nx; bY = ny; }
+        }
+        if (bD >= cur) break; cx = bX; cy = bY; path.push([cx, cy]);
+      }
+      if (reached && path.length >= 5) { rivers.push(path); count++; }
+    }
+    w._rivers = rivers; return rivers;
+  }
+
+  // a small-caps serif place label with a paper halo, for legibility on the map
+  function drawMapLabel(ctx, x, y, text, ink, base, size, italic, col) {
+    ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = (italic ? 'italic ' : '') + 'small-caps ' + (size || 12) + 'px Georgia, serif';
+    ctx.lineJoin = 'round'; ctx.lineWidth = Math.max(2.5, size * 0.28); ctx.strokeStyle = mix(base, '#ffffff', 0.35);
+    ctx.strokeText(text, x, y); ctx.fillStyle = col || ink; ctx.fillText(text, x, y);
+    ctx.restore();
+  }
+
+  // hand-drawn terrain icon (mountains, hills, woods, craters, mesas, dunes)
+  function realmIcon(ctx, cx, cy, u, glyph, col, ink, base) {
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    if (glyph === '▲') {
+      const peak = function (dx, hh) {
+        ctx.beginPath(); ctx.moveTo(cx + dx - u * 0.16, cy + u * 0.16); ctx.lineTo(cx + dx, cy + u * 0.16 - hh); ctx.lineTo(cx + dx + u * 0.16, cy + u * 0.16); ctx.closePath();
+        ctx.fillStyle = mix(col, base, 0.12); ctx.fill(); ctx.strokeStyle = ink; ctx.lineWidth = Math.max(0.8, u * 0.045); ctx.stroke();
+        ctx.fillStyle = mix('#ffffff', col, 0.25); ctx.beginPath(); ctx.moveTo(cx + dx, cy + u * 0.16 - hh); ctx.lineTo(cx + dx - u * 0.05, cy + u * 0.16 - hh + u * 0.09); ctx.lineTo(cx + dx + u * 0.05, cy + u * 0.16 - hh + u * 0.09); ctx.closePath(); ctx.fill();
+      };
+      peak(-u * 0.14, u * 0.34); peak(u * 0.16, u * 0.46);
+    } else if (glyph === 'n') {
+      ctx.fillStyle = mix(col, base, 0.25); ctx.strokeStyle = ink; ctx.lineWidth = Math.max(0.7, u * 0.035);
+      ctx.beginPath(); ctx.moveTo(cx - u * 0.24, cy + u * 0.1); ctx.quadraticCurveTo(cx - u * 0.08, cy - u * 0.14, cx + u * 0.06, cy + u * 0.1); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx - u * 0.02, cy + u * 0.12); ctx.quadraticCurveTo(cx + u * 0.14, cy - u * 0.08, cx + u * 0.26, cy + u * 0.12); ctx.closePath(); ctx.fill(); ctx.stroke();
+    } else if (glyph === '♣') {
+      for (let i = 0; i < 3; i++) { const tx = cx + (i - 1) * u * 0.22, ty = cy + (i % 2 ? u * 0.05 : -u * 0.03);
+        ctx.strokeStyle = ink; ctx.lineWidth = Math.max(0.7, u * 0.035); ctx.beginPath(); ctx.moveTo(tx, ty + u * 0.14); ctx.lineTo(tx, ty + u * 0.02); ctx.stroke();
+        ctx.fillStyle = mix(col, '#3f6a3a', 0.5); ctx.beginPath(); ctx.arc(tx, ty - u * 0.05, u * 0.11, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = ink; ctx.stroke(); }
+    } else if (glyph === 'o') { // a shaded impact crater — a bowl, not a ring
+      ctx.fillStyle = mix(col, '#2a2016', 0.32); ctx.beginPath(); ctx.ellipse(cx, cy, u * 0.2, u * 0.13, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.lineWidth = Math.max(1, u * 0.05);
+      ctx.strokeStyle = mix(col, '#000000', 0.5); ctx.beginPath(); ctx.ellipse(cx, cy, u * 0.2, u * 0.13, 0, 0.2, Math.PI - 0.2); ctx.stroke();          // lower rim shadow
+      ctx.strokeStyle = mix(col, '#ffffff', 0.45); ctx.beginPath(); ctx.ellipse(cx, cy, u * 0.2, u * 0.13, 0, Math.PI + 0.2, Math.PI * 2 - 0.2); ctx.stroke(); // upper rim light
+    } else if (glyph === '=') { // a mesa / chasm plateau
+      ctx.fillStyle = mix(col, base, 0.15); ctx.strokeStyle = ink; ctx.lineWidth = Math.max(0.7, u * 0.035);
+      ctx.beginPath(); ctx.moveTo(cx - u * 0.22, cy + u * 0.14); ctx.lineTo(cx - u * 0.14, cy - u * 0.1); ctx.lineTo(cx + u * 0.14, cy - u * 0.1); ctx.lineTo(cx + u * 0.22, cy + u * 0.14); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = mix(col, '#000000', 0.35); for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.moveTo(cx - u * 0.16 + i * u * 0.12, cy - u * 0.06); ctx.lineTo(cx - u * 0.13 + i * u * 0.12, cy + u * 0.12); ctx.stroke(); }
+    } else if (glyph === ':') { // dunes
+      ctx.strokeStyle = mix(col, '#000000', 0.25); ctx.lineWidth = Math.max(0.8, u * 0.04);
+      ctx.beginPath(); ctx.moveTo(cx - u * 0.24, cy + u * 0.06); ctx.quadraticCurveTo(cx - u * 0.06, cy - u * 0.06, cx + u * 0.1, cy + u * 0.06); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx - u * 0.06, cy + u * 0.14); ctx.quadraticCurveTo(cx + u * 0.12, cy + u * 0.02, cx + u * 0.26, cy + u * 0.14); ctx.stroke();
+    } else if (glyph === '§') { ctx.fillStyle = mix(col, '#c0703a', 0.6); for (let i = 0; i < 3; i++) dot(ctx, cx + (i - 1) * u * 0.16, cy + (i % 2 ? u * 0.1 : -u * 0.1), u * 0.045); }
+  }
+
   function drawRealm(env) {
     const { ctx, cell, base, ink, ink2 } = env;
+    const seed = (env.game && env.game.seed) || 'x';
     ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    const I0 = Math.floor(env.ox / MSTEP) - 1, I1 = Math.floor((env.ox + env.cols) / MSTEP) + 1;
+    const J0 = Math.floor(env.oy / MSTEP) - 1, J1 = Math.floor((env.oy + env.rows) / MSTEP) + 1;
 
-    // PASS 1 — polygon fills (each tile = its 4 jittered corners)
-    for (let sy = 0; sy < env.rows; sy++) for (let sx = 0; sx < env.cols; sx++) {
-      const mx = env.ox + sx, my = env.oy + sy, t = vtile(env, mx, my); if (!t) continue;
-      const TL = cpx(env, corner(env, mx, my)), TR = cpx(env, corner(env, mx + 1, my)),
-        BR = cpx(env, corner(env, mx + 1, my + 1)), BL = cpx(env, corner(env, mx, my + 1));
-      ctx.beginPath(); ctx.moveTo(TL[0], TL[1]); ctx.lineTo(TR[0], TR[1]); ctx.lineTo(BR[0], BR[1]); ctx.lineTo(BL[0], BL[1]); ctx.closePath();
-      ctx.fillStyle = isWater(t) ? mix(base, '#9fb6bd', 0.34) : mix(base, t.color, t.glyph === '§' ? 0.3 : 0.24);
+    // PASS 1 — coarse polygon fills, each region's wash nudged for life
+    for (let I = I0; I <= I1; I++) for (let J = J0; J <= J1; J++) {
+      const cc = coarseCell(env, I, J); if (!cc.seen) continue;
+      const A = cpx(env, ccorner(env, I, J)), B = cpx(env, ccorner(env, I + 1, J)), C = cpx(env, ccorner(env, I + 1, J + 1)), D = cpx(env, ccorner(env, I, J + 1));
+      ctx.beginPath(); ctx.moveTo(A[0], A[1]); ctx.lineTo(B[0], B[1]); ctx.lineTo(C[0], C[1]); ctx.lineTo(D[0], D[1]); ctx.closePath();
+      const v = (hash01(I, J, seed + 'w') - 0.5) * 0.06;
+      ctx.fillStyle = isWater(cc.rep) ? mix(base, '#9fb6bd', 0.32 + v) : mix(base, cc.rep.color, (cc.rep.glyph === '§' ? 0.3 : 0.24) + v);
       ctx.fill();
     }
 
-    // PASS 2 — edges only at boundaries (so like-terrain merges into regions)
-    const coastCol = ink, borderCol = mix(ink, base, 0.55);
-    for (let sy = 0; sy < env.rows; sy++) for (let sx = 0; sx < env.cols; sx++) {
-      const mx = env.ox + sx, my = env.oy + sy, t = vtile(env, mx, my); if (!t) continue;
-      const g = bgroup(t), sea = g === 'sea';
-      // right edge
-      const rRaw = rtile(env, mx + 1, my), rSeen = vtile(env, mx + 1, my);
-      if (rRaw && ((sea) !== (bgroup(rRaw) === 'sea'))) drawEdge(env, corner(env, mx + 1, my), corner(env, mx + 1, my + 1), coastCol, Math.max(1.3, cell * 0.075));
-      else if (rSeen && !sea && bgroup(rSeen) !== 'sea' && bgroup(rSeen) !== g) drawEdge(env, corner(env, mx + 1, my), corner(env, mx + 1, my + 1), borderCol, Math.max(0.7, cell * 0.03));
-      // down edge
-      const dRaw = rtile(env, mx, my + 1), dSeen = vtile(env, mx, my + 1);
-      if (dRaw && ((sea) !== (bgroup(dRaw) === 'sea'))) drawEdge(env, corner(env, mx, my + 1), corner(env, mx + 1, my + 1), coastCol, Math.max(1.3, cell * 0.075));
-      else if (dSeen && !sea && bgroup(dSeen) !== 'sea' && bgroup(dSeen) !== g) drawEdge(env, corner(env, mx, my + 1), corner(env, mx + 1, my + 1), borderCol, Math.max(0.7, cell * 0.03));
+    // PASS 2 — boundary edges: bold wobbly coast, faint biome borders
+    const coastCol = ink, borderCol = mix(ink, base, 0.5);
+    for (let I = I0; I <= I1; I++) for (let J = J0; J <= J1; J++) {
+      const cc = coarseCell(env, I, J), cE = coarseCell(env, I + 1, J), cD = coarseCell(env, I, J + 1);
+      const gs = isWater(cc.rep), gE = isWater(cE.rep), gD = isWater(cD.rep);
+      if (cc.seen || cE.seen) {
+        if (gs !== gE) drawEdge(env, ccorner(env, I + 1, J), ccorner(env, I + 1, J + 1), coastCol, Math.max(1.4, cell * 0.08));
+        else if (cc.seen && cE.seen && !gs && bgroup(cc.rep) !== bgroup(cE.rep)) drawEdge(env, ccorner(env, I + 1, J), ccorner(env, I + 1, J + 1), borderCol, Math.max(0.7, cell * 0.03));
+      }
+      if (cc.seen || cD.seen) {
+        if (gs !== gD) drawEdge(env, ccorner(env, I, J + 1), ccorner(env, I + 1, J + 1), coastCol, Math.max(1.4, cell * 0.08));
+        else if (cc.seen && cD.seen && !gs && bgroup(cc.rep) !== bgroup(cD.rep)) drawEdge(env, ccorner(env, I, J + 1), ccorner(env, I + 1, J + 1), borderCol, Math.max(0.7, cell * 0.03));
+      }
     }
 
-    // PASS 3 — sea hatch near the coast, for a charted-water feel
-    ctx.strokeStyle = mix(ink, '#3f5a70', 0.5); ctx.lineWidth = Math.max(0.6, cell * 0.03);
-    for (let sy = 0; sy < env.rows; sy++) for (let sx = 0; sx < env.cols; sx++) {
-      const mx = env.ox + sx, my = env.oy + sy, t = vtile(env, mx, my); if (!isWater(t)) continue;
-      let coast = false; for (const d of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nb = rtile(env, mx + d[0], my + d[1]); if (nb && bgroup(nb) !== 'sea') { coast = true; break; } }
-      if (!coast) continue;
-      const cn = corner(env, mx, my), C = cpx(env, { x: cn.x + 0.5, y: cn.y + 0.5 });
-      ctx.globalAlpha = 0.5; ctx.beginPath(); ctx.moveTo(C[0] - cell * 0.3, C[1]); ctx.lineTo(C[0] + cell * 0.3, C[1]); ctx.stroke(); ctx.globalAlpha = 1;
+    // PASS 3 — rivers, from the highlands to the sea
+    const rivers = ensureRivers(env), rivCol = mix(ink, '#3f6173', 0.55);
+    for (let r = 0; r < rivers.length; r++) {
+      const path = rivers[r]; let seg = [];
+      const flush = function () {
+        for (let i = 1; i < seg.length; i++) { const a = seg[i - 1], b = seg[i];
+          ctx.strokeStyle = rivCol; ctx.lineWidth = Math.max(1.2, cell * (0.06 + b[2] * 0.16));
+          ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke(); }
+        seg = [];
+      };
+      for (let i = 0; i < path.length; i++) { const x = path[i][0], y = path[i][1];
+        if (env.p.visited[x + ',' + y]) { const jx = (hash01(x, y, 'rx') - 0.5) * 0.36, jy = (hash01(x, y, 'ry') - 0.5) * 0.36; seg.push([(x + 0.5 + jx - env.ox) * cell, (y + 0.5 + jy - env.oy) * cell, i / path.length]); }
+        else flush();
+      }
+      flush();
     }
 
-    // PASS 4 — terrain icons sprinkled across the regions (hash-gated so they
-    // read as hand-placed, not tiled). Reuses the relief icon set.
-    for (let sy = 0; sy < env.rows; sy++) for (let sx = 0; sx < env.cols; sx++) {
-      const mx = env.ox + sx, my = env.oy + sy, t = vtile(env, mx, my); if (!t || isWater(t) || t.site || t.road) continue;
-      if (t.glyph === '"') continue; // leave open plains uncluttered
-      const g = bgroup(t);
-      const gate = (((mx * 92821 + my * 53987) >>> 3) & 7);     // 0..7, deterministic
-      const keep = (g === 'mtn' || g === 'forest') ? gate < 6 : gate < 4; // ranges/woods denser
-      if (!keep) continue;
-      const ct = corner(env, mx, my), cen = cpx(env, { x: ct.x + 0.5, y: ct.y + 0.5 });
-      vellumRelief(ctx, cen[0] - cell / 2, cen[1] - cell / 2, cell, t.glyph, mix(ink, t.color, 0.35), ink);
+    // PASS 4 — terrain icons, a few hand-placed per region (not per tile)
+    const ICON_N = { mtn: 2, forest: 2, hill: 1, crater: 1, plateau: 1, desert: 1, churn: 1 };
+    for (let I = I0; I <= I1; I++) for (let J = J0; J <= J1; J++) {
+      const cc = coarseCell(env, I, J); if (!cc.seen || isWater(cc.rep) || cc.rep.glyph === '"') continue;
+      const g = bgroup(cc.rep), n = ICON_N[g] || 0;
+      for (let k = 0; k < n; k++) {
+        const jx = hash01(I * 5 + k, J, seed + 'ix') * 1.7 - 0.85, jy = hash01(I, J * 5 + k, seed + 'iy') * 1.7 - 0.85;
+        const wx = cc.bx + MSTEP / 2 + jx, wy = cc.by + MSTEP / 2 + jy;
+        realmIcon(ctx, (wx - env.ox) * cell, (wy - env.oy) * cell, cell * 1.15, cc.rep.glyph, mix(ink, cc.rep.color, 0.35), ink, base);
+      }
     }
 
-    // PASS 5 — roads as an organic dashed trail through cell centres
-    ctx.strokeStyle = mix(ink, '#9a7a48', 0.5); ctx.lineWidth = Math.max(1.4, cell * 0.1); ctx.setLineDash([cell * 0.32, cell * 0.26]);
+    // PASS 5 — roads: an organic dashed trail between cell centres
+    ctx.strokeStyle = mix(ink, '#9a7a48', 0.5); ctx.lineWidth = Math.max(1.4, cell * 0.1); ctx.setLineDash([cell * 0.34, cell * 0.26]);
     for (let sy = 0; sy < env.rows; sy++) for (let sx = 0; sx < env.cols; sx++) {
       const mx = env.ox + sx, my = env.oy + sy, t = vtile(env, mx, my); if (!t || !t.road || t.site) continue;
-      const ct = corner(env, mx, my), C = cpx(env, { x: ct.x + 0.5, y: ct.y + 0.5 });
-      for (const d of [[1, 0], [0, 1]]) { const nb = vtile(env, mx + d[0], my + d[1]); if (nb && nb.road) { const cn2 = corner(env, mx + d[0], my + d[1]), N = cpx(env, { x: cn2.x + 0.5, y: cn2.y + 0.5 }); ctx.beginPath(); ctx.moveTo(C[0], C[1]); ctx.lineTo(N[0], N[1]); ctx.stroke(); } }
+      const ct = corner(env, mx, my), Cp = cpx(env, { x: ct.x + 0.5, y: ct.y + 0.5 });
+      for (const d of [[1, 0], [0, 1]]) { const nb = vtile(env, mx + d[0], my + d[1]); if (nb && nb.road) { const cn2 = corner(env, mx + d[0], my + d[1]), N = cpx(env, { x: cn2.x + 0.5, y: cn2.y + 0.5 }); ctx.beginPath(); ctx.moveTo(Cp[0], Cp[1]); ctx.lineTo(N[0], N[1]); ctx.stroke(); } }
     }
     ctx.setLineDash([]);
 
-    // PASS 6 — pins at cell centres
+    // PASS 6 — sea label at the charted-water centroid
+    let swx = 0, swy = 0, swn = 0;
+    for (let sy = 0; sy < env.rows; sy++) for (let sx = 0; sx < env.cols; sx++) { const t = vtile(env, env.ox + sx, env.oy + sy); if (isWater(t)) { swx += sx; swy += sy; swn++; } }
+    if (swn > 24) drawMapLabel(ctx, (swx / swn) * cell + cell / 2, (swy / swn) * cell + cell / 2, 'The Eastern Sea', ink, base, Math.max(12, cell * 0.7), true, mix(ink, '#3f6173', 0.6));
+
+    // PASS 7 — pins + place labels
     for (let sy = 0; sy < env.rows; sy++) for (let sx = 0; sx < env.cols; sx++) {
       const mx = env.ox + sx, my = env.oy + sy, t = vtile(env, mx, my); if (!t || !t.site) continue;
       const ct = corner(env, mx, my), cen = cpx(env, { x: ct.x + 0.5, y: ct.y + 0.5 });
       drawPin(ctx, cen[0] - cell / 2, cen[1] - cell / 2, cell, t.site, base, ink);
+      if (t.site.type === 'town' || t.site.type === 'ruin' || t.site.type === 'lair') {
+        const nm = (t.site.name || '').split(',')[0];
+        drawMapLabel(ctx, cen[0], cen[1] + cell * 0.62, nm, ink, base, Math.max(10, cell * 0.56), false, t.site.type === 'town' ? ink : mix(ink, t.site.color, 0.5));
+      }
     }
     ctx.restore();
   }

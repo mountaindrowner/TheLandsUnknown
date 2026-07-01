@@ -189,10 +189,12 @@ or fill the **Codex** bestiary to see it. A standalone gallery lives at `design/
   toggles. Your choice drives the generative ink portrait everywhere it appears (the HUD,
   the character sheet, dialogue), and persists with your save and your dynasty.
 - **An illustrated overworld, in four hand-drawn map styles** (cycle with **M**):
-  - **Hand-Drawn Realm** *(default)* — an organic polygon map: a jittered shared-corner mesh
-    turns the world into irregular cells, like-terrain merges into soft regions, and
-    coastlines & borders become wobbly hand-inked curves with terrain icons sprinkled
-    across them. No grid in sight.
+  - **Hand-Drawn Realm** *(default)* — a living, organic polygon map: a coarse jittered
+    mesh makes big loose regions, like-terrain merges into soft washes (each nudged for
+    life), coastlines are wobbly hand-inked curves, **rivers** trace from the highlands
+    down a distance-to-sea field to the coast, hand-placed terrain icons (mountain ranges,
+    woods, shaded craters, mesas, dunes) dot the regions, and **inked place-labels** name
+    the holds, the ruin, and *The Eastern Sea*. No grid in sight.
   - **Field Chart** — a colourful inked working map: biome washes, hand-symbols (water
     waves, ironbud tufts, hill bumps, stonewood trees, mountains, crater rings), ink
     coastlines, framed map-pins, road trails.
